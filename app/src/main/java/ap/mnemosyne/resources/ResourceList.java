@@ -16,8 +16,13 @@
 
 package ap.mnemosyne.resources;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 public final class ResourceList<T extends Resource> extends Resource {
 
@@ -55,6 +60,20 @@ public final class ResourceList<T extends Resource> extends Resource {
         }
         if(toRet.charAt(toRet.length()-1) == ',') toRet = toRet.substring(0,toRet.length()-1);
         toRet += "]}";
+        return toRet;
+    }
+
+    public static final List<Resource> fromJSON(String json) throws IOException
+    {
+        List<Resource> toRet = new ArrayList<>();
+        ObjectMapper map = new ObjectMapper();
+        JsonNode obj = map.readTree(json).get("resource-list");
+
+        for(int i=0; i<obj.size(); i++)
+        {
+            InputStream stream = new ByteArrayInputStream(obj.get(i).toString().getBytes(StandardCharsets.UTF_8));
+            toRet.add(Resource.fromJSON(stream));
+        }
         return toRet;
     }
 }

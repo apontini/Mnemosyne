@@ -6,6 +6,7 @@ import android.app.AlertDialog
 import android.content.pm.PackageManager
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
+import android.util.Log
 import ap.mnemosyne.resources.Message
 import ap.mnemosyne.resources.Resource
 import com.fasterxml.jackson.core.JsonParseException
@@ -24,6 +25,7 @@ class HttpHandler(act: Activity)
         }
         const val AUTH_URL : String = "http://pintini.ddns.net:8080/mnemosyne/auth"
         const val REST_USER_URL : String = "http://pintini.ddns.net:8080/mnemosyne/rest/user"
+        const val REST_TASK_URL : String = "http://pintini.ddns.net:8080/mnemosyne/rest/task"
     }
 
     init

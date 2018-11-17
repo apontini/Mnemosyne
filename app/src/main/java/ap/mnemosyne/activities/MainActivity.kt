@@ -19,6 +19,7 @@ import okhttp3.Request
 import org.jetbrains.anko.design.snackbar
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.toast
+import org.jetbrains.anko.uiThread
 
 class MainActivity : AppCompatActivity() {
 
@@ -55,6 +56,11 @@ class MainActivity : AppCompatActivity() {
                         snackbar(findViewById(R.id.layout_main), "Sei collegato come: " + (resp.first as User).email).show()
                     }
                 }
+                uiThread {
+                    listButton.isClickable = true
+                    addButton.isClickable = true
+                    micButton.isClickable = true
+                }
             }
         }
 
@@ -62,7 +68,8 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
 
         listButton.setOnClickListener {
-            view -> snackbar(view, "Non implementato")
+            val intent = Intent(thisActivity, TaskListActivity::class.java)
+            startActivity(intent)
         }
 
         addButton.setOnClickListener {
@@ -107,7 +114,10 @@ class MainActivity : AppCompatActivity() {
                         putString(getString(R.string.sharedPreferences_user_sessionid), data?.getStringExtra(getString(R.string.sharedPreferences_user_sessionid)))
                         putString(getString(R.string.sharedPreferences_user_mail), data?.getStringExtra(getString(R.string.sharedPreferences_user_mail)))
                         putString(getString(R.string.sharedPreferences_user_psw), data?.getStringExtra(getString(R.string.sharedPreferences_user_psw)))
-                        if(!commit()) toast("WOPS").show()
+                        if(!commit()) toast("Errore nel salvare i dati, riavvia l'applicazione").show()
+                        listButton.isClickable = true
+                        addButton.isClickable = true
+                        micButton.isClickable = true
                     }
 
                 }
