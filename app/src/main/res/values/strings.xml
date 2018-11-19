@@ -3,7 +3,6 @@
     <string name="action_settings">Settings</string>
     <string name="sharedPreferences_user_FILE">apontini.mnemosyne.userSharedPrefs</string>
     <string name="title_activity_login">Entra in Mnemosyne</string>
-    <!-- Strings related to login -->
     <string name="login_button">LogIn to Mnemosyne</string>
     <string name="user_login_hint">lucarossi@mail.it</string>
     <string name="password_login_hint">password</string>
@@ -18,4 +17,17 @@
     <string name="text_list_401">401 - La sessione non è più valida</string>
     <string name="title_activity_task_details">TaskDetailsActivity</string>
     <string name="title_activity_task_list">TaskListActivity</string>
+    <string name="text_details_constraint">Vincolo:</string>
+    <string name="text_details_temporalConstr">Vincolo temporale:</string>
+    <string name="text_details_normact">Azione Normalizzata:</string>
+    <string name="text_details_constrPlace">Luogo vincolante:</string>
+    <string name="text_details_paramName">Nome parametro:</string>
+    <string name="text_details_fromtime">Dalle</string>
+    <string name="tedt_details_toTime">Alle</string>
+    <string name="text_details_failed">Fallito:</string>
+    <string name="text_details_noConstraint">Nessun vincolo</string>
+    <string name="text_details_viewPlaces">Visualizza i posti dove soddisfarlo</string>
+    <string name="text_yes">Sì</string>
+    <string name="text_no">No</string>
+    <string name="title_activity_maps">Puoi soddisfare il task in..</string>
 </resources>

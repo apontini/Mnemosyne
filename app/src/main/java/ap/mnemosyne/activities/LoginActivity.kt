@@ -46,7 +46,7 @@ class LoginActivity : AppCompatActivity()
         loginButton.isEnabled = false
         loginProgress.visibility = View.VISIBLE
 
-        mgr!!.hideSoftInputFromWindow(findViewById(R.id.layout_login).windowToken, 0)
+        mgr!!.hideSoftInputFromWindow(layout_login.windowToken, 0)
         val act = this
         val mtype = MediaType.parse("application/x-www-form-urlencoded; charset=utf-8")
         val body = FormBody.Builder().add("email", loginUser.text.toString()).add("password", loginPassword.text.toString()).build()

@@ -1,52 +1,64 @@
 package ap.mnemosyne.adapters
 
 import android.content.Context
+import android.content.Intent
+import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.BaseAdapter
 import android.widget.TextView
+import ap.mnemosyne.activities.TaskDetailsActivity
 import ap.mnemosyne.resources.Task
 import apontini.mnemosyne.R
+import kotlinx.android.synthetic.main.task_list_item.view.*
+import kotlin.coroutines.coroutineContext
 
 class TaskListAdapter(private val context: Context,
-                      private val data: List<Task>) : BaseAdapter()
+                      private val data: List<Task>) : RecyclerView.Adapter<TaskListAdapter.ViewHolder>()
 {
-
-    private val inflater: LayoutInflater
-            = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-
-    override fun getView(p0: Int, p1: View?, p2: ViewGroup?): View
+    override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): ViewHolder
     {
-        // Get view for row item
-        val rowView = inflater.inflate(R.layout.task_list_item, p2, false)
-
-        val idtext = rowView.findViewById(R.id.textTaskID) as TextView
-        val nametext = rowView.findViewById(R.id.textTaskName) as TextView
-        val extratext = rowView.findViewById(R.id.textTaskExtra) as TextView
-
-        val curTask = getItem(p0) as Task
-
-        idtext.text = curTask.id.toString()
-        nametext.text = curTask.name.capitalize()
-        extratext.text = "Failed: " + curTask.isFailed
-
-        return rowView
+        return ViewHolder(LayoutInflater.from(context).inflate(R.layout.task_list_item, parent, false), context)
     }
 
-    override fun getItem(p0: Int): Any
-    {
-        return data[p0]
-    }
-
-    override fun getItemId(p0: Int): Long
-    {
-        return p0.toLong()
-    }
-
-    override fun getCount(): Int
+    override fun getItemCount(): Int
     {
         return data.size
+    }
+
+    override fun onBindViewHolder(holder: ViewHolder?, position: Int)
+    {
+        holder?.setItem(data[position])
+    }
+
+    class ViewHolder (view: View, ctx: Context) : RecyclerView.ViewHolder(view), View.OnClickListener
+    {
+        val idtext = view.textTaskID as TextView
+        val nametext = view.textTaskName as TextView
+        val extratext = view.textTaskExtra as TextView
+        lateinit var task : Task
+        val ctx : Context
+
+        init
+        {
+            this.ctx = ctx
+            view.setOnClickListener(this)
+        }
+
+        fun setItem(t: Task)
+        {
+            task = t
+            idtext.text = task.id.toString()
+            nametext.text = task.name.capitalize()
+            extratext.text = "Fallito: "  + if(task.isFailed) ctx.getString(R.string.text_yes) else ctx.getString(R.string.text_no)
+        }
+
+        override fun onClick(p0: View?)
+        {
+            val detailIntent = Intent(p0?.context, TaskDetailsActivity::class.java)
+            detailIntent.putExtra("task", task)
+            p0?.context?.startActivity(detailIntent)
+        }
     }
 
 }

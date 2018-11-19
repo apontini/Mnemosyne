@@ -11,7 +11,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @JsonTypeName("task")
-public class Task extends Resource
+public class Task extends Resource implements Serializable
 {
 	private int id;
 	private String user;

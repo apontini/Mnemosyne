@@ -32,12 +32,11 @@
             android:text="@string/text_list_loading"
             android:textColor="@color/textColor" />
 
-        <ListView
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/taskList"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/colorPrimary"
-            android:cacheColorHint="@color/textColor"
-            android:id="@+id/taskList"/>
+            android:background="@color/colorPrimary" />
 
     </LinearLayout>
 

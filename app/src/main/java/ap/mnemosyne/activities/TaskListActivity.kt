@@ -1,12 +1,11 @@
 package ap.mnemosyne.activities
 
 import android.content.Context
+import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Looper
-import android.util.Log
+import android.support.v7.widget.LinearLayoutManager
 import android.view.View
-import android.widget.ArrayAdapter
 import ap.mnemosyne.httphandler.HttpHandler
 import ap.mnemosyne.resources.Resource
 import ap.mnemosyne.resources.ResourceList
@@ -31,6 +30,8 @@ class TaskListActivity : AppCompatActivity()
         val act = this
         val sharedPref = this.getSharedPreferences(getString(R.string.sharedPreferences_user_FILE), Context.MODE_PRIVATE)
         val sessionid = sharedPref.getString(getString(R.string.sharedPreferences_user_sessionid), "")
+        val taskJSONList : MutableList<Task> = mutableListOf()
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_task_list)
         setSupportActionBar(toolbar)
@@ -43,7 +44,6 @@ class TaskListActivity : AppCompatActivity()
                 .build()
 
             var resultText : String = ""
-            val list : MutableList<Task> = mutableListOf()
 
             val res = HttpHandler(act).request(request)
             when(res.code())
@@ -61,7 +61,7 @@ class TaskListActivity : AppCompatActivity()
                                 }
 
                         resList.forEach {
-                            list.add(it as Task)
+                            taskJSONList.add(it as Task)
                         }
                     }
                     else
@@ -79,11 +79,9 @@ class TaskListActivity : AppCompatActivity()
 
             }
 
-            val adapter = TaskListAdapter(act, list)
-
             uiThread {
-
-                taskList.adapter = adapter
+                taskList.layoutManager = LinearLayoutManager(act)
+                taskList.adapter = TaskListAdapter(act, taskJSONList)
                 when(resultText)
                 {
                     "" -> textProgressList.visibility = View.GONE
@@ -92,15 +90,6 @@ class TaskListActivity : AppCompatActivity()
                 }
                 progressList.visibility = View.GONE
             }
-        }
-
-        val context = this
-        taskList.setOnItemClickListener { _, _, position, _ ->
-
-            /*val selectedRecipe = recipeList[position]
-            val detailIntent = TaskDetailsActivity.newIntent(context, selectedRecipe)
-            startActivity(detailIntent)*/
-
         }
     }
 }

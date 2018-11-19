@@ -5,6 +5,8 @@
 /.idea/libraries
 /.idea/modules.xml
 /.idea/workspace.xml
+/src/debug/res/values/google_maps_api.xml
+/src/main/res/values/google_maps_api.xml
 .DS_Store
 /build
 /captures

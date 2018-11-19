@@ -3,8 +3,9 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@android:color/transparent"
-    android:weightSum="100">
+    android:clickable="true"
+    android:weightSum="100"
+    android:background="@drawable/task_list_elem_style">
 
     <TextView
         android:id="@+id/textTaskID"

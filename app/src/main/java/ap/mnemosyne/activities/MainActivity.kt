@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu
 import android.view.MenuItem
@@ -107,7 +106,7 @@ class MainActivity : AppCompatActivity() {
             when(resultCode)
             {
                 Activity.RESULT_OK -> {
-                    snackbar(findViewById(R.id.layout_main), "Sei collegato come: " + data?.getStringExtra("mail") ?: "null").show()
+                    snackbar(findViewById(R.id.layout_main), "Sei collegato come: " + data?.getStringExtra("mail")).show()
                     val pref : SharedPreferences = this.getSharedPreferences(getString(R.string.sharedPreferences_user_FILE), Context.MODE_PRIVATE)
                     with(pref.edit())
                     {
