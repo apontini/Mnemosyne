@@ -11,6 +11,7 @@ import apontini.mnemosyne.R
 
 import kotlinx.android.synthetic.main.activity_task_details.*
 import kotlinx.android.synthetic.main.content_task_details.*
+import org.jetbrains.anko.design.snackbar
 
 class TaskDetailsActivity : AppCompatActivity()
 {
@@ -39,38 +40,45 @@ class TaskDetailsActivity : AppCompatActivity()
             viewPlacesButton.visibility = View.GONE
         }
 
-        if (task.constr is TaskPlaceConstraint)
-        {
-            textNameP1.text = getString(R.string.text_details_temporalConstr)
-            textValueP1.text = task.constr.type.toString()
-            textNameP2.text = getString(R.string.text_details_normact)
-            textNameP2.text = (task.constr as TaskPlaceConstraint).normalizedAction.toString()
-            textNameP3.text = getString(R.string.text_details_constrPlace)
-            textNameP3.text = (task.constr as TaskPlaceConstraint).constraintPlace?.placeType?.toString() ?: "-"
-            textNameP4.text = getString(R.string.text_details_paramName)
-            textNameP4.text = (task.constr as TaskPlaceConstraint).paramName.toString()
+        deleteTaskButton.setOnClickListener{
+            snackbar(tableLayout, "Non implementato")
         }
-        else if (task.constr is TaskTimeConstraint)
+
+        when
         {
-            textNameP1.text = getString(R.string.text_details_temporalConstr)
-            textValueP1.text = task.constr.type.toString()
-            textNameP2.text = getString(R.string.text_details_fromtime)
-            textValueP2.text = (task.constr as TaskTimeConstraint).fromTime?.toString("HH:mm") ?: "-"
-            textNameP3.text = getString(R.string.tedt_details_toTime)
-            textValueP3.text = (task.constr as TaskTimeConstraint).toTime?.toString("HH:mm") ?: "-"
-            textNameP4.text = getString(R.string.text_details_paramName)
-            textValueP4.text = task.constr.paramName.toString()
-        }
-        else
-        {
-            textNameP1.text = getString(R.string.text_details_noConstraint)
-            textValueP1.visibility = View.GONE
-            textNameP2.visibility = View.GONE
-            textValueP2.visibility = View.GONE
-            textNameP3.visibility = View.GONE
-            textValueP3.visibility = View.GONE
-            textNameP4.visibility = View.GONE
-            textValueP4.visibility = View.GONE
+            task.constr is TaskPlaceConstraint ->
+            {
+                textNameP1.text = getString(R.string.text_details_temporalConstr)
+                textValueP1.text = task.constr.type.toString()
+                textNameP2.text = getString(R.string.text_details_normact)
+                textValueP2.text = (task.constr as TaskPlaceConstraint).normalizedAction.toString()
+                textNameP3.text = getString(R.string.text_details_constrPlace)
+                textValueP3.text = (task.constr as TaskPlaceConstraint).constraintPlace?.placeType?.toString() ?: "-"
+                textNameP4.text = getString(R.string.text_details_paramName)
+                textValueP4.text = (task.constr as TaskPlaceConstraint).paramName.toString()
+            }
+            task.constr is TaskTimeConstraint  ->
+            {
+                textNameP1.text = getString(R.string.text_details_temporalConstr)
+                textValueP1.text = task.constr.type.toString()
+                textNameP2.text = getString(R.string.text_details_fromtime)
+                textValueP2.text = (task.constr as TaskTimeConstraint).fromTime?.toString("HH:mm") ?: "-"
+                textNameP3.text = getString(R.string.tedt_details_toTime)
+                textValueP3.text = (task.constr as TaskTimeConstraint).toTime?.toString("HH:mm") ?: "-"
+                textNameP4.text = getString(R.string.text_details_paramName)
+                textValueP4.text = task.constr.paramName.toString()
+            }
+            else                               ->
+            {
+                textNameP1.text = getString(R.string.text_details_noConstraint)
+                textValueP1.visibility = View.GONE
+                textNameP2.visibility = View.GONE
+                textValueP2.visibility = View.GONE
+                textNameP3.visibility = View.GONE
+                textValueP3.visibility = View.GONE
+                textNameP4.visibility = View.GONE
+                textValueP4.visibility = View.GONE
+            }
         }
 
         textPossibleWorkValue.text = if (task.isPossibleAtWork)

@@ -20,12 +20,14 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <TableLayout
+            android:id="@+id/tableLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
             <TableRow
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" >
+                android:layout_height="match_parent"
+                android:layout_marginTop="20dp">
 
                 <TextView
                     android:id="@+id/textView8"
@@ -39,13 +41,13 @@
 
             <TableRow
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" >
+                android:layout_height="match_parent">
 
                 <TextView
                     android:id="@+id/textNameP1"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:paddingLeft="20dp"
+                    android:paddingLeft="10dp"
                     android:text="TextView"
                     android:textColor="@color/textColor"
                     android:textSize="18sp" />
@@ -54,6 +56,7 @@
                     android:id="@+id/textValueP1"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:paddingLeft="25dp"
                     android:text="TextView"
                     android:textColor="@color/textColor"
                     android:textSize="18sp" />
@@ -61,13 +64,13 @@
 
             <TableRow
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" >
+                android:layout_height="match_parent">
 
                 <TextView
                     android:id="@+id/textNameP2"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:paddingLeft="20dp"
+                    android:paddingLeft="10dp"
                     android:text="TextView"
                     android:textColor="@color/textColor"
                     android:textSize="18sp" />
@@ -76,6 +79,7 @@
                     android:id="@+id/textValueP2"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:paddingLeft="25dp"
                     android:text="TextView"
                     android:textColor="@color/textColor"
                     android:textSize="18sp" />
@@ -83,13 +87,13 @@
 
             <TableRow
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" >
+                android:layout_height="match_parent">
 
                 <TextView
                     android:id="@+id/textNameP3"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:paddingLeft="20dp"
+                    android:paddingLeft="10dp"
                     android:text="TextView"
                     android:textColor="@color/textColor"
                     android:textSize="18sp" />
@@ -98,6 +102,7 @@
                     android:id="@+id/textValueP3"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:paddingLeft="25dp"
                     android:text="TextView"
                     android:textColor="@color/textColor"
                     android:textSize="18sp" />
@@ -105,13 +110,14 @@
 
             <TableRow
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" >
+                android:layout_height="match_parent"
+                android:layout_marginBottom="30dp">
 
                 <TextView
                     android:id="@+id/textNameP4"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:paddingLeft="20dp"
+                    android:paddingLeft="10dp"
                     android:text="TextView"
                     android:textColor="@color/textColor"
                     android:textSize="18sp" />
@@ -120,6 +126,7 @@
                     android:id="@+id/textValueP4"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:paddingLeft="25dp"
                     android:text="TextView"
                     android:textColor="@color/textColor"
                     android:textSize="18sp" />
@@ -142,6 +149,7 @@
                     android:id="@+id/textPossibleWorkValue"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:paddingLeft="25dp"
                     android:text="TextView"
                     android:textColor="@color/textColor"
                     android:textSize="18sp" />
@@ -165,6 +173,7 @@
                     android:id="@+id/textRepeatableValue"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:paddingLeft="25dp"
                     android:text="TextView"
                     android:textColor="@color/textColor"
                     android:textSize="18sp" />
@@ -188,6 +197,7 @@
                     android:id="@+id/textDoneTodayValue"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:paddingLeft="25dp"
                     android:text="TextView"
                     android:textColor="@color/textColor"
                     android:textSize="18sp" />
@@ -197,7 +207,8 @@
             <TableRow
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginTop="15dp">
+                android:layout_marginTop="15dp"
+                android:layout_marginBottom="30dp">
 
                 <TextView
                     android:id="@+id/textFailed"
@@ -211,6 +222,7 @@
                     android:id="@+id/textFailedValue"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:paddingLeft="25dp"
                     android:text="TextView"
                     android:textColor="@color/textColor"
                     android:textSize="18sp" />
@@ -221,21 +233,36 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginTop="15dp"
-                android:gravity="center">
+                android:layout_marginBottom="30dp"
+                android:gravity="center_horizontal">
 
                 <Button
                     android:id="@+id/viewPlacesButton"
                     style="@style/Widget.AppCompat.Button.Borderless"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginRight="15dp"
+                    android:background="@color/colorPrimary"
+                    android:elevation="0dp"
+                    android:shadowRadius="0"
+                    android:text="@string/button_details_viewPlaces"
+                    android:textColor="@color/textColor" />
+
+                <Button
+                    android:id="@+id/deleteTaskButton"
+                    style="@style/Widget.AppCompat.Button.Borderless"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:background="@color/colorPrimary"
                     android:elevation="0dp"
                     android:shadowRadius="0"
-                    android:text="@string/text_details_viewPlaces"
+                    android:text="@string/button_details_deleteTask"
                     android:textColor="@color/textColor" />
 
             </TableRow>
+
         </TableLayout>
     </ScrollView>
 

@@ -26,8 +26,22 @@
     <string name="tedt_details_toTime">Alle</string>
     <string name="text_details_failed">Fallito:</string>
     <string name="text_details_noConstraint">Nessun vincolo</string>
-    <string name="text_details_viewPlaces">Visualizza i posti dove soddisfarlo</string>
+    <string name="button_details_viewPlaces">Visualizza luoghi</string>
     <string name="text_yes">Sì</string>
     <string name="text_no">No</string>
     <string name="title_activity_maps">Puoi soddisfare il task in..</string>
+    <string name="title_activity_voice">VoiceActivity</string>
+    <string name="text_voice_listening">Ascolto..</string>
+    <string name="text_voice_button">Salva Task</string>
+    <string name="text_voice_error">Qualcosa è andato storto!\nInserisci il testo manualmente</string>
+    <string name="alert_noSession">Sessione scaduta o corrotta</string>
+    <string name="alert_noInternetPermission">Errore, i permessi per accedere ad internet sono stati negati</string>
+    <string name="alert_noPositionPermission">Sono stati negati il permessi per accedere alla posizione</string>
+    <string name="alert_voice_vttNotPossible">Non è possibile effettuare il voice-to-text, inserisci il testo manualmente</string>
+    <string name="alert_noRecordAudioPermission">Non è stato concesso il permesso per utilizzare il microfono</string>
+    <string name="alert_noCoarsePositionPermission">Non è stato concesso il permesso per accedere alla posizione approssimativa</string>
+    <string name="text_voice_waitPosition">Calcolo la tua posizione..</string>
+    <string name="text_voice_waitServer">Interrogo il server..\n(Potrebbe metterci un po\', abbiate pietà di un Raspberry)</string>
+    <string name="text_voice_retry">Reinserisci la tua richiesta</string>
+    <string name="button_details_deleteTask">Elimina task</string>
 </resources>

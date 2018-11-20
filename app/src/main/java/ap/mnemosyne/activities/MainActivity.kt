@@ -6,33 +6,48 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import ap.mnemosyne.httphandler.HttpHandler
+import ap.mnemosyne.permissions.PermissionsHandler
+import ap.mnemosyne.resources.Task
 import ap.mnemosyne.resources.User
+import ap.mnemosyne.session.SessionManager
 import apontini.mnemosyne.R
 
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
 import okhttp3.Request
+import org.jetbrains.anko.alert
 import org.jetbrains.anko.design.snackbar
 import org.jetbrains.anko.doAsync
-import org.jetbrains.anko.toast
 import org.jetbrains.anko.uiThread
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity()
+{
+
+    private lateinit var session : SessionManager
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
 
-        val sharedPref = this.getSharedPreferences(getString(R.string.sharedPreferences_user_FILE), Context.MODE_PRIVATE)
+        session = SessionManager(this)
 
-        val sessionid = sharedPref.getString(getString(R.string.sharedPreferences_user_sessionid), "")
-        val useremail = sharedPref.getString(getString(R.string.sharedPreferences_user_mail),"")
+        //Permissions check
+        PermissionsHandler.askInternetPermission(this)
+        PermissionsHandler.askPositionPermission(this)
+        PermissionsHandler.askMicrophonePermission(this)
+        PermissionsHandler.askCoarsePositionPermission(this)
+
+        val sessionid = session.user.sessionID
+        val useremail = session.user.email
         val thisActivity = this
+
         if(sessionid == "" || useremail == "")
         {
+            Log.d("SESSION", "Preferences non trovate")
             val intent = Intent(this, LoginActivity::class.java)
             startActivityForResult(intent, 0)
         }
@@ -42,23 +57,38 @@ class MainActivity : AppCompatActivity() {
                 .addHeader("Cookie" , "JSESSIONID="+sessionid)
                 .url(HttpHandler.REST_USER_URL)
                 .build()
+            var error = false
             doAsync {
                 val resp = HttpHandler(thisActivity).request(request, true)
                 when(resp.second.code())
                 {
                     401 -> {
+                        Log.d("SESSION", "Sessione scaduta")
                         val intent = Intent(thisActivity, LoginActivity::class.java)
                         startActivityForResult(intent, 0)
                     }
 
                     200 -> {
+                        Log.d("SESSION", "Sessione valida")
                         snackbar(findViewById(R.id.layout_main), "Sei collegato come: " + (resp.first as User).email).show()
+                    }
+
+                    999 ->{
+                        alert(getString(R.string.alert_noInternetPermission)) {  }.show()
+                        error = true
+                    }
+
+                    else ->{
+                        snackbar(findViewById(R.id.layout_main), resp.second.code()).show()
                     }
                 }
                 uiThread {
-                    listButton.isClickable = true
-                    addButton.isClickable = true
-                    micButton.isClickable = true
+                    if(!error)
+                    {
+                        listButton.isClickable = true
+                        addButton.isClickable = true
+                        micButton.isClickable = true
+                    }
                 }
             }
         }
@@ -76,7 +106,9 @@ class MainActivity : AppCompatActivity() {
         }
 
          micButton.setOnClickListener {
-                view -> snackbar(view, "Non implementato")
+             val intent = Intent(thisActivity, VoiceActivity::class.java)
+             intent.putExtra("sessionid", sessionid)
+             startActivityForResult(intent, 1)
         }
     }
 
@@ -101,31 +133,35 @@ class MainActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
     {
-        if(requestCode == 0)
-        {
-            when(resultCode)
-            {
-                Activity.RESULT_OK -> {
-                    snackbar(findViewById(R.id.layout_main), "Sei collegato come: " + data?.getStringExtra("mail")).show()
-                    val pref : SharedPreferences = this.getSharedPreferences(getString(R.string.sharedPreferences_user_FILE), Context.MODE_PRIVATE)
-                    with(pref.edit())
-                    {
-                        putString(getString(R.string.sharedPreferences_user_sessionid), data?.getStringExtra(getString(R.string.sharedPreferences_user_sessionid)))
-                        putString(getString(R.string.sharedPreferences_user_mail), data?.getStringExtra(getString(R.string.sharedPreferences_user_mail)))
-                        putString(getString(R.string.sharedPreferences_user_psw), data?.getStringExtra(getString(R.string.sharedPreferences_user_psw)))
-                        if(!commit()) toast("Errore nel salvare i dati, riavvia l'applicazione").show()
+       when(requestCode)
+       {
+            0->{
+                when(resultCode)
+                {
+                    Activity.RESULT_OK -> {
+                        snackbar(findViewById(R.id.layout_main), "Sei collegato come: " + session.user.email).show()
                         listButton.isClickable = true
                         addButton.isClickable = true
                         micButton.isClickable = true
                     }
 
-                }
-
-                else -> {
-                    val intent = Intent(this, LoginActivity::class.java)
-                    startActivityForResult(intent, 0)
+                    else -> {
+                        val intent = Intent(this, LoginActivity::class.java)
+                        startActivityForResult(intent, 0)
+                    }
                 }
             }
-        }
+
+           1->{
+               when(resultCode)
+               {
+                   Activity.RESULT_OK -> {
+                       val intent = Intent(this, TaskDetailsActivity::class.java)
+                       intent.putExtra("task", data?.getSerializableExtra("resultTask"))
+                       startActivity(intent)
+                   }
+               }
+           }
+       }
     }
 }

@@ -19,6 +19,7 @@ import ap.mnemosyne.resources.Message
 import ap.mnemosyne.resources.Resource
 import android.view.inputmethod.InputMethodManager
 import ap.mnemosyne.resources.User
+import ap.mnemosyne.session.SessionManager
 import okhttp3.MediaType
 import okhttp3.FormBody
 import org.jetbrains.anko.*
@@ -26,9 +27,14 @@ import org.jetbrains.anko.*
 
 class LoginActivity : AppCompatActivity()
 {
+    private lateinit var session : SessionManager
+
     override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
+
+        session = SessionManager(this)
+
         setContentView(R.layout.activity_login)
         setSupportActionBar(toolbar)
 
@@ -63,11 +69,13 @@ class LoginActivity : AppCompatActivity()
                 201 ->
                 {
                     val returnIntent = Intent()
-                    returnIntent.putExtra("JSESSIONID", (response.first as User).sessionID)
-                    returnIntent.putExtra("mail", loginUser.text.toString())
-                    returnIntent.putExtra("password", loginPassword.text.toString())
+                    session.user = User((response.first as User).sessionID, loginUser.text.toString())
                     setResult(Activity.RESULT_OK, returnIntent)
                     finish()
+                }
+
+                999 ->{
+                    alert(getString(R.string.alert_noInternetPermission)) {  }.show()
                 }
 
                 else -> {
