@@ -125,30 +125,30 @@ class VoiceActivity : AppCompatActivity()
 
                         400->{
                             uiThread {
-                                textStatus.text = (response.first as Message).errorDetails
+                                textStatus.text = "ERRORE: " + (response.first as Message).errorDetails
                             }
                         }
 
                         404->{
                             uiThread {
-                                textStatus.text = (response.first as Message).errorDetails
+                                textStatus.text = "ERRORE: " +  (response.first as Message).errorDetails
                             }
                         }
 
                         500->{
                             uiThread {
-                                textStatus.text = (response.first as Message).errorDetails
+                                textStatus.text = "ERRORE: " +  (response.first as Message).errorDetails
                             }
                         }
 
                         501->{
                             uiThread {
-                                textStatus.text = (response.first as Message).errorDetails
+                                textStatus.text = "ERRORE: " +  (response.first as Message).errorDetails
                             }
                         }
 
                         999->{
-                            textStatus.text = getString(R.string.alert_noInternetPermission)
+                            textStatus.text = "ERRORE: " + getString(R.string.alert_noInternetPermission)
                         }
                     }
 
@@ -207,9 +207,11 @@ class VoiceActivity : AppCompatActivity()
             1234-> {
                 if(resultCode!= Activity.RESULT_OK)
                 {
-                    textStatus.text = getString(R.string.text_voice_error)
-                    return
+
                 }
+
+                textStatus.text = getString(R.string.text_voice_error)
+                return
 
                 // Fill the list view with the strings the recognizer thought it
                 // could have heard
