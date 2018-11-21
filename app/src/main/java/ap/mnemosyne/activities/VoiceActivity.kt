@@ -12,6 +12,7 @@ import android.content.Intent
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
+import android.text.Editable
 import android.util.Log
 import android.view.View
 import ap.mnemosyne.httphandler.HttpHandler
@@ -20,7 +21,6 @@ import ap.mnemosyne.resources.Message
 import ap.mnemosyne.resources.Resource
 import ap.mnemosyne.resources.Task
 import ap.mnemosyne.session.SessionManager
-import kotlinx.android.synthetic.main.content_login.*
 import kotlinx.android.synthetic.main.content_voice.*
 import okhttp3.FormBody
 import okhttp3.Request
@@ -75,7 +75,8 @@ class VoiceActivity : AppCompatActivity()
         }
 
         saveTaskButton.setOnClickListener {
-            sendTask(sessionid)
+            if(textSentence.text.toString() != "")
+                sendTask(sessionid)
         }
     }
 
@@ -125,25 +126,98 @@ class VoiceActivity : AppCompatActivity()
 
                         400->{
                             uiThread {
-                                textStatus.text = "ERRORE: " + (response.first as Message).errorDetails
+                                val respMessage = response.first as Message
+                                when(respMessage.errorCode)
+                                {
+                                    "PRSR01" -> {
+                                        textStatus.text = getString(R.string.text_voice_PRSR01)
+                                    }
+
+                                    "PRSR02" -> {
+                                        textStatus.text = getString(R.string.text_voice_PRSR02)
+                                    }
+
+                                    "PRSR07" -> {
+                                        textStatus.text = getString(R.string.text_voice_PRSR07, respMessage.errorDetails.split(":")[1])
+                                    }
+
+                                    "PRSR10" -> {
+                                        textStatus.text = getString(R.string.text_voice_PRSR10)
+                                    }
+
+                                    else -> {
+                                        textStatus.text = getString(R.string.text_general_error, respMessage.errorDetails)
+                                    }
+                                }
                             }
                         }
 
                         404->{
                             uiThread {
-                                textStatus.text = "ERRORE: " +  (response.first as Message).errorDetails
+                                val respMessage = response.first as Message
+                                when(respMessage.errorCode)
+                                {
+                                    "PRSR05" -> {
+                                        textStatus.text = getString(R.string.text_voice_PRSR05, respMessage.errorDetails.split(":")[1])
+                                    }
+
+                                    "PRSR11" -> {
+                                        textStatus.text = getString(R.string.text_voice_PRSR11, respMessage.errorDetails)
+                                    }
+
+                                    else -> {
+                                        textStatus.text = getString(R.string.text_general_error, respMessage.errorDetails)
+                                    }
+                                }
                             }
                         }
 
                         500->{
                             uiThread {
-                                textStatus.text = "ERRORE: " +  (response.first as Message).errorDetails
+                                val respMessage = response.first as Message
+                                when(respMessage.errorCode)
+                                {
+                                    "PRSR03" -> {
+                                        textStatus.text = getString(R.string.text_voice_PRSR03)
+                                    }
+
+                                    "PRSR08" -> {
+                                        textStatus.text = "SQLException: " + respMessage.errorDetails
+                                    }
+
+                                    "PRSR09" -> {
+                                        textStatus.text = "ServletException: " + respMessage.errorDetails
+                                    }
+
+                                    else -> {
+                                        textStatus.text = getString(R.string.text_general_error, respMessage.errorDetails)
+                                    }
+                                }
                             }
                         }
 
                         501->{
                             uiThread {
-                                textStatus.text = "ERRORE: " +  (response.first as Message).errorDetails
+                                val respMessage = response.first as Message
+                                when(respMessage.errorCode)
+                                {
+                                    "PRSR04" -> {
+                                        textStatus.text = getString(R.string.text_voice_PRSR04, respMessage.errorDetails.split(":")[1])
+                                    }
+
+                                    "PRSR06" -> {
+                                        textStatus.text = getString(R.string.text_voice_PRSR06, respMessage.errorDetails.split(":")[1])
+                                    }
+
+                                    "PRSR13" -> {
+                                        textStatus.text = getString(R.string.text_voice_PRSR13, respMessage.errorDetails.split(":")[1])
+                                    }
+
+                                    else -> {
+                                        textStatus.text = getString(R.string.text_general_error, respMessage.errorDetails)
+                                    }
+                                }
+
                             }
                         }
 
@@ -205,34 +279,34 @@ class VoiceActivity : AppCompatActivity()
         when (requestCode)
         {
             1234-> {
-                if(resultCode!= Activity.RESULT_OK)
+                if(resultCode == Activity.RESULT_OK)
                 {
+                    textStatus.text = "OK"
+                    // Fill the list view with the strings the recognizer thought it
+                    // could have heard
+                    val matches = data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS) ?: arrayListOf("No, non ho capito in realtà")
+                    textSentence.setText(matches[0])
+                    // matches is the result of voice input. It is a list of what the
+                    // user possibly said.
+                    // Using an if statement for the keyword you want to use allows the
+                    // use of any activity if keywords match
+                    // it is possible to set up multiple keywords to use the same
+                    // activity so more than one word will allow the user
+                    // to use the activity (makes it so the user doesn't have to
+                    // memorize words from a list)
+                    // to use an activity from the voice input information simply use
+                    // the following format;
+                    // if (matches.contains("keyword here") { startActivity(new
+                    // Intent("name.of.manifest.ACTIVITY")
 
+                    if (matches?.contains("information") ?: false)
+                    {
+                        startActivity(Intent("android.intent.action.INFOSCREEN"))
+                    }
                 }
-
-                textStatus.text = getString(R.string.text_voice_error)
-                return
-
-                // Fill the list view with the strings the recognizer thought it
-                // could have heard
-                val matches = data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
-                alert(matches.toString()) { }.show()
-                // matches is the result of voice input. It is a list of what the
-                // user possibly said.
-                // Using an if statement for the keyword you want to use allows the
-                // use of any activity if keywords match
-                // it is possible to set up multiple keywords to use the same
-                // activity so more than one word will allow the user
-                // to use the activity (makes it so the user doesn't have to
-                // memorize words from a list)
-                // to use an activity from the voice input information simply use
-                // the following format;
-                // if (matches.contains("keyword here") { startActivity(new
-                // Intent("name.of.manifest.ACTIVITY")
-
-                if (matches?.contains("information") ?: false)
+                else
                 {
-                    startActivity(Intent("android.intent.action.INFOSCREEN"))
+                    textStatus.text = getString(R.string.text_voice_error)
                 }
             }
 

@@ -32,7 +32,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback
         {
             list.forEach {
                 val latlon = LatLng(it.coordinates.lat, it.coordinates.lon)
-                googleMap.addMarker(MarkerOptions().position(latlon).title(it.name))
+                googleMap.addMarker(MarkerOptions().position(latlon).title(it.name).title(it.name ?: "Nome non trovato"))
             }
 
             val camera = LatLng(list.first().coordinates.lat, list.first().coordinates.lon)

@@ -44,4 +44,18 @@
     <string name="text_voice_waitServer">Interrogo il server..\n(Potrebbe metterci un po\', abbiate pietà di un Raspberry)</string>
     <string name="text_voice_retry">Reinserisci la tua richiesta</string>
     <string name="button_details_deleteTask">Elimina task</string>
+    <string name="hint_voice_sentence">devo prendere, ricordami di fare..</string>
+    <string name="text_voice_PRSR03">Il parser non ha capito la frase, prova a riformularla</string>
+    <string name="text_voice_PRSR04">L\'azione \'%s\' non è stata definita</string>
+    <string name="text_voice_PRSR06">Il vincolo \'%s\' non è stato definito</string>
+    <string name="text_voice_PRSR13">Il vincolo \'%s\' non è ancora implementato</string>
+    <string name="text_voice_PRSR05">Non so dove trovare l\'oggetto \'%s\'</string>
+    <string name="text_voice_PRSR11">Non è stato specificato il parametro \'%s\'</string>
+    <string name="text_voice_PRSR01">Non hai specificato la frase!</string>
+    <string name="text_voice_PRSR02">Lat o Lon non specificati nella richiesta</string>
+    <string name="text_voice_PRSR07">Non ho trovato posti aperti per soddisfare il task all\'ora \'%s\'</string>
+    <string name="text_voice_PRSR10">Il server non ha ricevuto dati dai servizi Places, riprova tra un po\'</string>
+    <string name="text_general_error">ERRORE: %s</string>
+    <string name="title_activity_time_interval_picker">Scegli un intervallo</string>
+    <string name="title_activity_settings">Impostazioni</string>
 </resources>

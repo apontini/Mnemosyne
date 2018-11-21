@@ -45,8 +45,10 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="30dp"
             android:ems="10"
+            android:hint="@string/hint_voice_sentence"
             android:inputType="textPersonName"
-            android:textColor="@color/textColor" />
+            android:textColor="@color/textColor"
+            android:textColorHint="@color/textColor" />
 
         <Button
             android:id="@+id/saveTaskButton"

@@ -10,6 +10,16 @@ class PermissionsHandler
 {
     companion object
     {
+        private val permissionsRequired = arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.INTERNET,
+            Manifest.permission.RECORD_AUDIO)
+
+        fun askPermissions(act: Activity)
+        {
+            ActivityCompat.requestPermissions(act, permissionsRequired, 0)
+        }
+
         fun checkPositionPermission(act: Activity): Boolean
         {
             return ContextCompat.checkSelfPermission(act,

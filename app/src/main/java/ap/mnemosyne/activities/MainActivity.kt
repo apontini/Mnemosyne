@@ -1,9 +1,7 @@
 package ap.mnemosyne.activities
 
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log
@@ -11,7 +9,6 @@ import android.view.Menu
 import android.view.MenuItem
 import ap.mnemosyne.httphandler.HttpHandler
 import ap.mnemosyne.permissions.PermissionsHandler
-import ap.mnemosyne.resources.Task
 import ap.mnemosyne.resources.User
 import ap.mnemosyne.session.SessionManager
 import apontini.mnemosyne.R
@@ -28,6 +25,7 @@ class MainActivity : AppCompatActivity()
 {
 
     private lateinit var session : SessionManager
+    private lateinit var thisActivity : Activity
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
@@ -36,14 +34,11 @@ class MainActivity : AppCompatActivity()
         session = SessionManager(this)
 
         //Permissions check
-        PermissionsHandler.askInternetPermission(this)
-        PermissionsHandler.askPositionPermission(this)
-        PermissionsHandler.askMicrophonePermission(this)
-        PermissionsHandler.askCoarsePositionPermission(this)
+        PermissionsHandler.askPermissions(this)
 
         val sessionid = session.user.sessionID
         val useremail = session.user.email
-        val thisActivity = this
+        thisActivity = this
 
         if(sessionid == "" || useremail == "")
         {
@@ -126,7 +121,11 @@ class MainActivity : AppCompatActivity()
         // as you specify a parent activity in AndroidManifest.xml.
         return when (item.itemId)
         {
-            R.id.action_settings -> true
+            R.id.action_settings -> {
+                val intent = Intent(thisActivity, SettingsActivity::class.java)
+                startActivity(intent)
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
     }

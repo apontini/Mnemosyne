@@ -5,7 +5,7 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission." />
 
@@ -43,6 +43,7 @@
             android:name="ap.mnemosyne.activities.TaskDetailsActivity"
             android:label="@string/title_activity_task_details"
             android:theme="@style/AppTheme.NoActionBar" />
+
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
@@ -59,6 +60,14 @@
                 <category android:name="android.intent.category.VOICE" />
             </intent-filter>
         </activity>
+        <activity
+            android:name="ap.mnemosyne.activities.TimeIntervalPickerActivity"
+            android:label="@string/title_activity_time_interval_picker"
+            android:theme="@style/AppTheme.NoActionBar" />
+
+        <activity android:name="ap.mnemosyne.activities.SettingsActivity"
+            android:label="@string/title_activity_settings"
+            android:theme="@style/AppTheme.NoActionBar"/>
     </application>
 
 </manifest>

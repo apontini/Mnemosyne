@@ -28,19 +28,15 @@ class HttpHandler(act: Activity)
             b.writeTimeout(20, TimeUnit.SECONDS)
             return@lazy b.build()
         }
-        const val AUTH_URL : String = "http://pintini.ddns.net:8080/mnemosyne/auth"
-        const val REST_USER_URL : String = "http://pintini.ddns.net:8080/mnemosyne/rest/user"
-        const val REST_TASK_URL : String = "http://pintini.ddns.net:8080/mnemosyne/rest/task"
-        const val PARSE_URL : String = "http://pintini.ddns.net:8080/mnemosyne/parse"
+
+        const val BASE_URL : String = "http://pintini.ddns.net:8080"
+        const val AUTH_URL : String = "$BASE_URL/mnemosyne/auth"
+        const val REST_USER_URL : String = "$BASE_URL/mnemosyne/rest/user"
+        const val REST_TASK_URL : String = "$BASE_URL/mnemosyne/rest/task"
+        const val PARSE_URL : String = "$BASE_URL/mnemosyne/parse"
     }
 
-    val act : Activity
-
-    init
-    {
-         this.act = act
-    }
-
+    val act : Activity = act
 
     fun request(req : Request, parseRes : Boolean) : Pair<Resource?, Response>
     {
