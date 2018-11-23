@@ -7,10 +7,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import ap.mnemosyne.httphandler.HttpHandler
-import ap.mnemosyne.permissions.PermissionsHandler
+import ap.mnemosyne.http.HttpHelper
+import ap.mnemosyne.permissions.PermissionsHelper
 import ap.mnemosyne.resources.User
-import ap.mnemosyne.session.SessionManager
+import ap.mnemosyne.session.SessionHelper
 import apontini.mnemosyne.R
 
 import kotlinx.android.synthetic.main.activity_main.*
@@ -20,21 +20,24 @@ import org.jetbrains.anko.alert
 import org.jetbrains.anko.design.snackbar
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
+import android.support.v7.app.AppCompatDelegate
+import android.view.animation.AnimationUtils
+
 
 class MainActivity : AppCompatActivity()
 {
 
-    private lateinit var session : SessionManager
+    private lateinit var session : SessionHelper
     private lateinit var thisActivity : Activity
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
 
-        session = SessionManager(this)
+        session = SessionHelper(this)
 
         //Permissions check
-        PermissionsHandler.askPermissions(this)
+        PermissionsHelper.askPermissions(this)
 
         val sessionid = session.user.sessionID
         val useremail = session.user.email
@@ -50,11 +53,11 @@ class MainActivity : AppCompatActivity()
         {
             val request = Request.Builder()
                 .addHeader("Cookie" , "JSESSIONID="+sessionid)
-                .url(HttpHandler.REST_USER_URL)
+                .url(HttpHelper.REST_USER_URL)
                 .build()
             var error = false
             doAsync {
-                val resp = HttpHandler(thisActivity).request(request, true)
+                val resp = HttpHelper(thisActivity).request(request, true)
                 when(resp.second.code())
                 {
                     401 -> {
@@ -80,6 +83,7 @@ class MainActivity : AppCompatActivity()
                 uiThread {
                     if(!error)
                     {
+                        settingsButton.isClickable = true
                         listButton.isClickable = true
                         addButton.isClickable = true
                         micButton.isClickable = true
@@ -89,7 +93,6 @@ class MainActivity : AppCompatActivity()
         }
 
         setContentView(R.layout.activity_main)
-        setSupportActionBar(toolbar)
 
         listButton.setOnClickListener {
             val intent = Intent(thisActivity, TaskListActivity::class.java)
@@ -100,11 +103,28 @@ class MainActivity : AppCompatActivity()
                 view -> snackbar(view, "Non implementato")
         }
 
-         micButton.setOnClickListener {
+        micButton.setOnClickListener {
              val intent = Intent(thisActivity, VoiceActivity::class.java)
              intent.putExtra("sessionid", sessionid)
              startActivityForResult(intent, 1)
         }
+
+        settingsButton.setOnClickListener{
+            val animation = AnimationUtils.loadAnimation(this, R.anim.spin_around_itself)
+            settingsButton.startAnimation(animation)
+            val intent = Intent(thisActivity, SettingsActivity::class.java)
+            startActivityForResult(intent, 2)
+        }
+    }
+
+    override fun onMenuOpened(featureId: Int, menu: Menu?): Boolean
+    {
+        if (featureId == AppCompatDelegate.FEATURE_SUPPORT_ACTION_BAR && menu != null)
+        {
+            val intent = Intent(thisActivity, SettingsActivity::class.java)
+            startActivity(intent)
+        }
+        return super.onMenuOpened(featureId, menu)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean
@@ -139,6 +159,7 @@ class MainActivity : AppCompatActivity()
                 {
                     Activity.RESULT_OK -> {
                         snackbar(findViewById(R.id.layout_main), "Sei collegato come: " + session.user.email).show()
+                        settingsButton.isClickable = true
                         listButton.isClickable = true
                         addButton.isClickable = true
                         micButton.isClickable = true
@@ -158,6 +179,15 @@ class MainActivity : AppCompatActivity()
                        val intent = Intent(this, TaskDetailsActivity::class.java)
                        intent.putExtra("task", data?.getSerializableExtra("resultTask"))
                        startActivity(intent)
+                   }
+               }
+           }
+
+           2->{
+               when(resultCode)
+               {
+                   Activity.RESULT_OK -> {
+
                    }
                }
            }

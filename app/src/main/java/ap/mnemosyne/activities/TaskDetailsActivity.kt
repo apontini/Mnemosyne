@@ -3,18 +3,23 @@ package ap.mnemosyne.activities
 import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log
 import android.view.View
-import ap.mnemosyne.resources.Task
-import ap.mnemosyne.resources.TaskPlaceConstraint
-import ap.mnemosyne.resources.TaskTimeConstraint
+import ap.mnemosyne.http.HttpHelper
+import ap.mnemosyne.resources.*
+import ap.mnemosyne.session.SessionHelper
 import apontini.mnemosyne.R
 
 import kotlinx.android.synthetic.main.activity_task_details.*
 import kotlinx.android.synthetic.main.content_task_details.*
+import okhttp3.Request
+import org.jetbrains.anko.*
 import org.jetbrains.anko.design.snackbar
 
 class TaskDetailsActivity : AppCompatActivity()
 {
+
+    private lateinit var session : SessionHelper
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
@@ -22,6 +27,8 @@ class TaskDetailsActivity : AppCompatActivity()
         val task: Task = intent.extras.getSerializable("task") as Task
 
         super.onCreate(savedInstanceState)
+        session = SessionHelper(this)
+
         setContentView(R.layout.activity_task_details)
 
         toolbar.title = task.name.capitalize()
@@ -41,7 +48,11 @@ class TaskDetailsActivity : AppCompatActivity()
         }
 
         deleteTaskButton.setOnClickListener{
-            snackbar(tableLayout, "Non implementato")
+
+            alert("Sei sicuro?"){
+                yesButton { deleteTask(task) }
+                noButton { }
+            }.show()
         }
 
         when
@@ -114,5 +125,57 @@ class TaskDetailsActivity : AppCompatActivity()
             getString(R.string.text_no)
         }
 
+    }
+
+    fun deleteTask(task : Task)
+    {
+        viewPlacesButton.isClickable = false
+        deleteTaskButton.isClickable = false
+        progressBar3.visibility = View.VISIBLE
+        val request = Request.Builder()
+            .addHeader("Cookie" , "JSESSIONID="+session.user.sessionID)
+            .url(HttpHelper.REST_TASK_URL + "/" + task.id)
+            .delete()
+            .build()
+        Log.d("URL", request.toString())
+        var error = false
+        doAsync {
+            val resp = HttpHelper(this@TaskDetailsActivity).request(request, true)
+            when(resp.second.code())
+            {
+                401 -> {
+                    Log.d("SESSION", "Sessione scaduta")
+                    error = true
+                    val intent = Intent(this@TaskDetailsActivity, LoginActivity::class.java)
+                    startActivity(intent)
+                }
+
+                200 -> {
+                    val returnIntent = Intent()
+                    returnIntent.putExtra("deletedTask", task)
+                    setResult(1000, returnIntent)
+                    finish()
+                }
+
+                999 ->{
+                    alert(getString(R.string.alert_noInternetPermission)) {  }.show()
+                    error = true
+                }
+
+                else ->{
+                    Log.d("MESSAGGIO", resp.second.code().toString())
+                    error = true
+                }
+            }
+            if(error)
+            {
+                uiThread {
+                    viewPlacesButton.isClickable = true
+                    deleteTaskButton.isClickable = true
+                    progressBar3.visibility = View.INVISIBLE
+                    snackbar(tableLayout, (resp.first as Message).errorDetails)
+                }
+            }
+        }
     }
 }

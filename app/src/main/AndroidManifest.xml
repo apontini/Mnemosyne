@@ -21,6 +21,11 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="@string/google_maps_key" />
+
         <activity
             android:name="ap.mnemosyne.activities.MainActivity"
             android:label="@string/app_name"
@@ -44,10 +49,6 @@
             android:label="@string/title_activity_task_details"
             android:theme="@style/AppTheme.NoActionBar" />
 
-        <meta-data
-            android:name="com.google.android.geo.API_KEY"
-            android:value="@string/google_maps_key" />
-
         <activity
             android:name="ap.mnemosyne.activities.MapsActivity"
             android:label="@string/title_activity_maps" />
@@ -62,8 +63,8 @@
         </activity>
         <activity
             android:name="ap.mnemosyne.activities.TimeIntervalPickerActivity"
-            android:label="@string/title_activity_time_interval_picker"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:label=""
+            android:theme="@style/Theme.Transparent" />
 
         <activity android:name="ap.mnemosyne.activities.SettingsActivity"
             android:label="@string/title_activity_settings"

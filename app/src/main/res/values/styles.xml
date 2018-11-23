@@ -6,6 +6,8 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:actionOverflowButtonStyle">@style/SettingsOverflowButton</item>
+        <item name="android:alertDialogTheme">@style/Alert</item>
     </style>
 
     <style name="AppTheme.NoActionBar">
@@ -28,5 +30,24 @@
     <style name="FullscreenActionBarStyle" parent="Widget.AppCompat.ActionBar">
         <item name="android:background">@color/black_overlay</item>
     </style>
+
+    <style name="SettingsOverflowButton" parent="android:style/Widget.Holo.Light.ActionButton.Overflow">
+        <item name="android:src">@drawable/ic_baseline_settings_20px</item>
+        <item name="android:tint">@color/textColor</item>
+    </style>
+
+    <style name="Alert" parent="Theme.AppCompat.Light.Dialog.Alert">
+        <item name="android:colorAccent">#209615</item>
+    </style>
+
+    <style name="Theme.Transparent" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:backgroundDimEnabled">false</item>
+    </style>
+
 
 </resources>

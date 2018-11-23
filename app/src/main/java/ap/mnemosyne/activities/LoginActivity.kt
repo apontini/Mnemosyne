@@ -8,10 +8,9 @@ import kotlinx.android.synthetic.main.activity_login.*
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.support.annotation.UiThread
 import android.support.design.widget.Snackbar
 import android.view.View
-import ap.mnemosyne.httphandler.HttpHandler
+import ap.mnemosyne.http.HttpHelper
 import kotlinx.android.synthetic.main.content_login.*
 import okhttp3.Request
 import okhttp3.Response
@@ -19,7 +18,7 @@ import ap.mnemosyne.resources.Message
 import ap.mnemosyne.resources.Resource
 import android.view.inputmethod.InputMethodManager
 import ap.mnemosyne.resources.User
-import ap.mnemosyne.session.SessionManager
+import ap.mnemosyne.session.SessionHelper
 import okhttp3.MediaType
 import okhttp3.FormBody
 import org.jetbrains.anko.*
@@ -27,13 +26,13 @@ import org.jetbrains.anko.*
 
 class LoginActivity : AppCompatActivity()
 {
-    private lateinit var session : SessionManager
+    private lateinit var session : SessionHelper
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
 
-        session = SessionManager(this)
+        session = SessionHelper(this)
 
         setContentView(R.layout.activity_login)
         setSupportActionBar(toolbar)
@@ -57,12 +56,12 @@ class LoginActivity : AppCompatActivity()
         val mtype = MediaType.parse("application/x-www-form-urlencoded; charset=utf-8")
         val body = FormBody.Builder().add("email", loginUser.text.toString()).add("password", loginPassword.text.toString()).build()
         val request = Request.Builder()
-            .url(HttpHandler.AUTH_URL)
+            .url(HttpHelper.AUTH_URL)
             .post(body)
             .build()
 
         doAsync{
-            val response : Pair<Resource?, Response> = HttpHandler(act).request(request, true)
+            val response : Pair<Resource?, Response> = HttpHelper(act).request(request, true)
 
             when(response.second.code())
             {

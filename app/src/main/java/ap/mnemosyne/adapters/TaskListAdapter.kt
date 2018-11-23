@@ -1,5 +1,6 @@
 package ap.mnemosyne.adapters
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.support.v7.widget.RecyclerView
@@ -11,7 +12,6 @@ import ap.mnemosyne.activities.TaskDetailsActivity
 import ap.mnemosyne.resources.Task
 import apontini.mnemosyne.R
 import kotlinx.android.synthetic.main.task_list_item.view.*
-import kotlin.coroutines.coroutineContext
 
 class TaskListAdapter(private val context: Context,
                       private val data: List<Task>) : RecyclerView.Adapter<TaskListAdapter.ViewHolder>()
@@ -26,6 +26,8 @@ class TaskListAdapter(private val context: Context,
         return data.size
     }
 
+
+
     override fun onBindViewHolder(holder: ViewHolder?, position: Int)
     {
         holder?.setItem(data[position])
@@ -37,11 +39,11 @@ class TaskListAdapter(private val context: Context,
         val nametext = view.textTaskName as TextView
         val extratext = view.textTaskExtra as TextView
         lateinit var task : Task
-        val ctx : Context
+        val ctx : Context = ctx
+        val v : View = view
 
         init
         {
-            this.ctx = ctx
             view.setOnClickListener(this)
         }
 
@@ -57,8 +59,10 @@ class TaskListAdapter(private val context: Context,
         {
             val detailIntent = Intent(p0?.context, TaskDetailsActivity::class.java)
             detailIntent.putExtra("task", task)
-            p0?.context?.startActivity(detailIntent)
+            if(ctx is Activity)
+                ctx.startActivityForResult(detailIntent, 100)
+            else
+                ctx.startActivity(detailIntent)
         }
     }
-
 }

@@ -6,7 +6,7 @@ import android.content.pm.PackageManager
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 
-class PermissionsHandler
+class PermissionsHelper
 {
     companion object
     {

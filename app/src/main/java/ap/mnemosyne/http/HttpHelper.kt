@@ -1,24 +1,20 @@
-package ap.mnemosyne.httphandler
+package ap.mnemosyne.http
 
 import android.app.Activity
-import android.os.Looper
 import android.util.Log
-import ap.mnemosyne.permissions.PermissionsHandler
+import ap.mnemosyne.permissions.PermissionsHelper
 import ap.mnemosyne.resources.Message
 import ap.mnemosyne.resources.Resource
+import ap.mnemosyne.resources.ResourceList
 import com.fasterxml.jackson.core.JsonParseException
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
-import org.jetbrains.anko.alert
-import org.jetbrains.anko.design.snackbar
-import org.jetbrains.anko.toast
 import java.io.ByteArrayInputStream
 import java.lang.ClassCastException
 import java.util.concurrent.TimeUnit
-import kotlin.math.log
 
-class HttpHandler(act: Activity)
+class HttpHelper(act: Activity)
 {
     companion object
     {
@@ -34,13 +30,14 @@ class HttpHandler(act: Activity)
         const val REST_USER_URL : String = "$BASE_URL/mnemosyne/rest/user"
         const val REST_TASK_URL : String = "$BASE_URL/mnemosyne/rest/task"
         const val PARSE_URL : String = "$BASE_URL/mnemosyne/parse"
+        const val REST_PARAMETER_URL : String = "$BASE_URL/mnemosyne/rest/parameter"
     }
 
     val act : Activity = act
 
     fun request(req : Request, parseRes : Boolean) : Pair<Resource?, Response>
     {
-        if(!PermissionsHandler.checkInternetPermission(act))
+        if(!PermissionsHelper.checkInternetPermission(act))
         {
             //ERROR: permission are not given
             val res = Response.Builder().code(999).build()
@@ -50,15 +47,42 @@ class HttpHandler(act: Activity)
         synchronized(httpclient)
         {
             val resp = httpclient.newCall(req).execute()
-            var resRet : Resource? = null
+            lateinit var resRet : Resource
             if(parseRes)
             {
                 val bodyResp: String = resp.body()?.string() ?: Message("Errore", "", "null dal server").toJSON()
                 Log.d("RESPONSE", bodyResp)
-                val stream = ByteArrayInputStream(bodyResp.toByteArray(Charsets.UTF_8))
-                resRet = try{ Resource.fromJSON(stream) }
-                    catch (jpe : JsonParseException) { Message("JPE", "", jpe.message) }
-                    catch (cce : ClassCastException){ Message("CCE", "", cce.message) }
+                if(bodyResp.contains("{\"resource-list\":["))
+                {
+                    resRet = try
+                    {
+                        ResourceList.fromJSON(bodyResp)
+                    }
+                    catch (jpe: JsonParseException)
+                    {
+                        Message("JPE", "", jpe.message)
+                    }
+                    catch (cce: ClassCastException)
+                    {
+                        Message("CCE", "", cce.message)
+                    }
+                }
+                else
+                {
+                    val stream = ByteArrayInputStream(bodyResp.toByteArray(Charsets.UTF_8))
+                    resRet = try
+                    {
+                        Resource.fromJSON(stream)
+                    }
+                    catch (jpe: JsonParseException)
+                    {
+                        Message("JPE", "", jpe.message)
+                    }
+                    catch (cce: ClassCastException)
+                    {
+                        Message("CCE", "", cce.message)
+                    }
+                }
 
             }
             return Pair(resRet, resp)

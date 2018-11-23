@@ -32,6 +32,10 @@ public final class ResourceList<T extends Resource> extends Resource {
         this.list = list;
     }
 
+    public Iterable<T> getList() {
+        return list;
+    }
+
     @Override
     public final void toJSON(final OutputStream out) throws IOException
     {
@@ -63,7 +67,7 @@ public final class ResourceList<T extends Resource> extends Resource {
         return toRet;
     }
 
-    public static final List<Resource> fromJSON(String json) throws IOException
+    public static final ResourceList<Resource> fromJSON(String json) throws IOException
     {
         List<Resource> toRet = new ArrayList<>();
         ObjectMapper map = new ObjectMapper();
@@ -74,6 +78,6 @@ public final class ResourceList<T extends Resource> extends Resource {
             InputStream stream = new ByteArrayInputStream(obj.get(i).toString().getBytes(StandardCharsets.UTF_8));
             toRet.add(Resource.fromJSON(stream));
         }
-        return toRet;
+        return new ResourceList<>(toRet);
     }
 }

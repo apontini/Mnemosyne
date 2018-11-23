@@ -2,31 +2,58 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <PreferenceCategory
-        android:title="Categoria Prova">
-
-        <SwitchPreference
-            android:key="key1"
-            android:title="Switch Preference"
-            android:summary="Switch Summary"
-            android:defaultValue="true" />
-
-        <EditTextPreference
-            android:key="key2"
-            android:title="EditText Preference"
-            android:summary="EditText Summary"
-            android:dialogMessage="Dialog Message"
-            android:defaultValue="Default value" />
-        <CheckBoxPreference
-            android:key="key3"
-            android:title="CheckBox Preference"
-            android:summary="CheckBox Summary"
-            android:defaultValue="true"/>
+        android:title="Utente">
 
         <Preference
-            android:key="key4"
-            android:title="Parametro 1"
-            android:summary="Summary parametro 1"
+            android:key="password"
+            android:title="Cambia Password"
             />
+
+        <Preference
+            android:key="log_out"
+            android:title="Esci"
+            />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="Parametri utente">
+
+        <Preference
+            android:key="location_house"
+            android:title="Casa"
+            android:icon="@drawable/ic_round_home_24px"
+            />
+
+        <Preference
+            android:key="location_work"
+            android:title="Lavoro"
+            android:icon="@drawable/ic_round_work_24px"
+            />
+
+        <Preference
+            android:key="time_lunch"
+            android:title="Orario di pranzo"
+            android:icon="@drawable/ic_round_restaurant_24px"
+            />
+
+        <Preference
+            android:key="time_dinner"
+            android:title="Orario di cena"
+            android:icon="@drawable/ic_round_restaurant_24px"
+            />
+
+        <Preference
+            android:key="time_bed"
+            android:title="Orario letto"
+            android:icon="@drawable/ic_round_hotel_24px"
+            />
+
+        <Preference
+            android:key="time_work"
+            android:title="Orario di lavoro"
+            android:icon="@drawable/ic_round_access_time_24px"
+            />
+
     </PreferenceCategory>
 
 </PreferenceScreen>

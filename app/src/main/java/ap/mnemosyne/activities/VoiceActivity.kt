@@ -12,15 +12,14 @@ import android.content.Intent
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
-import android.text.Editable
 import android.util.Log
 import android.view.View
-import ap.mnemosyne.httphandler.HttpHandler
-import ap.mnemosyne.permissions.PermissionsHandler
+import ap.mnemosyne.http.HttpHelper
+import ap.mnemosyne.permissions.PermissionsHelper
 import ap.mnemosyne.resources.Message
 import ap.mnemosyne.resources.Resource
 import ap.mnemosyne.resources.Task
-import ap.mnemosyne.session.SessionManager
+import ap.mnemosyne.session.SessionHelper
 import kotlinx.android.synthetic.main.content_voice.*
 import okhttp3.FormBody
 import okhttp3.Request
@@ -34,13 +33,13 @@ import java.util.*
 
 class VoiceActivity : AppCompatActivity()
 {
-    private lateinit var session : SessionManager
+    private lateinit var session : SessionHelper
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
 
-        session = SessionManager(this)
+        session = SessionHelper(this)
         setContentView(R.layout.activity_voice)
         setSupportActionBar(toolbar)
 
@@ -54,7 +53,7 @@ class VoiceActivity : AppCompatActivity()
             return
         }
 
-        if(!PermissionsHandler.checkMicrophonePermission(this))
+        if(!PermissionsHelper.checkMicrophonePermission(this))
         {
             alert(getString(R.string.alert_noRecordAudioPermission)){
                 okButton { finish() }
@@ -82,13 +81,19 @@ class VoiceActivity : AppCompatActivity()
 
     private fun sendTask(sessionid : String)
     {
-        // Acquire a reference to the system Location Manager
+
+        val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+
+        if(!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER))
+        {
+            alert("I servizi di localizzazione non sono abilitati!").show()
+            return
+        }
+
         progressBar.visibility = View.VISIBLE
         textStatus.text = getString(R.string.text_voice_waitPosition)
         textSentence.visibility = View.INVISIBLE
         saveTaskButton.visibility = View.INVISIBLE
-
-        val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
         // Define a listener that responds to location updates
         val locationListener = object : LocationListener
@@ -103,12 +108,12 @@ class VoiceActivity : AppCompatActivity()
 
                 val request = Request.Builder()
                     .addHeader("Cookie" , "JSESSIONID=" + sessionid)
-                    .url(HttpHandler.PARSE_URL)
+                    .url(HttpHelper.PARSE_URL)
                     .post(body)
                     .build()
 
                 doAsync {
-                    val response : Pair<Resource?, Response> = HttpHandler(this@VoiceActivity).request(request, true)
+                    val response : Pair<Resource?, Response> = HttpHelper(this@VoiceActivity).request(request, true)
                     when(response.second.code())
                     {
                         200->{
@@ -222,7 +227,7 @@ class VoiceActivity : AppCompatActivity()
                         }
 
                         999->{
-                            textStatus.text = "ERRORE: " + getString(R.string.alert_noInternetPermission)
+                            textStatus.text =  getString(R.string.text_general_error, getString(R.string.alert_noInternetPermission))
                         }
                     }
 
@@ -242,7 +247,7 @@ class VoiceActivity : AppCompatActivity()
             override fun onProviderDisabled(provider: String) {}
         }
 
-        if(!PermissionsHandler.checkPositionPermission(this))
+        if(!PermissionsHelper.checkPositionPermission(this))
         {
             alert(getString(R.string.alert_noPositionPermission)){
                 okButton { finish() }
@@ -250,7 +255,7 @@ class VoiceActivity : AppCompatActivity()
             return
         }
 
-        if(!PermissionsHandler.checkCoarsePositionPermission(this))
+        if(!PermissionsHelper.checkCoarsePositionPermission(this))
         {
             alert(getString(R.string.alert_noCoarsePositionPermission)){
                 okButton { finish() }
@@ -258,7 +263,8 @@ class VoiceActivity : AppCompatActivity()
             return
         }
 
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0f,locationListener)
+
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0f, locationListener)
     }
 
     fun startVoiceRecognitionActivity()
@@ -281,28 +287,9 @@ class VoiceActivity : AppCompatActivity()
             1234-> {
                 if(resultCode == Activity.RESULT_OK)
                 {
-                    textStatus.text = "OK"
-                    // Fill the list view with the strings the recognizer thought it
-                    // could have heard
+                    textStatus.text = getString(R.string.text_voice_understood)
                     val matches = data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS) ?: arrayListOf("No, non ho capito in realtà")
                     textSentence.setText(matches[0])
-                    // matches is the result of voice input. It is a list of what the
-                    // user possibly said.
-                    // Using an if statement for the keyword you want to use allows the
-                    // use of any activity if keywords match
-                    // it is possible to set up multiple keywords to use the same
-                    // activity so more than one word will allow the user
-                    // to use the activity (makes it so the user doesn't have to
-                    // memorize words from a list)
-                    // to use an activity from the voice input information simply use
-                    // the following format;
-                    // if (matches.contains("keyword here") { startActivity(new
-                    // Intent("name.of.manifest.ACTIVITY")
-
-                    if (matches?.contains("information") ?: false)
-                    {
-                        startActivity(Intent("android.intent.action.INFOSCREEN"))
-                    }
                 }
                 else
                 {

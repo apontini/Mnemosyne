@@ -10,6 +10,8 @@ import org.joda.time.LocalTime;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @JsonTypeName("place")
 public class Place extends Resource implements Serializable
@@ -18,6 +20,7 @@ public class Place extends Resource implements Serializable
 	private String state;
 	private String town;
 	private String suburb;
+	private String road;
 	private int houseNumber;
 	private String name;
 	private String placeType;
@@ -27,13 +30,14 @@ public class Place extends Resource implements Serializable
 
 	@JsonCreator
 	public Place(@JsonProperty("country") String country, @JsonProperty("state") String state, @JsonProperty("town") String town, @JsonProperty("suburb") String suburb,
-	             @JsonProperty("house-number") int houseNumber, @JsonProperty("name") String name, @JsonProperty("place-type") String placeType,
+	             @JsonProperty("road") String road, @JsonProperty("house-number") int houseNumber, @JsonProperty("name") String name, @JsonProperty("place-type") String placeType,
 	             @JsonProperty("coordinates") Point coordinates, @JsonProperty("opening") LocalTime opening, @JsonProperty("closing") LocalTime closing)
 	{
 		this.country = country;
 		this.state = state;
 		this.town = town;
 		this.suburb = suburb;
+		this.road = road;
 		this.houseNumber = houseNumber;
 		this.name = name;
 		this.placeType = placeType;
@@ -60,6 +64,10 @@ public class Place extends Resource implements Serializable
 	public String getSuburb()
 	{
 		return suburb;
+	}
+
+	public String getRoad() {
+		return road;
 	}
 
 	public int getHouseNumber()
@@ -119,6 +127,29 @@ public class Place extends Resource implements Serializable
 		return om.writeValueAsString(this);
 	}
 
+	public static final Place fromJSON(InputStream in) throws IOException
+	{
+		String regex = "\\{\"place\":(\\{.*\\})\\}";
+		StringBuilder textBuilder = new StringBuilder();
+		Reader reader = new BufferedReader(new InputStreamReader(in));
+		int c = 0;
+		while ((c = reader.read()) != -1)
+		{
+			textBuilder.append((char) c);
+		}
+
+		if(!textBuilder.toString().matches(regex)) throw new IOException("No Place object found (needed: " + regex + ", found: " + textBuilder.toString() + ")");
+
+		Pattern pattern = Pattern.compile(regex);
+		Matcher matcher = pattern.matcher(textBuilder.toString());
+		matcher.find();
+
+		ObjectMapper om = new ObjectMapper();
+		om.findAndRegisterModules();
+		Place p = om.readValue(matcher.group(0), Place.class);
+		return p;
+	}
+
 	@Override
 	public boolean equals(Object o)
 	{
@@ -142,6 +173,7 @@ public class Place extends Resource implements Serializable
 				", state='" + state + '\'' +
 				", town='" + town + '\'' +
 				", suburb='" + suburb + '\'' +
+				", road='" + road + '\'' +
 				", houseNumber=" + houseNumber +
 				", name='" + name + '\'' +
 				", placeType='" + placeType + '\'' +

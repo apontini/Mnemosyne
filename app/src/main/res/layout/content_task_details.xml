@@ -10,6 +10,7 @@
     tools:showIn="@layout/activity_task_details">
 
     <ScrollView
+        android:id="@+id/scrollView2"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_marginStart="16dp"
@@ -261,6 +262,19 @@
                     android:text="@string/button_details_deleteTask"
                     android:textColor="@color/textColor" />
 
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="109dp"
+                android:gravity="center">
+
+                <ProgressBar
+                    android:id="@+id/progressBar3"
+                    style="?android:attr/progressBarStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="116dp"
+                    android:visibility="invisible" />
             </TableRow>
 
         </TableLayout>

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -25,8 +26,8 @@ public class Task extends Resource implements Serializable
 
 	@JsonCreator
 	public Task(@JsonProperty("id") int id,@JsonProperty("user") String user, @JsonProperty("name") String name, @JsonProperty("constr") TaskConstraint constr,
-	            @JsonProperty("possibleAtWork") boolean possibleAtWork, @JsonProperty("repeatable") boolean repeatable, @JsonProperty("doneToday") boolean doneToday,
-	            @JsonProperty("failed") boolean failed, @JsonProperty("placesToSatisfy") Set<Place> placesToSatisfy)
+				@JsonProperty("possibleAtWork") boolean possibleAtWork, @JsonProperty("repeatable") boolean repeatable, @JsonProperty("doneToday") boolean doneToday,
+				@JsonProperty("failed") boolean failed, @JsonProperty("placesToSatisfy") Set<Place> placesToSatisfy)
 	{
 		this.user = user;
 		this.name = name;
@@ -97,6 +98,21 @@ public class Task extends Resource implements Serializable
 				", failed=" + failed +
 				", placesToSatisfy=" + placesToSatisfy +
 				'}';
+	}
+
+	@Override
+	public boolean equals(Object o)
+	{
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		Task task = (Task) o;
+		return id == task.id;
+	}
+
+	@Override
+	public int hashCode()
+	{
+		return Objects.hash(id, user, name, constr, possibleAtWork, repeatable, doneToday, failed, placesToSatisfy);
 	}
 
 	@Override

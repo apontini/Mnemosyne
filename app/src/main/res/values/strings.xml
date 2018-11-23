@@ -15,8 +15,8 @@
     <string name="text_list_loading">Interrogo il server..</string>
     <string name="text_list_noJSON">Non ho ricevuto JSON in risposta</string>
     <string name="text_list_401">401 - La sessione non è più valida</string>
-    <string name="title_activity_task_details">TaskDetailsActivity</string>
-    <string name="title_activity_task_list">TaskListActivity</string>
+    <string name="title_activity_task_details">Dettagli</string>
+    <string name="title_activity_task_list">Lista Task</string>
     <string name="text_details_constraint">Vincolo:</string>
     <string name="text_details_temporalConstr">Vincolo temporale:</string>
     <string name="text_details_normact">Azione Normalizzata:</string>
@@ -30,7 +30,7 @@
     <string name="text_yes">Sì</string>
     <string name="text_no">No</string>
     <string name="title_activity_maps">Puoi soddisfare il task in..</string>
-    <string name="title_activity_voice">VoiceActivity</string>
+    <string name="title_activity_voice">Inserisci Task</string>
     <string name="text_voice_listening">Ascolto..</string>
     <string name="text_voice_button">Salva Task</string>
     <string name="text_voice_error">Qualcosa è andato storto!\nInserisci il testo manualmente</string>
@@ -56,6 +56,8 @@
     <string name="text_voice_PRSR07">Non ho trovato posti aperti per soddisfare il task all\'ora \'%s\'</string>
     <string name="text_voice_PRSR10">Il server non ha ricevuto dati dai servizi Places, riprova tra un po\'</string>
     <string name="text_general_error">ERRORE: %s</string>
-    <string name="title_activity_time_interval_picker">Scegli un intervallo</string>
     <string name="title_activity_settings">Impostazioni</string>
+    <string name="text_voice_understood">OK! Ho capito!</string>
+    <string name="alert_settings_parametersChange">Attenzione: se si cambiano i parametri, i task non cambieranno e gli avvisi rimarranno sempre gli stessi, continuare?</string>
+    <string name="text_settings_notDefined">Non definito</string>
 </resources>

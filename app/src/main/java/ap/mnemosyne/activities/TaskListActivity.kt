@@ -1,11 +1,11 @@
 package ap.mnemosyne.activities
 
+import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
 import android.view.View
-import ap.mnemosyne.httphandler.HttpHandler
-import ap.mnemosyne.resources.Resource
+import ap.mnemosyne.http.HttpHelper
 import ap.mnemosyne.resources.ResourceList
 import ap.mnemosyne.resources.Task
 import apontini.mnemosyne.R
@@ -13,9 +13,9 @@ import kotlinx.android.synthetic.main.content_task_list.*
 import okhttp3.Request
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
-import java.lang.Exception
 import ap.mnemosyne.adapters.TaskListAdapter
-import ap.mnemosyne.session.SessionManager
+import ap.mnemosyne.resources.Message
+import ap.mnemosyne.session.SessionHelper
 import kotlinx.android.synthetic.main.activity_task_details.*
 import org.jetbrains.anko.alert
 import org.jetbrains.anko.okButton
@@ -23,18 +23,14 @@ import org.jetbrains.anko.okButton
 
 class TaskListActivity : AppCompatActivity()
 {
-
-
-    private lateinit var session : SessionManager
+    private lateinit var session : SessionHelper
+    private val taskJSONList : MutableList<Task> = mutableListOf()
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
-        val act = this
-        val taskJSONList : MutableList<Task> = mutableListOf()
-
         super.onCreate(savedInstanceState)
 
-        session = SessionManager(this)
+        session = SessionHelper(this)
 
         if(session.user.sessionID == null || session.user.sessionID == "")
         {
@@ -47,31 +43,39 @@ class TaskListActivity : AppCompatActivity()
         setContentView(R.layout.activity_task_list)
         setSupportActionBar(toolbar)
 
+        loadTasks()
+        layout_listTask.setOnRefreshListener {
+            loadTasks()
+        }
+    }
+
+    fun loadTasks()
+    {
+        if(!layout_listTask.isRefreshing)
+        {
+            taskList.visibility = View.GONE
+            progressList.visibility = View.VISIBLE
+            textProgressList.visibility = View.VISIBLE
+        }
         doAsync {
 
+            taskJSONList.clear()
             val request = Request.Builder()
                 .addHeader("Cookie" , "JSESSIONID="+session.user.sessionID)
-                .url(HttpHandler.REST_TASK_URL)
+                .url(HttpHelper.REST_TASK_URL)
                 .build()
 
             var resultText : String = ""
 
-            val res = HttpHandler(act).request(request)
-            when(res.code())
+            val res = HttpHelper(this@TaskListActivity).request(request, true)
+            when(res.second.code())
             {
                 200 ->{
-                    if(res.header("Content-Type", "") != "")
+                    if(res.second.header("Content-Type", "") != "")
                     {
-                        var bodyResp : String = res.body()?.string() ?: ""
+                        val resList = res.first as ResourceList<Task>
 
-                        val resList = try {ResourceList.fromJSON(bodyResp)}
-                                catch (jpe : Exception) {
-                                    uiThread { alert(jpe.message.toString()){}.show() }
-                                    jpe.printStackTrace()
-                                    mutableListOf<Resource>()
-                                }
-
-                        resList.forEach {
+                        resList.list.forEach {
                             taskJSONList.add(it as Task)
                         }
                     }
@@ -89,21 +93,41 @@ class TaskListActivity : AppCompatActivity()
 
                 else ->
                 {
-                    resultText = res.code().toString()
+                    resultText = (res.first as Message).errorDetails
                 }
 
             }
 
             uiThread {
-                taskList.layoutManager = LinearLayoutManager(act)
-                taskList.adapter = TaskListAdapter(act, taskJSONList)
+                layout_listTask.isRefreshing = false
+                taskList.layoutManager = LinearLayoutManager(this@TaskListActivity)
+                taskList.adapter = TaskListAdapter(this@TaskListActivity, taskJSONList)
                 when(resultText)
                 {
-                    "" -> textProgressList.visibility = View.GONE
+                    "" ->
+                    {
+                        textProgressList.visibility = View.GONE
+                        taskList.visibility = View.VISIBLE
+                    }
                     else -> textProgressList.text = resultText
 
                 }
                 progressList.visibility = View.GONE
+            }
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
+    {
+        when(requestCode)
+        {
+            100 ->{
+                if(resultCode == 1000 && data?.getSerializableExtra("deletedTask") != null )
+                {
+                    val pos = taskJSONList.indexOf(data.getSerializableExtra("deletedTask") as Task)
+                    taskJSONList.removeAt(pos)
+                    taskList.adapter.notifyItemRemoved(pos)
+                }
             }
         }
     }

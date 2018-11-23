@@ -6,7 +6,7 @@ import ap.mnemosyne.resources.User
 import apontini.mnemosyne.R
 import org.jetbrains.anko.toast
 
-class SessionManager(ctx : Context)
+class SessionHelper(ctx : Context)
 {
     val thisCtx = ctx
     val sharedPref : SharedPreferences =
