@@ -8,6 +8,12 @@ import org.jetbrains.anko.toast
 
 class SessionHelper(ctx : Context)
 {
+    companion object
+    {
+        const val LOGIN_REQUEST_CODE = 100
+    }
+
+
     val thisCtx = ctx
     val sharedPref : SharedPreferences =
             ctx.getSharedPreferences(ctx.getString(R.string.sharedPreferences_user_FILE), Context.MODE_PRIVATE)

@@ -126,7 +126,7 @@ class VoiceActivity : AppCompatActivity()
                         401->{
                             Log.d("SESSION", "Sessione scaduta")
                             val intent = Intent(this@VoiceActivity, LoginActivity::class.java)
-                            startActivityForResult(intent, 0)
+                            startActivityForResult(intent, SessionHelper.LOGIN_REQUEST_CODE)
                         }
 
                         400->{
@@ -297,7 +297,7 @@ class VoiceActivity : AppCompatActivity()
                 }
             }
 
-            0->{
+            SessionHelper.LOGIN_REQUEST_CODE->{
                 if(resultCode == Activity.RESULT_OK)
                 {
                     snackbar(findViewById(R.id.layout_main), "Sei collegato come: " + session.user.email).show()
@@ -306,7 +306,7 @@ class VoiceActivity : AppCompatActivity()
                 else
                 {
                     val intent = Intent(this, LoginActivity::class.java)
-                    startActivityForResult(intent, 0)
+                    startActivityForResult(intent, SessionHelper.LOGIN_REQUEST_CODE)
                 }
             }
         }

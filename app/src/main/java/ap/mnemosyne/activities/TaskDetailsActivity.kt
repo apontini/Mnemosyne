@@ -1,7 +1,9 @@
 package ap.mnemosyne.activities
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.speech.RecognizerIntent
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log
 import android.view.View
@@ -12,6 +14,7 @@ import apontini.mnemosyne.R
 
 import kotlinx.android.synthetic.main.activity_task_details.*
 import kotlinx.android.synthetic.main.content_task_details.*
+import kotlinx.android.synthetic.main.content_voice.*
 import okhttp3.Request
 import org.jetbrains.anko.*
 import org.jetbrains.anko.design.snackbar
@@ -147,7 +150,7 @@ class TaskDetailsActivity : AppCompatActivity()
                     Log.d("SESSION", "Sessione scaduta")
                     error = true
                     val intent = Intent(this@TaskDetailsActivity, LoginActivity::class.java)
-                    startActivity(intent)
+                    startActivityForResult(intent, SessionHelper.LOGIN_REQUEST_CODE)
                 }
 
                 200 -> {
@@ -174,6 +177,28 @@ class TaskDetailsActivity : AppCompatActivity()
                     deleteTaskButton.isClickable = true
                     progressBar3.visibility = View.INVISIBLE
                     snackbar(tableLayout, (resp.first as Message).errorDetails)
+                }
+            }
+        }
+    }
+
+    public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
+    {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        when (requestCode)
+        {
+            SessionHelper.LOGIN_REQUEST_CODE ->
+            {
+                if (resultCode == Activity.RESULT_OK)
+                {
+                    snackbar(findViewById(R.id.layout_main), "Sei collegato come: " + session.user.email).show()
+                    textStatus.text = getString(R.string.text_voice_retry)
+                }
+                else
+                {
+                    val intent = Intent(this, LoginActivity::class.java)
+                    startActivityForResult(intent, SessionHelper.LOGIN_REQUEST_CODE)
                 }
             }
         }

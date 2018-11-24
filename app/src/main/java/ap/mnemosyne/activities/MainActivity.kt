@@ -47,7 +47,7 @@ class MainActivity : AppCompatActivity()
         {
             Log.d("SESSION", "Preferences non trovate")
             val intent = Intent(this, LoginActivity::class.java)
-            startActivityForResult(intent, 0)
+            startActivityForResult(intent, SessionHelper.LOGIN_REQUEST_CODE)
         }
         else
         {
@@ -63,7 +63,7 @@ class MainActivity : AppCompatActivity()
                     401 -> {
                         Log.d("SESSION", "Sessione scaduta")
                         val intent = Intent(thisActivity, LoginActivity::class.java)
-                        startActivityForResult(intent, 0)
+                        startActivityForResult(intent, SessionHelper.LOGIN_REQUEST_CODE)
                     }
 
                     200 -> {
@@ -154,7 +154,7 @@ class MainActivity : AppCompatActivity()
     {
        when(requestCode)
        {
-            0->{
+            SessionHelper.LOGIN_REQUEST_CODE->{
                 when(resultCode)
                 {
                     Activity.RESULT_OK -> {
@@ -167,7 +167,7 @@ class MainActivity : AppCompatActivity()
 
                     else -> {
                         val intent = Intent(this, LoginActivity::class.java)
-                        startActivityForResult(intent, 0)
+                        startActivityForResult(intent, SessionHelper.LOGIN_REQUEST_CODE)
                     }
                 }
             }

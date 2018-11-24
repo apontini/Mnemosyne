@@ -10,20 +10,23 @@ import android.view.MenuItem
 import com.google.android.gms.location.places.ui.PlacePicker
 import kotlinx.android.synthetic.main.activity_settings.*
 import android.content.Intent
+import android.util.Log
 import ap.mnemosyne.enums.ParamsName
 import ap.mnemosyne.http.HttpHelper
+import ap.mnemosyne.parameters.ParametersHelper
 import ap.mnemosyne.resources.LocationParameter
-import ap.mnemosyne.resources.Parameter
+import ap.mnemosyne.resources.TimeParameter
 import ap.mnemosyne.session.SessionHelper
 import okhttp3.Request
 import org.jetbrains.anko.*
-import java.io.IOException
-import java.nio.charset.StandardCharsets
+import org.jetbrains.anko.design.snackbar
 import org.joda.time.format.DateTimeFormat
 
 
 class SettingsActivity : AppCompatActivity()
 {
+
+    val thisActivity = this
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,6 +43,13 @@ class SettingsActivity : AppCompatActivity()
     class Preferences : PreferenceFragment()
     {
         private lateinit var session : SessionHelper
+        private lateinit var parameters : ParametersHelper
+        var locationHouse : LocationParameter? = null
+        var locationWork : LocationParameter? = null
+        var timeLunch : TimeParameter? = null
+        var timeDinner : TimeParameter? = null
+        var timeBed : TimeParameter? = null
+        var timeWork : TimeParameter? = null
 
         override fun onCreate(savedInstanceState: Bundle?)
         {
@@ -47,26 +57,9 @@ class SettingsActivity : AppCompatActivity()
             addPreferencesFromResource(R.xml.preferences)
 
             session = SessionHelper(this.activity)
+            parameters = ParametersHelper(this.activity)
 
-            val fmt = DateTimeFormat.forPattern("HH:mm")
-
-            val locationHouse = try { Parameter.fromJSON(defaultSharedPreferences.getString("location_house", "").byteInputStream(StandardCharsets.UTF_8)) as LocationParameter}
-                catch(ioe : IOException) { null }
-            val locationWork = try { Parameter.fromJSON(defaultSharedPreferences.getString("location_work", "").byteInputStream(StandardCharsets.UTF_8)) as LocationParameter}
-                catch(ioe : IOException) { null }
-            val timeLunch = defaultSharedPreferences.getString("time_lunch", "")
-            val timeDinner = defaultSharedPreferences.getString("time_dinner", "")
-            val timeBed = defaultSharedPreferences.getString("time_bed", "")
-            val timeWork = defaultSharedPreferences.getString("time_work", "")
-
-            findPreference("location_house").summary = if(locationHouse != null) "${locationHouse.location?.lat}, ${locationHouse.location?.lon}"
-                                                            else getString(R.string.text_settings_notDefined)
-            findPreference("location_work").summary = if(locationWork != null) "${locationWork.location?.lat}, ${locationWork.location?.lon}"
-                                                            else getString(R.string.text_settings_notDefined)
-            findPreference("time_lunch").summary = if(timeLunch=="") getString(R.string.text_settings_notDefined) else timeLunch
-            findPreference("time_dinner").summary = if(timeDinner=="") getString(R.string.text_settings_notDefined) else timeDinner
-            findPreference("time_bed").summary = if(timeBed=="") getString(R.string.text_settings_notDefined) else timeBed
-            findPreference("time_work").summary = if(timeWork=="") getString(R.string.text_settings_notDefined) else timeWork
+            printParameters()
 
             findPreference("location_house").onPreferenceClickListener = Preference.OnPreferenceClickListener{
                 if(locationHouse != null)
@@ -195,6 +188,41 @@ class SettingsActivity : AppCompatActivity()
             }
         }
 
+        private fun printParameters()
+        {
+            parameters.updateParametersAndDo{
+                locationHouse = parameters.getLocalParameter(ParamsName.location_house) as LocationParameter?
+                locationWork = parameters.getLocalParameter(ParamsName.location_work) as LocationParameter?
+                timeLunch = parameters.getLocalParameter(ParamsName.time_lunch) as TimeParameter?
+                timeDinner = parameters.getLocalParameter(ParamsName.time_dinner) as TimeParameter?
+                timeBed = parameters.getLocalParameter(ParamsName.time_bed) as TimeParameter?
+                timeWork = parameters.getLocalParameter(ParamsName.time_work) as TimeParameter?
+
+                Log.d("PARAM", locationHouse.toString())
+
+                findPreference("location_house").summary = if(locationHouse != null) "${(locationHouse as LocationParameter).location?.lat}, ${(locationHouse as LocationParameter).location?.lon}"
+                else getString(R.string.text_settings_notDefined)
+                findPreference("location_work").summary = if(locationWork != null) "${(locationWork as LocationParameter).location?.lat}, ${(locationWork as LocationParameter).location?.lon}"
+                else getString(R.string.text_settings_notDefined)
+
+                findPreference("time_lunch").summary = if(timeLunch != null ) "${(timeLunch as TimeParameter).fromTime.toString(
+                    DateTimeFormat.forPattern("HH:mm"))} - ${(timeLunch as TimeParameter).toTime.toString(
+                    DateTimeFormat.forPattern("HH:mm"))}"  else getString(R.string.text_settings_notDefined)
+
+                findPreference("time_dinner").summary = if(timeDinner != null ) "${(timeDinner as TimeParameter).fromTime.toString(
+                    DateTimeFormat.forPattern("HH:mm"))} - ${(timeDinner as TimeParameter).toTime.toString(
+                    DateTimeFormat.forPattern("HH:mm"))}"  else getString(R.string.text_settings_notDefined)
+
+                findPreference("time_bed").summary = if(timeBed != null ) "${(timeBed as TimeParameter).fromTime.toString(
+                    DateTimeFormat.forPattern("HH:mm"))} - ${(timeBed as TimeParameter).toTime.toString(
+                    DateTimeFormat.forPattern("HH:mm"))}"  else getString(R.string.text_settings_notDefined)
+
+                findPreference("time_work").summary = if(timeWork != null ) "${(timeWork as TimeParameter).fromTime.toString(
+                    DateTimeFormat.forPattern("HH:mm"))} - ${(timeWork as TimeParameter).toTime.toString(
+                    DateTimeFormat.forPattern("HH:mm"))}"  else getString(R.string.text_settings_notDefined)
+            }
+        }
+
         override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
         {
             val paramName = when (requestCode)
@@ -229,6 +257,20 @@ class SettingsActivity : AppCompatActivity()
                 }
 
                 //controllare se inviare POST o PUT
+            }
+            else if(paramName == null)
+            {
+                when (requestCode)
+                {
+                    100 ->
+                    {
+                        if(resultCode == Activity.RESULT_OK)
+                        {
+                            snackbar(this.activity.toolbar, "Sei collegato come: " + session.user.email).show()
+                            printParameters()
+                        }
+                    }
+                }
             }
         }
     }
