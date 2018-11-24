@@ -31,7 +31,6 @@ class LoginActivity : AppCompatActivity()
     override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
-
         session = SessionHelper(this)
 
         setContentView(R.layout.activity_login)
