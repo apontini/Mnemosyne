@@ -72,8 +72,10 @@ class LoginActivity : AppCompatActivity()
                     finish()
                 }
 
-                999 ->{
-                    alert(getString(R.string.alert_noInternetPermission)) {  }.show()
+                HttpHelper.ERROR_PERMISSIONS ->{
+                    uiThread {
+                        alert(getString(R.string.alert_noInternetPermission)) {  }.show()
+                    }
                 }
 
                 else -> {

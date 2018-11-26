@@ -14,14 +14,16 @@ import android.util.Log
 import ap.mnemosyne.enums.ParamsName
 import ap.mnemosyne.http.HttpHelper
 import ap.mnemosyne.parameters.ParametersHelper
-import ap.mnemosyne.resources.LocationParameter
-import ap.mnemosyne.resources.TimeParameter
+import ap.mnemosyne.resources.*
 import ap.mnemosyne.session.SessionHelper
+import okhttp3.MediaType
 import okhttp3.Request
+import okhttp3.RequestBody
 import org.jetbrains.anko.*
 import org.jetbrains.anko.design.snackbar
+import org.joda.time.LocalTime
 import org.joda.time.format.DateTimeFormat
-
+import java.nio.charset.StandardCharsets
 
 class SettingsActivity : AppCompatActivity()
 {
@@ -100,7 +102,7 @@ class SettingsActivity : AppCompatActivity()
             }
 
             findPreference("time_lunch").onPreferenceClickListener = Preference.OnPreferenceClickListener{
-                if(locationWork != null)
+                if(timeLunch != null)
                 {
                     alert(getString(R.string.alert_settings_parametersChange)) {
                         yesButton {
@@ -120,7 +122,7 @@ class SettingsActivity : AppCompatActivity()
             }
 
             findPreference("time_dinner").onPreferenceClickListener = Preference.OnPreferenceClickListener{
-                if(locationWork != null)
+                if(timeDinner != null)
                 {
                     alert(getString(R.string.alert_settings_parametersChange)) {
                         yesButton {
@@ -139,7 +141,7 @@ class SettingsActivity : AppCompatActivity()
             }
 
             findPreference("time_bed").onPreferenceClickListener = Preference.OnPreferenceClickListener{
-                if(locationWork != null)
+                if(timeBed != null)
                 {
                     alert(getString(R.string.alert_settings_parametersChange)) {
                         yesButton {
@@ -158,7 +160,7 @@ class SettingsActivity : AppCompatActivity()
             }
 
             findPreference("time_work").onPreferenceClickListener = Preference.OnPreferenceClickListener{
-                if(locationWork != null)
+                if(timeWork != null)
                 {
                     alert(getString(R.string.alert_settings_parametersChange)) {
                         yesButton {
@@ -183,7 +185,12 @@ class SettingsActivity : AppCompatActivity()
             }
 
             findPreference("log_out").onPreferenceClickListener = Preference.OnPreferenceClickListener{
-                alert("Non implementato") {  }.show()
+                alert("Sei sicuro?") {
+                    yesButton {
+                        this@Preferences.activity.finish()
+                    }
+                    noButton {}
+                }.show()
                 true
             }
         }
@@ -197,8 +204,6 @@ class SettingsActivity : AppCompatActivity()
                 timeDinner = parameters.getLocalParameter(ParamsName.time_dinner) as TimeParameter?
                 timeBed = parameters.getLocalParameter(ParamsName.time_bed) as TimeParameter?
                 timeWork = parameters.getLocalParameter(ParamsName.time_work) as TimeParameter?
-
-                Log.d("PARAM", locationHouse.toString())
 
                 findPreference("location_house").summary = if(locationHouse != null) "${(locationHouse as LocationParameter).location?.lat}, ${(locationHouse as LocationParameter).location?.lon}"
                 else getString(R.string.text_settings_notDefined)
@@ -247,22 +252,118 @@ class SettingsActivity : AppCompatActivity()
                     0, 1 ->
                     {
                         val place = PlacePicker.getPlace(this.activity, data)
-                        //val param = LocationParameter(paramName, session.user.email, )
+                        val def = defaultSharedPreferences.getString(paramName.name, "")
+                        if(def == "")
+                        {
+                            Log.d("PARAMETER", "Creating parameter")
+                            val param = LocationParameter(paramName, session.user.email, Point(place.latLng.latitude, place.latLng.longitude), -1, null)
+                            bRequest.post(RequestBody.create(MediaType.parse("application/json"), param.toJSON()))
+                        }
+                        else
+                        {
+                            Log.d("PARAMETER", "Updating parameter")
+                            val pre = Parameter.fromJSON(def.byteInputStream(StandardCharsets.UTF_8)) as LocationParameter
+                            val param = LocationParameter(paramName, session.user.email, Point(place.latLng.latitude, place.latLng.longitude), pre.cellID, pre.ssid)
+                            bRequest.put(RequestBody.create(MediaType.parse("application/json"), param.toJSON()))
+                        }
                     }
 
                     2,3,4,5 ->
                     {
-
+                        val fromTime = data?.getSerializableExtra("fromTime") as LocalTime
+                        val toTime = data?.getSerializableExtra("toTime") as LocalTime
+                        val def = defaultSharedPreferences.getString(paramName.name, "")
+                        if(def == "")
+                        {
+                            Log.d("PARAMETER", "Creating parameter")
+                            val param = TimeParameter(paramName, session.user.email, fromTime, toTime)
+                            bRequest.post(RequestBody.create(MediaType.parse("application/json"), param.toJSON()))
+                        }
+                        else
+                        {
+                            Log.d("PARAMETER", "Updating parameter")
+                            val param = TimeParameter(paramName, session.user.email, fromTime, toTime)
+                            bRequest.put(RequestBody.create(MediaType.parse("application/json"), param.toJSON()))
+                        }
                     }
                 }
 
-                //controllare se inviare POST o PUT
+                doAsync {
+                    val resp = HttpHelper(this@Preferences.activity).request(bRequest.build(), true)
+                    when(resp.second.code())
+                    {
+                        201, 200 ->
+                        {
+                            snackbar(this@Preferences.activity.toolbar, getString(R.string.text_settings_successUpdate)).show()
+                            when (requestCode)
+                            {
+                                0, 1 ->
+                                {
+                                    uiThread {
+                                        findPreference(paramName.name).summary = "${(resp.first as LocationParameter).location.lat}, ${(resp.first as LocationParameter).location.lon}"
+                                    }
+                                    with(defaultSharedPreferences.edit())
+                                    {
+                                        putString(paramName.name, (resp.first as LocationParameter).toJSON())
+                                        apply()
+                                    }
+                                }
+
+                                2,3,4,5 ->
+                                {
+                                    uiThread { findPreference(paramName.name).summary = "${(resp.first as TimeParameter).fromTime.toString(DateTimeFormat.forPattern("HH:mm"))}, " +
+                                            (resp.first as TimeParameter).toTime.toString(DateTimeFormat.forPattern("HH:mm")) }
+                                    with(defaultSharedPreferences.edit())
+                                    {
+                                        putString(paramName.name, (resp.first as LocationParameter).toJSON())
+                                        apply()
+                                    }
+                                }
+                            }
+                        }
+
+                        401 ->
+                        {
+                            Log.d("SESSION", "Sessione scaduta")
+                            val intent = Intent(this@Preferences.activity, LoginActivity::class.java)
+                            startActivityForResult(intent, SessionHelper.LOGIN_REQUEST_CODE)
+                        }
+
+                        400 ->
+                        {
+                            uiThread {
+                                alert("400: " + (resp.first as Message).errorDetails).show()
+                            }
+                        }
+
+                        500 ->
+                        {
+                            uiThread {
+                                alert("500: " + (resp.first as Message).errorDetails).show()
+                            }
+                        }
+
+                        HttpHelper.ERROR_PERMISSIONS ->
+                        {
+                            uiThread {
+                                alert(this@Preferences.activity.getString(R.string.alert_noInternetPermission)).show()
+                            }
+                        }
+
+                        else ->
+                        {
+                            uiThread {
+                                alert(getString(R.string.text_general_error, (resp.first as Message).errorDetails)).show()
+                            }
+                        }
+                    }
+                }
             }
             else if(paramName == null)
             {
                 when (requestCode)
                 {
-                    100 ->
+                    SessionHelper.LOGIN_REQUEST_CODE ->
                     {
                         if(resultCode == Activity.RESULT_OK)
                         {

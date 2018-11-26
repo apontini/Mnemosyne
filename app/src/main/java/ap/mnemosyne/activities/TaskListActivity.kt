@@ -87,8 +87,8 @@ class TaskListActivity : AppCompatActivity()
 
                 401 -> resultText = getString(R.string.text_list_401)
 
-                999 ->{
-                    alert(getString(R.string.alert_noInternetPermission)) {  }.show()
+                HttpHelper.ERROR_PERMISSIONS ->{
+                    uiThread { alert(getString(R.string.alert_noInternetPermission)) {  }.show() }
                 }
 
                 else ->

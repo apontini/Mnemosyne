@@ -31,16 +31,17 @@ class HttpHelper(act: Activity)
         const val REST_TASK_URL : String = "$BASE_URL/mnemosyne/rest/task"
         const val PARSE_URL : String = "$BASE_URL/mnemosyne/parse"
         const val REST_PARAMETER_URL : String = "$BASE_URL/mnemosyne/rest/parameter"
+        const val ERROR_PERMISSIONS = 999
     }
 
     val act : Activity = act
 
-    fun request(req : Request, parseRes : Boolean) : Pair<Resource?, Response>
+    fun request(req : Request, parseRes : Boolean = false) : Pair<Resource?, Response>
     {
         if(!PermissionsHelper.checkInternetPermission(act))
         {
             //ERROR: permission are not given
-            val res = Response.Builder().code(999).build()
+            val res = Response.Builder().code(HttpHelper.ERROR_PERMISSIONS).build()
             return Pair(null, res)
         }
 
@@ -87,10 +88,5 @@ class HttpHelper(act: Activity)
             }
             return Pair(resRet, resp)
         }
-    }
-
-    fun request(req: Request) : Response
-    {
-        return request(req, false).second
     }
 }

@@ -27,7 +27,7 @@ class ParametersHelper(act: Activity)
     companion object
     {
         val dateTimeFormat : DateTimeFormatter by lazy { return@lazy DateTimeFormat.forPattern("yyyy-MM-dd HH:mm") }
-        private const val MIN_UPDATE = 1
+        private const val MIN_UPDATE = 3
         const val LAST_REFRESH : String = "last_refresh"
     }
 
@@ -62,9 +62,25 @@ class ParametersHelper(act: Activity)
 
                     200 ->
                     {
+                        val map = mutableMapOf<ParamsName, Boolean>()
+                        with(map)
+                        {
+                            ParamsName.values().forEach {
+                                put(it,false)
+                            }
+                        }
+
                         (resp.first as ResourceList<Parameter>).list.forEach {
                             with(act.defaultSharedPreferences.edit()) {
                                 putString(it.name.name, it.toJSON())
+                                map[it.name] = true
+                                apply()
+                            }
+                        }
+
+                        map.filter { !it.value }.forEach {
+                            with(act.defaultSharedPreferences.edit()) {
+                                putString(it.key.name, "")
                                 apply()
                             }
                         }
@@ -75,16 +91,17 @@ class ParametersHelper(act: Activity)
                         }
                     }
 
-                    999 ->
+                    HttpHelper.ERROR_PERMISSIONS ->
                     {
                         error = true
-                        act.alert(act.getString(R.string.alert_noInternetPermission)) { }.show()
+                        uiThread { act.alert(act.getString(R.string.alert_noInternetPermission)) { }.show() }
+
                     }
 
                     else ->
                     {
                         error = true
-                        act.alert("Non ho potuto aggiornare i parametri, codice: " + resp.second.code()) { }.show()
+                        uiThread {act.alert("Non ho potuto aggiornare i parametri, codice: " + resp.second.code()) { }.show()  }
                     }
                 }
                 if (!error)
@@ -136,16 +153,18 @@ class ParametersHelper(act: Activity)
                         }
                     }
 
-                    999 ->
+                    HttpHelper.ERROR_PERMISSIONS ->
                     {
                         error = true
-                        act.alert(act.getString(R.string.alert_noInternetPermission)) { }.show()
+                        uiThread { act.alert(act.getString(R.string.alert_noInternetPermission)) { }.show() }
+
                     }
 
                     else ->
                     {
                         error = true
-                        act.alert("Non ho potuto aggiornare i parametri, codice: " + resp.second.code()) { }.show()
+                        uiThread { act.alert("Non ho potuto aggiornare i parametri, codice: " + resp.second.code()) { }.show() }
+
                     }
                 }
                 if (!error)
@@ -173,6 +192,8 @@ class ParametersHelper(act: Activity)
         }
     }
 
+
+
     fun getLocalParameter(p : ParamsName) : Parameter?
     {
         return try
@@ -182,7 +203,6 @@ class ParametersHelper(act: Activity)
         }
         catch (e: Exception)
         {
-            e.printStackTrace()
             null
         }
 

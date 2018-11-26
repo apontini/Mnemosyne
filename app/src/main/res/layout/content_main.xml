@@ -55,7 +55,7 @@
                         android:layout_height="match_parent"
                         android:layout_weight="20"
                         android:background="@android:color/transparent"
-                        android:clickable="false"
+                        android:clickable="true"
                         android:scaleType="fitCenter"
                         android:tint="@color/textColor"
                         app:srcCompat="@drawable/ic_baseline_mic_24px" />
@@ -91,7 +91,7 @@
                         android:layout_height="match_parent"
                         android:layout_weight="20"
                         android:background="@android:color/transparent"
-                        android:clickable="false"
+                        android:clickable="true"
                         android:scaleType="fitCenter"
                         android:tint="@color/textColor"
                         app:srcCompat="@drawable/ic_baseline_library_add_24px" />
@@ -128,7 +128,7 @@
                         android:layout_height="match_parent"
                         android:layout_weight="20"
                         android:background="@android:color/transparent"
-                        android:clickable="false"
+                        android:clickable="true"
                         android:scaleType="fitCenter"
                         android:tint="@color/textColor"
                         app:srcCompat="@drawable/ic_baseline_view_list_24px" />

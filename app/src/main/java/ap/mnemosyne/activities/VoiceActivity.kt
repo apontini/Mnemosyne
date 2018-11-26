@@ -14,21 +14,17 @@ import android.location.LocationListener
 import android.location.LocationManager
 import android.util.Log
 import android.view.View
+import ap.mnemosyne.enums.ParamsName
 import ap.mnemosyne.http.HttpHelper
 import ap.mnemosyne.permissions.PermissionsHelper
-import ap.mnemosyne.resources.Message
-import ap.mnemosyne.resources.Resource
-import ap.mnemosyne.resources.Task
+import ap.mnemosyne.resources.*
 import ap.mnemosyne.session.SessionHelper
+import com.google.android.gms.location.places.ui.PlacePicker
 import kotlinx.android.synthetic.main.content_voice.*
-import okhttp3.FormBody
-import okhttp3.Request
-import okhttp3.Response
-import org.jetbrains.anko.alert
+import okhttp3.*
+import org.jetbrains.anko.*
 import org.jetbrains.anko.design.snackbar
-import org.jetbrains.anko.doAsync
-import org.jetbrains.anko.okButton
-import org.jetbrains.anko.uiThread
+import org.joda.time.LocalTime
 import java.util.*
 
 class VoiceActivity : AppCompatActivity()
@@ -151,7 +147,7 @@ class VoiceActivity : AppCompatActivity()
                                     }
 
                                     else -> {
-                                        textStatus.text = getString(R.string.text_general_error, respMessage.errorDetails)
+                                        textStatus.text = getString(R.string.text_general_error, respMessage.errorCode + ": " + respMessage.errorDetails)
                                     }
                                 }
                             }
@@ -167,11 +163,14 @@ class VoiceActivity : AppCompatActivity()
                                     }
 
                                     "PRSR11" -> {
-                                        textStatus.text = getString(R.string.text_voice_PRSR11, respMessage.errorDetails)
+                                        textStatus.text = getString(R.string.text_voice_PRSR11Repeat)
+                                        alert(getString(R.string.text_voice_PRSR11, respMessage.errorDetails)){
+                                            yesButton { askParameter(ParamsName.valueOf(respMessage.errorDetails)) }
+                                        }.show()
                                     }
 
                                     else -> {
-                                        textStatus.text = getString(R.string.text_general_error, respMessage.errorDetails)
+                                        textStatus.text = getString(R.string.text_general_error, respMessage.errorCode + ": " + respMessage.errorDetails)
                                     }
                                 }
                             }
@@ -195,7 +194,7 @@ class VoiceActivity : AppCompatActivity()
                                     }
 
                                     else -> {
-                                        textStatus.text = getString(R.string.text_general_error, respMessage.errorDetails)
+                                        textStatus.text = getString(R.string.text_general_error, respMessage.errorCode + ": " + respMessage.errorDetails)
                                     }
                                 }
                             }
@@ -219,15 +218,21 @@ class VoiceActivity : AppCompatActivity()
                                     }
 
                                     else -> {
-                                        textStatus.text = getString(R.string.text_general_error, respMessage.errorDetails)
+                                        textStatus.text = getString(R.string.text_general_error, respMessage.errorCode + ": " + respMessage.errorDetails)
                                     }
                                 }
 
                             }
                         }
 
-                        999->{
+                        HttpHelper.ERROR_PERMISSIONS->{
                             textStatus.text =  getString(R.string.text_general_error, getString(R.string.alert_noInternetPermission))
+                        }
+
+                        else ->
+                        {
+                            val respMessage = response.first as Message
+                            textStatus.text =  getString(R.string.text_general_error, respMessage.errorCode + ": " + respMessage.errorDetails)
                         }
                     }
 
@@ -267,12 +272,55 @@ class VoiceActivity : AppCompatActivity()
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0f, locationListener)
     }
 
-    fun startVoiceRecognitionActivity()
+    private fun askParameter(param : ParamsName)
+    {
+        when(param)
+        {
+
+            ParamsName.location_house ->
+            {
+                val builder: PlacePicker.IntentBuilder = PlacePicker.IntentBuilder()
+                startActivityForResult(builder.build(this@VoiceActivity), 0)
+            }
+
+            ParamsName.location_work ->
+            {
+                val builder: PlacePicker.IntentBuilder = PlacePicker.IntentBuilder()
+                startActivityForResult(builder.build(this@VoiceActivity), 1)
+            }
+
+            ParamsName.time_lunch ->
+            {
+                val intent = Intent(this@VoiceActivity, TimeIntervalPickerActivity::class.java)
+                startActivityForResult(intent, 2)
+            }
+
+            ParamsName.time_bed ->
+            {
+                val intent = Intent(this@VoiceActivity, TimeIntervalPickerActivity::class.java)
+                startActivityForResult(intent, 3)
+            }
+
+            ParamsName.time_dinner ->
+            {
+                val intent = Intent(this@VoiceActivity, TimeIntervalPickerActivity::class.java)
+                startActivityForResult(intent, 4)
+            }
+
+            ParamsName.time_work ->
+            {
+                val intent = Intent(this@VoiceActivity, TimeIntervalPickerActivity::class.java)
+                startActivityForResult(intent, 5)
+            }
+        }
+    }
+
+    private fun startVoiceRecognitionActivity()
     {
         val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
             RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault())
         intent.putExtra(RecognizerIntent.EXTRA_PROMPT,
             "Speech recognition demo")
         startActivityForResult(intent, 1234)
@@ -284,6 +332,113 @@ class VoiceActivity : AppCompatActivity()
 
         when (requestCode)
         {
+            0,1,2,3,4,5 ->
+            {
+                val paramName = when (requestCode)
+                {
+                    0 -> ParamsName.location_house
+                    1 -> ParamsName.location_work
+                    2 -> ParamsName.time_lunch
+                    3 -> ParamsName.time_dinner
+                    4 -> ParamsName.time_bed
+                    5 -> ParamsName.time_work
+                    else -> null
+                }
+
+                if(paramName != null && resultCode == Activity.RESULT_OK)
+                {
+                    val bRequest = Request.Builder()
+                        .addHeader("Cookie" , "JSESSIONID="+session.user.sessionID)
+                        .url(HttpHelper.REST_PARAMETER_URL)
+
+                    when (requestCode)
+                    {
+                        0, 1 ->
+                        {
+                            val place = PlacePicker.getPlace(this@VoiceActivity, data)
+                            Log.d("PARAMETER", "Creating parameter")
+                            val param = LocationParameter(paramName, session.user.email, Point(place.latLng.latitude, place.latLng.longitude), -1, null)
+                            bRequest.post(RequestBody.create(MediaType.parse("application/json"), param.toJSON()))
+                        }
+
+                        2,3,4,5 ->
+                        {
+                            val fromTime = data?.getSerializableExtra("fromTime") as LocalTime
+                            val toTime = data?.getSerializableExtra("toTime") as LocalTime
+                            Log.d("PARAMETER", "Creating parameter")
+                            val param = TimeParameter(paramName, session.user.email, fromTime, toTime)
+                            bRequest.post(RequestBody.create(MediaType.parse("application/json"), param.toJSON()))
+                        }
+                    }
+
+                    doAsync {
+                        val resp = HttpHelper(this@VoiceActivity).request(bRequest.build(), true)
+                        when(resp.second.code())
+                        {
+                            201, 200 ->
+                            {
+                                snackbar(toolbar, getString(R.string.text_settings_successUpdate)).show()
+                                when (requestCode)
+                                {
+                                    0, 1 ->
+                                    {
+                                        with(defaultSharedPreferences.edit())
+                                        {
+                                            putString(paramName.name, (resp.first as LocationParameter).toJSON())
+                                            apply()
+                                        }
+                                    }
+
+                                    2,3,4,5 ->
+                                    {
+                                        with(defaultSharedPreferences.edit())
+                                        {
+                                            putString(paramName.name, (resp.first as LocationParameter).toJSON())
+                                            apply()
+                                        }
+                                    }
+                                }
+                            }
+
+                            401 ->
+                            {
+                                Log.d("SESSION", "Sessione scaduta")
+                                val intent = Intent(this@VoiceActivity, LoginActivity::class.java)
+                                startActivityForResult(intent, SessionHelper.LOGIN_REQUEST_CODE)
+                            }
+
+                            400 ->
+                            {
+                                uiThread {
+                                    alert("400: " + (resp.first as Message).errorDetails).show()
+                                }
+                            }
+
+                            500 ->
+                            {
+                                uiThread {
+                                    alert("500: " + (resp.first as Message).errorDetails).show()
+                                }
+                            }
+
+                            HttpHelper.ERROR_PERMISSIONS ->
+                            {
+                                uiThread {
+                                    alert(this@VoiceActivity.getString(R.string.alert_noInternetPermission)).show()
+                                }
+                            }
+
+                            else ->
+                            {
+                                uiThread {
+                                    alert(getString(R.string.text_general_error, (resp.first as Message).errorDetails)).show()
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
             1234-> {
                 if(resultCode == Activity.RESULT_OK)
                 {
