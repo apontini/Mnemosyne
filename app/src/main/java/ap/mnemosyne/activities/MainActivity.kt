@@ -14,7 +14,6 @@ import apontini.mnemosyne.R
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
 import org.jetbrains.anko.design.snackbar
-import android.support.v7.app.AppCompatDelegate
 import android.view.animation.AnimationUtils
 
 
@@ -22,12 +21,16 @@ class MainActivity : AppCompatActivity()
 {
 
     private lateinit var session : SessionHelper
+    private var isViewCreated = false
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
         Log.d("LIFECYCLE", "onCreate")
         session = SessionHelper(this)
+        session.checkSessionValidity {
+            isViewCreated = true
+            createContentView() }
 
         //Permissions check
         PermissionsHelper.askPermissions(this)
@@ -62,23 +65,6 @@ class MainActivity : AppCompatActivity()
         }
     }
 
-    override fun onStart()
-    {
-        super.onStart()
-        Log.d("LIFECYCLE", "onStart")
-        session.checkSessionValidity { createContentView() }
-    }
-
-    override fun onMenuOpened(featureId: Int, menu: Menu?): Boolean
-    {
-        if (featureId == AppCompatDelegate.FEATURE_SUPPORT_ACTION_BAR && menu != null)
-        {
-            val intent = Intent(this, SettingsActivity::class.java)
-            startActivity(intent)
-        }
-        return super.onMenuOpened(featureId, menu)
-    }
-
     override fun onCreateOptionsMenu(menu: Menu): Boolean
     {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -109,8 +95,17 @@ class MainActivity : AppCompatActivity()
             SessionHelper.LOGIN_REQUEST_CODE->{
                 when(resultCode)
                 {
-                    Activity.RESULT_OK -> {
-                        createContentView()
+                    Activity.RESULT_OK ->
+                    {
+                        if(!isViewCreated)
+                        {
+                            createContentView()
+                        }
+                        else
+                        {
+                            snackbar(findViewById(R.id.layout_main), "Sei collegato come: " + session.user.email).show()
+                            isViewCreated = false
+                        }
                     }
 
                     else -> {
@@ -134,8 +129,10 @@ class MainActivity : AppCompatActivity()
            2->{
                when(resultCode)
                {
-                   Activity.RESULT_OK -> {
-
+                   SettingsActivity.LOGOUT_RESULT_CODE -> {
+                       val intent = Intent(this, LoginActivity::class.java)
+                       startActivityForResult(intent, SessionHelper.LOGIN_REQUEST_CODE)
+                       isViewCreated = true
                    }
                }
            }

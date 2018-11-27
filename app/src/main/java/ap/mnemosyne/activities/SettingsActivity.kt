@@ -28,17 +28,27 @@ import java.nio.charset.StandardCharsets
 class SettingsActivity : AppCompatActivity()
 {
 
+    companion object
+    {
+        const val LOGOUT_RESULT_CODE = 100
+    }
+
     val thisActivity = this
+    private lateinit var session : SessionHelper
+    private lateinit var fragment : Preferences
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
+        session = SessionHelper(this)
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
+        fragment = Preferences()
+
         fragmentManager
             .beginTransaction()
-            .replace(R.id.settingsLayout, Preferences())
+            .replace(R.id.settingsLayout, fragment)
             .commit()
     }
 
@@ -58,10 +68,12 @@ class SettingsActivity : AppCompatActivity()
             super.onCreate(savedInstanceState)
             addPreferencesFromResource(R.xml.preferences)
 
+            Log.d("LIFECYCLE", "onCreate")
+
             session = SessionHelper(this.activity)
             parameters = ParametersHelper(this.activity)
 
-            printParameters()
+            session.checkSessionValidity{ printParameters() }
 
             findPreference("location_house").onPreferenceClickListener = Preference.OnPreferenceClickListener{
                 if(locationHouse != null)
@@ -185,9 +197,9 @@ class SettingsActivity : AppCompatActivity()
             }
 
             findPreference("log_out").onPreferenceClickListener = Preference.OnPreferenceClickListener{
-                alert("Sei sicuro?") {
+                alert(getString(R.string.alert_settings_confirm)) {
                     yesButton {
-                        this@Preferences.activity.finish()
+                        doLogout()
                     }
                     noButton {}
                 }.show()
@@ -195,7 +207,46 @@ class SettingsActivity : AppCompatActivity()
             }
         }
 
-        private fun printParameters()
+        private fun doLogout()
+        {
+            val request = Request.Builder()
+                .addHeader("Cookie" , "JSESSIONID=${session.user.sessionID}")
+                .url(HttpHelper.AUTH_URL)
+                .delete()
+                .build()
+
+            doAsync {
+                val resp = HttpHelper(act).request(request, true)
+                var error = false
+                when(resp.second.code())
+                {
+                    401 -> {
+                        Log.d("SESSION", "Sessione scaduta")
+                    }
+
+                    200 -> {
+                        Log.d("SESSION", "Sessione Eliminata")
+                    }
+
+                    HttpHelper.ERROR_PERMISSIONS ->{
+                        uiThread { this@Preferences.activity.alert(this@Preferences.activity.getString(R.string.alert_noInternetPermission)) {  }.show() }
+                        error = true
+                    }
+
+                    else ->{
+                        uiThread { this@Preferences.activity.alert(resp.second.code()) {  }.show() }
+                        error = true
+                    }
+                }
+                if(!error)
+                {
+                    this@Preferences.activity.setResult(LOGOUT_RESULT_CODE)
+                    this@Preferences.activity.finish()
+                }
+            }
+        }
+
+        fun printParameters()
         {
             parameters.updateParametersAndDo{
                 locationHouse = parameters.getLocalParameter(ParamsName.location_house) as LocationParameter?
@@ -376,6 +427,15 @@ class SettingsActivity : AppCompatActivity()
         }
     }
 
+    override fun onRestart()
+    {
+        super.onRestart()
+        session.checkSessionValidity {
+            fragment.printParameters()
+            Unit
+        }
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean
     {
         return when (item.itemId)
@@ -385,6 +445,21 @@ class SettingsActivity : AppCompatActivity()
                 true
             }
             else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
+    {
+        super.onActivityResult(requestCode, resultCode, data)
+        when (requestCode)
+        {
+            SessionHelper.LOGIN_REQUEST_CODE ->
+            {
+                if(resultCode == Activity.RESULT_OK)
+                {
+                    snackbar(this.toolbar, "Sei collegato come: " + session.user.email).show()
+                }
+            }
         }
     }
 }

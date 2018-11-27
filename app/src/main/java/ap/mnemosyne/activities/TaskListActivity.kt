@@ -1,9 +1,11 @@
 package ap.mnemosyne.activities
 
+import android.app.Activity
 import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
+import android.util.Log
 import android.view.View
 import ap.mnemosyne.http.HttpHelper
 import ap.mnemosyne.resources.ResourceList
@@ -18,7 +20,7 @@ import ap.mnemosyne.resources.Message
 import ap.mnemosyne.session.SessionHelper
 import kotlinx.android.synthetic.main.activity_task_details.*
 import org.jetbrains.anko.alert
-import org.jetbrains.anko.okButton
+import org.jetbrains.anko.design.snackbar
 
 
 class TaskListActivity : AppCompatActivity()
@@ -32,25 +34,25 @@ class TaskListActivity : AppCompatActivity()
 
         session = SessionHelper(this)
 
-        if(session.user.sessionID == null || session.user.sessionID == "")
-        {
-            alert(getString(R.string.alert_noSession)){
-                okButton { finish() }
-            }.show()
-            return
-        }
-
         setContentView(R.layout.activity_task_list)
         setSupportActionBar(toolbar)
 
-        loadTasks()
+        session.checkSessionValidity{loadTasks()}
+
         layout_listTask.setOnRefreshListener {
             loadTasks()
         }
     }
 
+    override fun onRestart()
+    {
+        super.onRestart()
+        session.checkSessionValidity{}
+    }
+
     fun loadTasks()
     {
+        Log.d("LOADING", "loading tasks")
         if(!layout_listTask.isRefreshing)
         {
             taskList.visibility = View.GONE
@@ -121,12 +123,29 @@ class TaskListActivity : AppCompatActivity()
     {
         when(requestCode)
         {
-            100 ->{
+            101 ->{
                 if(resultCode == 1000 && data?.getSerializableExtra("deletedTask") != null )
                 {
                     val pos = taskJSONList.indexOf(data.getSerializableExtra("deletedTask") as Task)
                     taskJSONList.removeAt(pos)
                     taskList.adapter.notifyItemRemoved(pos)
+                }
+            }
+
+            SessionHelper.LOGIN_REQUEST_CODE ->
+            {
+                when(resultCode)
+                {
+                    Activity.RESULT_OK ->
+                    {
+                        loadTasks()
+                        snackbar(toolbar, "Sei collegato come: " + session.user.email).show()
+                    }
+
+                    else -> {
+                        val intent = Intent(this, LoginActivity::class.java)
+                        startActivityForResult(intent, SessionHelper.LOGIN_REQUEST_CODE)
+                    }
                 }
             }
         }

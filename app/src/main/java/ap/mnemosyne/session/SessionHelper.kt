@@ -57,7 +57,7 @@ class SessionHelper(act : Activity)
         else
         {
             val request = Request.Builder()
-                .addHeader("Cookie" , "JSESSIONID="+sessionid)
+                .addHeader("Cookie" , "JSESSIONID=$sessionid")
                 .url(HttpHelper.REST_USER_URL)
                 .build()
             var error = false

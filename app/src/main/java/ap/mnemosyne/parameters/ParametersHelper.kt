@@ -20,6 +20,7 @@ import org.joda.time.Minutes
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.format.DateTimeFormatter
 import java.nio.charset.StandardCharsets
+import java.util.concurrent.locks.ReentrantLock
 
 class ParametersHelper(act: Activity)
 {
@@ -29,6 +30,7 @@ class ParametersHelper(act: Activity)
         val dateTimeFormat : DateTimeFormatter by lazy { return@lazy DateTimeFormat.forPattern("yyyy-MM-dd HH:mm") }
         private const val MIN_UPDATE = 3
         const val LAST_REFRESH : String = "last_refresh"
+        val lock by lazy { ReentrantLock() }
     }
 
     val act = act
@@ -36,9 +38,11 @@ class ParametersHelper(act: Activity)
 
     fun updateParametersAndDo(forceUpdate : Boolean = false, doWhat: () -> (Unit))
     {
+        lock.lock()
         val refreshed = LocalDateTime.parse(act.defaultSharedPreferences.getString(ParametersHelper.LAST_REFRESH,
             "1970-01-01 00:00"), ParametersHelper.dateTimeFormat)
         val now = LocalDateTime.now()
+        Log.d("LOCK", refreshed.toString())
         if (forceUpdate || Minutes.minutesBetween(refreshed, now).minutes >= MIN_UPDATE)
         {
             Log.d("PARAMETERS", "Requesting Parameter Update")
@@ -117,10 +121,12 @@ class ParametersHelper(act: Activity)
             Log.d("PARAMETERS", "No need to update")
             doWhat()
         }
+        lock.unlock()
     }
 
     fun updateParameterAndDo(parameter : ParamsName,forceUpdate : Boolean = false, doWhat: () -> (Unit))
     {
+        lock.lock()
         val refreshed = LocalDateTime.parse(act.defaultSharedPreferences.getString(ParametersHelper.LAST_REFRESH,
             "1970-01-01 00:00"), ParametersHelper.dateTimeFormat)
         val now = LocalDateTime.now()
@@ -179,10 +185,12 @@ class ParametersHelper(act: Activity)
         {
             doWhat()
         }
+        lock.unlock()
     }
 
     fun resetLocalParameters()
     {
+        lock.lock()
         ParamsName.values().forEach {
             with(act.defaultSharedPreferences.edit()){
                 remove(it.name)
@@ -190,12 +198,14 @@ class ParametersHelper(act: Activity)
                 apply()
             }
         }
+        lock.unlock()
     }
 
 
 
     fun getLocalParameter(p : ParamsName) : Parameter?
     {
+        lock.lock()
         return try
         {
             Parameter.fromJSON(act.defaultSharedPreferences.getString(p.name, "").byteInputStream(
@@ -204,6 +214,10 @@ class ParametersHelper(act: Activity)
         catch (e: Exception)
         {
             null
+        }
+        finally
+        {
+            lock.unlock()
         }
 
     }

@@ -60,7 +60,7 @@ class TaskListAdapter(private val context: Context,
             val detailIntent = Intent(p0?.context, TaskDetailsActivity::class.java)
             detailIntent.putExtra("task", task)
             if(ctx is Activity)
-                ctx.startActivityForResult(detailIntent, 100)
+                ctx.startActivityForResult(detailIntent, 101)
             else
                 ctx.startActivity(detailIntent)
         }
