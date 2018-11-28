@@ -10,6 +10,7 @@
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@color/colorPrimary"
         android:theme="@style/AppTheme.AppBarOverlay"
         app:elevation="0dp">
 
@@ -24,9 +25,10 @@
                 style="@android:style/TextAppearance.Material.Widget.ActionBar.Title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
                 android:layout_weight="12"
                 android:paddingLeft="20dp"
-                android:paddingTop="5dp"
+                android:paddingTop="10dp"
                 android:text="@string/app_name" />
 
             <ImageButton

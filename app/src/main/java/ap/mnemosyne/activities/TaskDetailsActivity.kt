@@ -18,6 +18,9 @@ import kotlinx.android.synthetic.main.content_voice.*
 import okhttp3.Request
 import org.jetbrains.anko.*
 import org.jetbrains.anko.design.snackbar
+import com.google.android.gms.maps.GoogleMapOptions
+
+
 
 class TaskDetailsActivity : AppCompatActivity()
 {
@@ -41,9 +44,10 @@ class TaskDetailsActivity : AppCompatActivity()
         {
             viewPlacesButton.setOnClickListener{
                 val intent = Intent(this, MapsActivity::class.java)
-                intent.putExtra("places", task.placesToSatisfy as HashSet)
+                intent.putExtra("places", task.placesToSatisfy as HashSet<Place>)
                 startActivity(intent)
             }
+            val options = GoogleMapOptions().liteMode(true)
         }
         else
         {
@@ -140,7 +144,6 @@ class TaskDetailsActivity : AppCompatActivity()
             .url(HttpHelper.REST_TASK_URL + "/" + task.id)
             .delete()
             .build()
-        Log.d("URL", request.toString())
         var error = false
         doAsync {
             val resp = HttpHelper(this@TaskDetailsActivity).request(request, true)

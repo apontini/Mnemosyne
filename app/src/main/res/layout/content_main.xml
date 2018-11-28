@@ -11,7 +11,6 @@
     <ScrollView
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:background="@color/colorPrimary"
         android:fadeScrollbars="true"
         android:fillViewport="true"
         android:verticalScrollbarPosition="left"
@@ -38,10 +37,12 @@
             app:layout_constraintVertical_bias="0.0">
 
             <TableRow
+                style="@style/ButtonMnemosyne"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="15dp"
                 android:gravity="center"
-                android:paddingBottom="50dp">
+                android:paddingBottom="30dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -56,6 +57,7 @@
                         android:layout_weight="20"
                         android:background="@android:color/transparent"
                         android:clickable="true"
+                        android:focusable="true"
                         android:scaleType="fitCenter"
                         android:tint="@color/textColor"
                         app:srcCompat="@drawable/ic_baseline_mic_24px" />
@@ -74,10 +76,12 @@
             </TableRow>
 
             <TableRow
+                style="@style/ButtonMnemosyne"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:layout_marginBottom="15dp"
                 android:gravity="center"
-                android:paddingBottom="50dp">
+                android:paddingBottom="30dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -92,6 +96,7 @@
                         android:layout_weight="20"
                         android:background="@android:color/transparent"
                         android:clickable="true"
+                        android:focusable="true"
                         android:scaleType="fitCenter"
                         android:tint="@color/textColor"
                         app:srcCompat="@drawable/ic_baseline_view_list_24px" />
@@ -109,10 +114,12 @@
             </TableRow>
 
             <TableRow
+                style="@style/ButtonMnemosyne"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:layout_marginBottom="15dp"
                 android:gravity="center"
-                android:paddingBottom="50dp">
+                android:paddingBottom="30dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -127,6 +134,7 @@
                         android:layout_weight="20"
                         android:background="@android:color/transparent"
                         android:clickable="true"
+                        android:focusable="true"
                         android:scaleType="fitCenter"
                         android:tint="@color/textColor"
                         app:srcCompat="@drawable/ic_baseline_library_add_24px" />

@@ -4,7 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorPrimary"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="ap.mnemosyne.activities.LoginActivity"
     tools:showIn="@layout/activity_login">
@@ -54,6 +53,9 @@
                 android:id="@+id/loginUser"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:layout_margin="10dp"
+                android:background="@drawable/layout_text_border"
+                android:elevation="?attr/appElevation"
                 android:hint="@string/user_login_hint"
                 android:inputType="text"
                 android:textColor="@color/textColor"
@@ -63,6 +65,9 @@
                 android:id="@+id/loginPassword"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:layout_margin="10dp"
+                android:background="@drawable/layout_text_border"
+                android:elevation="?attr/appElevation"
                 android:hint="@string/password_login_hint"
                 android:inputType="textPassword"
                 android:textColor="@color/textColor"
@@ -70,15 +75,12 @@
 
             <Button
                 android:id="@+id/loginButton"
-                style="@style/Widget.AppCompat.Button.Borderless"
+                style="@style/ButtonMnemosyne"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:background="@color/colorPrimary"
-                android:elevation="0dp"
-                android:shadowRadius="0"
-                android:text="@string/login_button"
-                android:textColor="@color/textColor" />
+                android:layout_margin="10dp"
+                android:text="@string/login_button"/>
 
         </LinearLayout>
     </LinearLayout>

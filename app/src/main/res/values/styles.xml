@@ -6,8 +6,11 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:windowBackground">@color/colorPrimary</item>
+        <item name="buttonStyle">@style/ButtonMnemosyne</item>
         <item name="android:actionOverflowButtonStyle">@style/SettingsOverflowButton</item>
         <item name="android:alertDialogTheme">@style/Alert</item>
+        <item name="appElevation">3dp</item>
     </style>
 
     <style name="AppTheme.NoActionBar">
@@ -49,5 +52,24 @@
         <item name="android:backgroundDimEnabled">false</item>
     </style>
 
+    <style name="PreferencesTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:windowBackground">@color/colorPrimaryLighter</item>
+        <item name="android:textColorPrimary">@color/textColor</item>
+        <item name="android:textColorSecondary">@color/textColor</item>
+        <item name="android:tint">@color/textColor</item>
+        <item name="android:colorEdgeEffect">@color/colorPrimaryDark</item>
+        <item name="android:actionOverflowButtonStyle">@style/SettingsOverflowButton</item>
+        <item name="android:alertDialogTheme">@style/Alert</item>
+    </style>
+
+    <style name="ButtonMnemosyne" parent="Widget.AppCompat.Button.Borderless">
+        <item name="android:background">@drawable/layout_list_border</item>
+        <item name="android:stateListAnimator">@anim/click_elevation_animation</item>
+        <item name="android:elevation">?attr/appElevation</item>
+        <item name="android:textColor">@color/textColor</item>
+    </style>
 
 </resources>
