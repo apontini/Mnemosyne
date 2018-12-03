@@ -1,14 +1,14 @@
 package ap.mnemosyne.activities
 
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatActivity
 import apontini.mnemosyne.R
 
 import kotlinx.android.synthetic.main.activity_login.*
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.support.design.widget.Snackbar
+import com.google.android.material.snackbar.Snackbar
 import android.view.View
 import ap.mnemosyne.http.HttpHelper
 import kotlinx.android.synthetic.main.content_login.*

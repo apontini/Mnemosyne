@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -21,23 +21,13 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <LinearLayout
-            android:layout_width="wrap_content"
+        <ProgressBar
+            android:id="@+id/loginProgress"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:orientation="vertical">
-
-            <ProgressBar
-                android:id="@+id/loginProgress"
-                style="?android:attr/progressBarStyle"
-                android:layout_width="176dp"
-                android:layout_height="146dp"
-                android:visibility="invisible"
-                app:layout_constraintBottom_toTopOf="@+id/layout_login"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-        </LinearLayout>
+            android:indeterminate="true"
+            android:visibility="invisible" />
 
         <LinearLayout
             android:id="@+id/layout_login"
@@ -55,10 +45,10 @@
                 android:layout_height="match_parent"
                 android:layout_margin="10dp"
                 android:background="@drawable/layout_text_border"
-                android:elevation="?attr/appElevation"
+                android:elevation="?attr/MnemosyneBasicElevation"
                 android:hint="@string/user_login_hint"
                 android:inputType="text"
-                android:textColor="@color/textColor"
+                android:textColor="@color/onSecondary"
                 android:textColorHint="@color/black_overlay" />
 
             <EditText
@@ -67,10 +57,10 @@
                 android:layout_height="match_parent"
                 android:layout_margin="10dp"
                 android:background="@drawable/layout_text_border"
-                android:elevation="?attr/appElevation"
+                android:elevation="?attr/MnemosyneBasicElevation"
                 android:hint="@string/password_login_hint"
                 android:inputType="textPassword"
-                android:textColor="@color/textColor"
+                android:textColor="@color/onSecondary"
                 android:textColorHint="@color/black_overlay" />
 
             <Button
@@ -85,4 +75,4 @@
         </LinearLayout>
     </LinearLayout>
 
-</android.support.constraint.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

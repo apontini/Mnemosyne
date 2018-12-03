@@ -9,6 +9,9 @@
         <attr name="metaButtonBarButtonStyle" format="reference" />
     </declare-styleable>
 
-    <attr name="appElevation" format="dimension" />
+    <attr name="MnemosyneBasicElevation" format="dimension" />
+    <attr name="MnemosyneHigherElevation" format="dimension" />
+    <attr name="MnemosyneCornerRadius" format="dimension" />
+    <attr name="MnemosyneFlexibleToolbarHeight" format="dimension" />
 
 </resources>

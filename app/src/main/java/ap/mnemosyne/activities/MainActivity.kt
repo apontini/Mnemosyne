@@ -2,11 +2,13 @@ package ap.mnemosyne.activities
 
 import android.app.Activity
 import android.content.Intent
+import android.graphics.Rect
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import ap.mnemosyne.permissions.PermissionsHelper
 import ap.mnemosyne.session.SessionHelper
 import apontini.mnemosyne.R
@@ -15,7 +17,15 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
 import org.jetbrains.anko.design.snackbar
 import android.view.animation.AnimationUtils
-
+import ap.mnemosyne.adapters.MainCardsAdapter
+import ap.mnemosyne.uiResources.Card
+import ap.mnemosyne.uiResources.NumberCard
+import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
+import androidx.core.view.GravityCompat
+import apontini.mnemosyne.R.id.*
+import kotlinx.android.synthetic.main.drawer_header.view.*
+import org.jetbrains.anko.design.longSnackbar
 
 class MainActivity : AppCompatActivity()
 {
@@ -39,31 +49,69 @@ class MainActivity : AppCompatActivity()
     private fun createContentView()
     {
         setContentView(R.layout.activity_main)
+        setToolbar()
+        setNavDrawer()
 
-        snackbar(findViewById(R.id.layout_main), "Sei collegato come: " + session.user.email).show()
+        val cardCreatedList = listOf<Card>(NumberCard(0, "Prova carta 1 text"), NumberCard(57, "Prova carta 2"), NumberCard(2, "Prova carta 3 prova testo lungo"),
+            NumberCard(0, "Prova carta 1 text"), NumberCard(57, "Prova carta 2"), NumberCard(2, "Prova carta 3 prova testo lungo"),
+            NumberCard(0, "Prova carta 1 text"), NumberCard(57, "Prova carta 2"), NumberCard(2, "Prova carta 3 prova testo lungo"),
+            NumberCard(0, "Prova carta 1 text"), NumberCard(57, "Prova carta 2"), NumberCard(2, "Prova carta 3 prova testo lungo"))
 
-        listButton.setOnClickListener {
-            val intent = Intent(this, TaskListActivity::class.java)
-            startActivity(intent)
-        }
+        cardList.setHasFixedSize(true)
+        cardList.layoutManager = StaggeredGridLayoutManager(2,StaggeredGridLayoutManager.VERTICAL)
+        cardList.addItemDecoration(SpaceItemDecoration(-8)) //margin is 8dp
+        cardList.adapter = MainCardsAdapter(this@MainActivity, cardCreatedList)
 
-        addButton.setOnClickListener {
-                view -> snackbar(view, "Non implementato")
-        }
+        toolbar.snackbar("Sei collegato come: " + session.user.email).show()
 
-        micButton.setOnClickListener {
+        fab.setOnClickListener {
             val intent = Intent(this, VoiceActivity::class.java)
             intent.putExtra("sessionid", session.user.sessionID)
             startActivityForResult(intent, 1)
         }
+    }
 
-        settingsButton.setOnClickListener{
-            val animation = AnimationUtils.loadAnimation(this, R.anim.spin_around_itself)
-            settingsButton.startAnimation(animation)
-            val intent = Intent(this, SettingsActivity::class.java)
-            startActivityForResult(intent, 2)
+    private fun setToolbar()
+    {
+        setSupportActionBar(toolbar)
+        supportActionBar?.apply{
+            setDisplayHomeAsUpEnabled(true)
+            setHomeAsUpIndicator(R.drawable.ic_baseline_menu_24px)
         }
     }
+
+    private fun setNavDrawer()
+    {
+        nav_view.getHeaderView(0).header_text.text = session.user.email
+        nav_view.setNavigationItemSelectedListener { menuItem ->
+            menuItem.isChecked = true
+
+            when(menuItem.itemId)
+            {
+                create_task_voice ->
+                {
+                    val intent = Intent(this, VoiceActivity::class.java)
+                    intent.putExtra("sessionid", session.user.sessionID)
+                    startActivityForResult(intent, 1)
+                }
+
+                task_gallery ->
+                {
+                    val intent = Intent(this, TaskListActivity::class.java)
+                    this.startActivityForResult(intent, 101)
+                }
+
+                create_task_manual ->
+                {
+                    toolbar.snackbar("Non implementato").show()
+                }
+
+            }
+            drawer_layout.closeDrawers()
+            true
+        }
+    }
+
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean
     {
@@ -74,14 +122,17 @@ class MainActivity : AppCompatActivity()
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean
     {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         return when (item.itemId)
         {
             R.id.action_settings -> {
+                val animation = AnimationUtils.loadAnimation(this, R.anim.spin_around_itself)
+                findViewById<View>(R.id.action_settings).startAnimation(animation)
                 val intent = Intent(this, SettingsActivity::class.java)
-                startActivity(intent)
+                startActivityForResult(intent, 2)
+                true
+            }
+            android.R.id.home -> {
+                drawer_layout.openDrawer(GravityCompat.START)
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -103,7 +154,7 @@ class MainActivity : AppCompatActivity()
                         }
                         else
                         {
-                            snackbar(findViewById(R.id.layout_main), "Sei collegato come: " + session.user.email).show()
+                            toolbar.snackbar("Sei collegato come: " + session.user.email).show()
                             isViewCreated = false
                         }
                     }
@@ -121,7 +172,7 @@ class MainActivity : AppCompatActivity()
                    Activity.RESULT_OK -> {
                        val intent = Intent(this, TaskDetailsActivity::class.java)
                        intent.putExtra("task", data?.getSerializableExtra("resultTask"))
-                       startActivity(intent)
+                       startActivityForResult(intent, 101)
                    }
                }
            }
@@ -136,6 +187,39 @@ class MainActivity : AppCompatActivity()
                    }
                }
            }
+
+           101->
+           {
+               if(resultCode == 1000 && data?.getSerializableExtra("deletedTask") != null )
+               {
+                   toolbar.longSnackbar("Rimosso").show()
+               }
+           }
        }
+    }
+
+    inner class SpaceItemDecoration(private val space: Int) : RecyclerView.ItemDecoration()
+    {
+
+
+        override fun getItemOffsets(outRect: Rect, view: View, parent: RecyclerView, state: RecyclerView.State)
+        {
+            val position = parent.getChildAdapterPosition(view)
+
+            val lp = view.layoutParams as StaggeredGridLayoutManager.LayoutParams
+            val spanIndex = lp.spanIndex
+
+            if (position >= 0)
+            {
+                if (spanIndex == 1)
+                {
+                    outRect.left = space
+                }
+                else
+                {
+                    outRect.right = space
+                }
+            }
+        }
     }
 }

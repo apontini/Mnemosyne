@@ -4,6 +4,6 @@
       tools:context="apontini.mnemosyne.activities.MainActivity">
     <item android:id="@+id/action_settings"
           android:title="@string/action_settings"
-          android:orderInCategory="100"
-          app:showAsAction="never"/>
+          android:icon="@drawable/ic_baseline_settings_20px"
+          app:showAsAction="ifRoom"/>
 </menu>

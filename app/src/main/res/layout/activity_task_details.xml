@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout
+<androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -7,20 +7,52 @@
     android:layout_height="match_parent"
     tools:context="ap.mnemosyne.activities.TaskDetailsActivity">
 
-    <android.support.design.widget.AppBarLayout
+    <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:theme="@style/AppTheme.AppBarOverlay"
-        app:elevation="0dp">
+        android:layout_height="250dp"
+        android:id="@+id/appBarDetails"
+        android:theme="@style/AppTheme.AppBarOverlay">
 
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/toolbar"
+        <com.google.android.material.appbar.CollapsingToolbarLayout
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            app:popupTheme="@style/AppTheme.PopupOverlay" />
+            android:layout_height="match_parent"
+            app:contentScrim="@android:color/white"
+            android:theme="@style/MnemosyneExpandedToolbar"
+            app:expandedTitleTextAppearance="@style/MnemosyneExpandedTitleText"
+            app:collapsedTitleTextAppearance="@style/MnemosyneTitleText"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed">
 
-    </android.support.design.widget.AppBarLayout>
+            <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:map="http://schemas.android.com/apk/res-auto"
+                android:id="@+id/mapFrame"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                app:layout_collapseMode="parallax">
+
+                <com.google.android.gms.maps.MapView
+                    android:id="@+id/map"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:theme="@style/MnemosyneElevatingToolbar"
+                    map:cameraZoom="15"
+                    map:liteMode="true"
+                    map:mapType="normal" />
+            </FrameLayout>
+
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbar"
+                app:theme="@style/MnemosyneElevatingToolbar"
+                android:background="@android:color/transparent"
+                app:layout_collapseMode="pin"
+                android:layout_width="match_parent"
+                app:layout_scrollFlags="scroll|enterAlways"
+                android:layout_height="?attr/actionBarSize"/>
+
+        </com.google.android.material.appbar.CollapsingToolbarLayout>
+
+
+    </com.google.android.material.appbar.AppBarLayout>
 
     <include layout="@layout/content_task_details" />
 
-</android.support.design.widget.CoordinatorLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

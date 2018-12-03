@@ -1,29 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="5dp"
+    android:layout_marginTop="8dp"
+    android:layout_marginBottom="8dp"
+    android:background="@drawable/task_list_elem_style"
+    android:backgroundTint="@color/colorPrimary"
     android:clickable="true"
     android:focusable="true"
-    style="@style/ButtonMnemosyne"
-    android:weightSum="100">
+    android:paddingLeft="0dp"
+    android:paddingTop="0dp"
+    android:paddingBottom="0dp"
+    android:weightSum="100"
+    app:layout_collapseParallaxMultiplier="1.0">
 
-    <TextView
-        android:id="@+id/textTaskID"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="80"
-        android:gravity="center"
-        android:text="1"
-        android:textColor="@color/textColor"
-        android:textSize="30sp" />
+    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:map="http://schemas.android.com/apk/res-auto"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_marginRight="16dp"
+        android:layout_weight="70"
+        app:layout_collapseMode="parallax">
+
+        <com.google.android.gms.maps.MapView
+            android:id="@+id/map"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            map:cameraZoom="15"
+            map:liteMode="true"
+            map:mapType="normal" />
+    </FrameLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="20"
-        android:orientation="vertical">
+        android:layout_weight="30"
+        android:orientation="vertical"
+        android:paddingRight="10dp">
 
         <TextView
             android:id="@+id/textTaskName"
@@ -33,7 +48,7 @@
             android:minHeight="?android:attr/listPreferredItemHeightSmall"
             android:text="Prova"
             android:textAppearance="?android:attr/textAppearanceListItemSmall"
-            android:textColor="@color/textColor" />
+            android:textColor="@color/onPrimary" />
 
         <TextView
             android:id="@+id/textTaskExtra"
@@ -41,7 +56,7 @@
             android:layout_height="wrap_content"
             android:paddingBottom="8dp"
             android:text="TextView"
-            android:textColor="@color/textColor" />
+            android:textColor="@color/onPrimary" />
     </LinearLayout>
 
 </LinearLayout>

@@ -1,16 +1,18 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="AppTheme" parent="Theme.MaterialComponents.Light.DarkActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
-        <item name="android:windowBackground">@color/colorPrimary</item>
-        <item name="buttonStyle">@style/ButtonMnemosyne</item>
-        <item name="android:actionOverflowButtonStyle">@style/SettingsOverflowButton</item>
+        <item name="colorAccent">@color/colorSecondary</item>
+        <item name="android:statusBarColor">@color/statusBarColor</item>
+        <item name="android:windowBackground">@android:color/white</item>
         <item name="android:alertDialogTheme">@style/Alert</item>
-        <item name="appElevation">3dp</item>
+        <item name="MnemosyneBasicElevation">6dp</item>
+        <item name="MnemosyneHigherElevation">12dp</item>
+        <item name="MnemosyneFlexibleToolbarHeight">100dp</item>
+        <item name="MnemosyneCornerRadius">6dp</item>
     </style>
 
     <style name="AppTheme.NoActionBar">
@@ -22,25 +24,15 @@
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
-    <style name="FullscreenTheme" parent="AppTheme">
-        <item name="android:actionBarStyle">@style/FullscreenActionBarStyle</item>
-        <item name="android:windowActionBarOverlay">true</item>
-        <item name="android:windowBackground">@null</item>
-        <item name="metaButtonBarStyle">?android:attr/buttonBarStyle</item>
-        <item name="metaButtonBarButtonStyle">?android:attr/buttonBarButtonStyle</item>
-    </style>
-
     <style name="FullscreenActionBarStyle" parent="Widget.AppCompat.ActionBar">
         <item name="android:background">@color/black_overlay</item>
     </style>
 
-    <style name="SettingsOverflowButton" parent="android:style/Widget.Holo.Light.ActionButton.Overflow">
-        <item name="android:src">@drawable/ic_baseline_settings_20px</item>
-        <item name="android:tint">@color/textColor</item>
-    </style>
-
-    <style name="Alert" parent="Theme.AppCompat.Light.Dialog.Alert">
-        <item name="android:colorAccent">#209615</item>
+    <style name="Alert" parent="Theme.MaterialComponents.Dialog.Alert">
+        <item name="colorPrimary">@android:color/transparent</item>
+        <item name="android:colorAccent">@android:color/transparent</item>
+        <item name="android:textColorPrimary">@color/onPrimary</item>
+        <item name="android:buttonBarStyle">@style/ButtonMnemosyneText</item>
     </style>
 
     <style name="Theme.Transparent" parent="Theme.AppCompat.Light.DarkActionBar">
@@ -52,24 +44,88 @@
         <item name="android:backgroundDimEnabled">false</item>
     </style>
 
-    <style name="PreferencesTheme" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
-        <item name="android:windowBackground">@color/colorPrimaryLighter</item>
-        <item name="android:textColorPrimary">@color/textColor</item>
-        <item name="android:textColorSecondary">@color/textColor</item>
-        <item name="android:tint">@color/textColor</item>
-        <item name="android:colorEdgeEffect">@color/colorPrimaryDark</item>
-        <item name="android:actionOverflowButtonStyle">@style/SettingsOverflowButton</item>
+    <style name="PreferencesTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="colorAccent">@color/colorSecondary</item>
+        <item name="android:statusBarColor">@color/statusBarColor</item>
+        <item name="android:textColorPrimary">@color/onSecondary</item>
+        <item name="android:textColorSecondary">@color/onSecondary</item>
+        <item name="android:tint">@color/onSecondary</item>
         <item name="android:alertDialogTheme">@style/Alert</item>
     </style>
 
-    <style name="ButtonMnemosyne" parent="Widget.AppCompat.Button.Borderless">
-        <item name="android:background">@drawable/layout_list_border</item>
+    <style name="ButtonMnemosyne" parent="Widget.MaterialComponents.Button">
+        <item name="android:backgroundTint">@color/colorSecondary</item>
         <item name="android:stateListAnimator">@anim/click_elevation_animation</item>
-        <item name="android:elevation">?attr/appElevation</item>
-        <item name="android:textColor">@color/textColor</item>
+        <item name="android:elevation">?attr/MnemosyneBasicElevation</item>
+        <item name="android:textColor">@color/onSecondary</item>
+        <item name="cornerRadius">?attr/MnemosyneCornerRadius</item>
+    </style>
+
+    <style name="ButtonMnemosyneMedium" parent="@style/Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="android:textColor">@color/colorSecondary</item>
+    </style>
+
+    <style name="ButtonMnemosyneText" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="android:backgroundTint">#00000000</item>
+        <item name="android:textColor">@color/colorSecondary</item>
+        <item name="cornerRadius">?attr/MnemosyneCornerRadius</item>
+        <item name="android:elevation">0dp</item>
+    </style>
+
+    <style name="MnemosyneEditText" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="android:backgroundTint">#FFFFFF</item>
+        <item name="android:textColor">@color/onPrimary</item>
+        <item name="boxStrokeColor">@color/colorPrimary</item>
+        <item name="android:elevation">0dp</item>
+        <item name="boxCornerRadiusTopStart">?attr/MnemosyneCornerRadius</item>
+        <item name="boxCornerRadiusTopEnd">?attr/MnemosyneCornerRadius</item>
+        <item name="boxCornerRadiusBottomStart">?attr/MnemosyneCornerRadius</item>
+        <item name="boxCornerRadiusBottomEnd">?attr/MnemosyneCornerRadius</item>
+        <item name="cornerRadius">?attr/MnemosyneCornerRadius</item>
+    </style>
+
+    <style name="MnemosyneHintText" parent="TextAppearance.Design.Hint">
+        <item name="android:itemBackground">#000000</item>
+    </style>
+
+    <style name="MnemosyneEditTextOLD" parent="Base.Widget.MaterialComponents.TextInputEditText">
+        <item name="android:backgroundTint">@color/colorSecondary</item>
+        <item name="android:background">@drawable/layout_text_border</item>
+        <item name="android:stateListAnimator">@anim/click_elevation_animation</item>
+        <item name="android:textColor">@color/onPrimary</item>
+        <item name="cornerRadius">?attr/MnemosyneCornerRadius</item>
+    </style>
+
+    <style name="MnemosyneElevatingToolbar" parent="ThemeOverlay.MaterialComponents.ActionBar">
+        <item name="android:background">@android:color/white</item>
+        <item name="android:textColorSecondary">@color/onPrimary</item>
+        <item name="android:textColorPrimary">@color/onPrimary</item>
+    </style>
+
+    <style name="MnemosyneCard" parent="Widget.MaterialComponents.CardView">
+        <item name="android:backgroundTint">@color/colorPrimary</item>
+        <item name="cardCornerRadius">?attr/MnemosyneCornerRadius</item>
+        <item name="strokeColor">@color/cardBorder</item>
+        <item name="strokeWidth">1dp</item>
+    </style>
+
+    <style name="MnemosyneExpandedToolbar" parent="Widget.Design.CollapsingToolbar">
+        <item name="android:background">@android:color/white</item>
+        <item name="statusBarScrim">@color/onPrimary</item>
+        <item name="android:textColorSecondary">@color/onPrimary</item>
+        <item name="android:textColorPrimary">@color/onPrimary</item>
+    </style>
+
+    <style name="MnemosyneTitleText" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">
+        <item name="android:fontFamily">@font/source_sans_pro</item>
+        <item name="android:textSize">24sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="MnemosyneExpandedTitleText" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">
+        <item name="android:fontFamily">@font/source_sans_pro</item>
+        <item name="android:textSize">36sp</item>
+        <item name="android:textStyle">bold</item>
     </style>
 
 </resources>

@@ -3,55 +3,57 @@ package ap.mnemosyne.activities
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.speech.RecognizerIntent
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity
 import android.util.Log
+import android.view.MenuItem
 import android.view.View
 import ap.mnemosyne.http.HttpHelper
 import ap.mnemosyne.resources.*
 import ap.mnemosyne.session.SessionHelper
 import apontini.mnemosyne.R
+import com.google.android.gms.maps.*
 
-import kotlinx.android.synthetic.main.activity_task_details.*
 import kotlinx.android.synthetic.main.content_task_details.*
-import kotlinx.android.synthetic.main.content_voice.*
 import okhttp3.Request
 import org.jetbrains.anko.*
 import org.jetbrains.anko.design.snackbar
-import com.google.android.gms.maps.GoogleMapOptions
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MarkerOptions
+import kotlinx.android.synthetic.main.activity_task_details.*
 
 
-
-class TaskDetailsActivity : AppCompatActivity()
+class TaskDetailsActivity : AppCompatActivity(), OnMapReadyCallback
 {
-
     private lateinit var session : SessionHelper
+    private lateinit var task : Task
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
 
-        val task: Task = intent.extras.getSerializable("task") as Task
+        task = intent.extras.getSerializable("task") as Task
 
         super.onCreate(savedInstanceState)
         session = SessionHelper(this)
 
         setContentView(R.layout.activity_task_details)
-
-        toolbar.title = task.name.capitalize()
         setSupportActionBar(toolbar)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         if (!task.placesToSatisfy.isEmpty())
         {
-            viewPlacesButton.setOnClickListener{
+            map.onCreate(savedInstanceState)
+            val options = GoogleMapOptions().liteMode(true)
+            map.getMapAsync(this)
+            map.isClickable = false
+            mapFrame.setOnClickListener {
                 val intent = Intent(this, MapsActivity::class.java)
                 intent.putExtra("places", task.placesToSatisfy as HashSet<Place>)
                 startActivity(intent)
             }
-            val options = GoogleMapOptions().liteMode(true)
         }
         else
         {
-            viewPlacesButton.visibility = View.GONE
+            map.visibility = View.GONE
         }
 
         deleteTaskButton.setOnClickListener{
@@ -134,9 +136,52 @@ class TaskDetailsActivity : AppCompatActivity()
 
     }
 
+    override fun onMapReady(p0: GoogleMap)
+    {
+        p0.uiSettings.isMapToolbarEnabled = false
+        val list = task.placesToSatisfy as HashSet<Place>
+        Log.d("LISTA", list.toString())
+        if(!list.isEmpty())
+        {
+            list.forEach {
+                val latlon = LatLng(it.coordinates.lat, it.coordinates.lon)
+                p0.addMarker(MarkerOptions().position(latlon).title(it.name).title(it.name ?: "Nome non trovato"))
+            }
+
+            if(list.size > 1)
+            {
+                val camera = LatLng(list.elementAt(1).coordinates.lat,
+                    list.elementAt(1).coordinates.lon) //Deserialization seems to meddle with this list order
+                p0.moveCamera(CameraUpdateFactory.newLatLngZoom(camera, 13.0f))
+            }
+            else
+            {
+                val camera = LatLng(list.first().coordinates.lat,
+                    list.first().coordinates.lon)
+                p0.moveCamera(CameraUpdateFactory.newLatLngZoom(camera, 13.0f))
+            }
+        }
+        else
+        {
+            alert("Nessun posto indicato") {}.show()
+            finish()
+        }
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean
+    {
+        return when (item.itemId)
+        {
+            android.R.id.home -> {
+                finish()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
     fun deleteTask(task : Task)
     {
-        viewPlacesButton.isClickable = false
         deleteTaskButton.isClickable = false
         progressBar3.visibility = View.VISIBLE
         val request = Request.Builder()
@@ -176,10 +221,9 @@ class TaskDetailsActivity : AppCompatActivity()
             if(error)
             {
                 uiThread {
-                    viewPlacesButton.isClickable = true
                     deleteTaskButton.isClickable = true
                     progressBar3.visibility = View.INVISIBLE
-                    snackbar(tableLayout, (resp.first as Message).errorDetails)
+                    tableLayout.snackbar((resp.first as Message).errorDetails)
                 }
             }
         }
@@ -195,8 +239,7 @@ class TaskDetailsActivity : AppCompatActivity()
             {
                 if (resultCode == Activity.RESULT_OK)
                 {
-                    snackbar(findViewById(R.id.layout_main), "Sei collegato come: " + session.user.email).show()
-                    textStatus.text = getString(R.string.text_voice_retry)
+                    toolbar.snackbar("Sei collegato come: " + session.user.email).show()
                 }
                 else
                 {

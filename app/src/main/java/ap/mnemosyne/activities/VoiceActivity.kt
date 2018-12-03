@@ -3,7 +3,7 @@ package ap.mnemosyne.activities
 import android.app.Activity
 import android.content.Context
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import apontini.mnemosyne.R
 
 import kotlinx.android.synthetic.main.activity_voice.*
@@ -455,7 +455,7 @@ class VoiceActivity : AppCompatActivity()
             SessionHelper.LOGIN_REQUEST_CODE->{
                 if(resultCode == Activity.RESULT_OK)
                 {
-                    snackbar(findViewById(R.id.layout_main), "Sei collegato come: " + session.user.email).show()
+                    toolbar.snackbar("Sei collegato come: " + session.user.email).show()
                     textStatus.text = getString(R.string.text_voice_retry)
                 }
                 else

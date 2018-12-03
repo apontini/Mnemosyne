@@ -5,7 +5,7 @@ import android.os.Bundle
 import android.preference.Preference
 import apontini.mnemosyne.R
 import android.preference.PreferenceFragment
-import android.support.v7.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatActivity
 import android.view.MenuItem
 import com.google.android.gms.location.places.ui.PlacePicker
 import kotlinx.android.synthetic.main.activity_settings.*

@@ -4,7 +4,7 @@ import android.app.Activity
 import android.app.TimePickerDialog
 import android.content.Intent
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import apontini.mnemosyne.R
 
 import kotlinx.android.synthetic.main.activity_time_interval_picker.*

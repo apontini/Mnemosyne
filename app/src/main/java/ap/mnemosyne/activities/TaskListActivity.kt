@@ -2,10 +2,11 @@ package ap.mnemosyne.activities
 
 import android.app.Activity
 import android.content.Intent
-import android.support.v7.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.support.v7.widget.LinearLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import android.util.Log
+import android.view.MenuItem
 import android.view.View
 import ap.mnemosyne.http.HttpHelper
 import ap.mnemosyne.resources.ResourceList
@@ -18,8 +19,9 @@ import org.jetbrains.anko.uiThread
 import ap.mnemosyne.adapters.TaskListAdapter
 import ap.mnemosyne.resources.Message
 import ap.mnemosyne.session.SessionHelper
-import kotlinx.android.synthetic.main.activity_task_details.*
+import kotlinx.android.synthetic.main.activity_task_list.*
 import org.jetbrains.anko.alert
+import org.jetbrains.anko.design.longSnackbar
 import org.jetbrains.anko.design.snackbar
 
 
@@ -36,11 +38,24 @@ class TaskListActivity : AppCompatActivity()
 
         setContentView(R.layout.activity_task_list)
         setSupportActionBar(toolbar)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         session.checkSessionValidity{loadTasks()}
 
         layout_listTask.setOnRefreshListener {
             loadTasks()
+        }
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean
+    {
+        return when (item.itemId)
+        {
+            android.R.id.home -> {
+                finish()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
         }
     }
 
@@ -126,9 +141,10 @@ class TaskListActivity : AppCompatActivity()
             101 ->{
                 if(resultCode == 1000 && data?.getSerializableExtra("deletedTask") != null )
                 {
+                    toolbar.longSnackbar("Rimosso").show()
                     val pos = taskJSONList.indexOf(data.getSerializableExtra("deletedTask") as Task)
                     taskJSONList.removeAt(pos)
-                    taskList.adapter.notifyItemRemoved(pos)
+                    taskList.adapter!!.notifyItemRemoved(pos)
                 }
             }
 
@@ -139,7 +155,7 @@ class TaskListActivity : AppCompatActivity()
                     Activity.RESULT_OK ->
                     {
                         loadTasks()
-                        snackbar(toolbar, "Sei collegato come: " + session.user.email).show()
+                        toolbar.snackbar("Sei collegato come: " + session.user.email).show()
                     }
 
                     else -> {
