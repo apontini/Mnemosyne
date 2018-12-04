@@ -22,7 +22,6 @@
                 android:id="@+id/title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/source_sans_pro"
                 android:gravity="center"
                 android:text="0"
                 android:textColor="@color/onPrimary"
@@ -37,7 +36,7 @@
                 android:paddingRight="16dp"
                 android:paddingBottom="8dp"
                 android:text="Prova descrizione"
-                android:textColor="@color/onPrimaryHelper"
+                android:textAppearance="@style/MnemosyneBodyHelper"
                 android:textSize="18sp" />
 
         </RelativeLayout>

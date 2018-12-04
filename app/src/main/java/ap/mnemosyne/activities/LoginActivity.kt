@@ -43,6 +43,28 @@ class LoginActivity : AppCompatActivity()
 
     fun tryLogin()
     {
+        if(loginUser.text.toString() == "" || !android.util.Patterns.EMAIL_ADDRESS.matcher(loginUser.text.toString()).matches())
+        {
+            loginUser.requestFocus()
+            inputLayoutEmail.error = "Inserisci un indirizzo email valido"
+            return
+        }
+        else
+        {
+            inputLayoutEmail.error = null
+        }
+
+        if(loginPassword.text.toString() == "")
+        {
+            loginPassword.requestFocus()
+            inputLayoutPassword.error = "Inserisci una password valida"
+            return
+        }
+        else
+        {
+            inputLayoutPassword.error = null
+        }
+
         val mgr = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
 
         loginUser.isEnabled = false
@@ -87,7 +109,7 @@ class LoginActivity : AppCompatActivity()
                 loginUser.isEnabled = true
                 loginPassword.isEnabled = true
                 loginButton.isEnabled = true
-                loginProgress.visibility = View.INVISIBLE
+                loginProgress.visibility = View.GONE
             }
         }
     }

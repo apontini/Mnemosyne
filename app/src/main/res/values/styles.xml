@@ -13,6 +13,7 @@
         <item name="MnemosyneHigherElevation">12dp</item>
         <item name="MnemosyneFlexibleToolbarHeight">100dp</item>
         <item name="MnemosyneCornerRadius">6dp</item>
+        <item name="android:fontFamily">@font/rubik</item>
     </style>
 
     <style name="AppTheme.NoActionBar">
@@ -51,6 +52,7 @@
         <item name="android:textColorSecondary">@color/onSecondary</item>
         <item name="android:tint">@color/onSecondary</item>
         <item name="android:alertDialogTheme">@style/Alert</item>
+        <item name="android:fontFamily">@font/rubik</item>
     </style>
 
     <style name="ButtonMnemosyne" parent="Widget.MaterialComponents.Button">
@@ -59,10 +61,12 @@
         <item name="android:elevation">?attr/MnemosyneBasicElevation</item>
         <item name="android:textColor">@color/onSecondary</item>
         <item name="cornerRadius">?attr/MnemosyneCornerRadius</item>
+        <item name="android:fontFamily">@font/rubik_bold</item>
     </style>
 
     <style name="ButtonMnemosyneMedium" parent="@style/Widget.MaterialComponents.Button.OutlinedButton">
         <item name="android:textColor">@color/colorSecondary</item>
+        <item name="android:fontFamily">@font/rubik_bold</item>
     </style>
 
     <style name="ButtonMnemosyneText" parent="Widget.MaterialComponents.Button.TextButton">
@@ -70,10 +74,11 @@
         <item name="android:textColor">@color/colorSecondary</item>
         <item name="cornerRadius">?attr/MnemosyneCornerRadius</item>
         <item name="android:elevation">0dp</item>
+        <item name="android:fontFamily">@font/rubik_bold</item>
     </style>
 
     <style name="MnemosyneEditText" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
-        <item name="android:backgroundTint">#FFFFFF</item>
+        <item name="android:backgroundTint">@android:color/white</item>
         <item name="android:textColor">@color/onPrimary</item>
         <item name="boxStrokeColor">@color/colorPrimary</item>
         <item name="android:elevation">0dp</item>
@@ -117,15 +122,29 @@
     </style>
 
     <style name="MnemosyneTitleText" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">
-        <item name="android:fontFamily">@font/source_sans_pro</item>
-        <item name="android:textSize">24sp</item>
-        <item name="android:textStyle">bold</item>
+        <item name="android:fontFamily">@font/rubik_medium</item>
+        <item name="android:textSize">20sp</item>
     </style>
 
     <style name="MnemosyneExpandedTitleText" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">
-        <item name="android:fontFamily">@font/source_sans_pro</item>
-        <item name="android:textSize">36sp</item>
-        <item name="android:textStyle">bold</item>
+        <item name="android:fontFamily">@font/rubik_medium</item>
+        <item name="android:textSize">32sp</item>
+    </style>
+
+    <style name="MnemosyneBodyText1" parent="TextAppearance.AppCompat.Body1">
+        <item name="android:fontFamily">@font/rubik_medium</item>
+        <item name="android:textSize">24sp</item>
+    </style>
+
+    <style name="MnemosyneBodyText2" parent="TextAppearance.AppCompat.Body2">
+        <item name="android:fontFamily">@font/rubik</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <style name="MnemosyneBodyHelper" parent="TextAppearance.Design.HelperText">
+        <item name="android:fontFamily">@font/rubik</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/onPrimaryHelper</item>
     </style>
 
 </resources>

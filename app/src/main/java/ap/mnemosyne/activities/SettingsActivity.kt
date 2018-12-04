@@ -345,7 +345,7 @@ class SettingsActivity : AppCompatActivity()
                     {
                         201, 200 ->
                         {
-                            snackbar(this@Preferences.activity.toolbar, getString(R.string.text_settings_successUpdate)).show()
+                            this@Preferences.activity.toolbar.snackbar(getString(R.string.text_settings_successUpdate)).show()
                             when (requestCode)
                             {
                                 0, 1 ->
@@ -362,11 +362,13 @@ class SettingsActivity : AppCompatActivity()
 
                                 2,3,4,5 ->
                                 {
-                                    uiThread { findPreference(paramName.name).summary = "${(resp.first as TimeParameter).fromTime.toString(DateTimeFormat.forPattern("HH:mm"))}, " +
-                                            (resp.first as TimeParameter).toTime.toString(DateTimeFormat.forPattern("HH:mm")) }
+                                    uiThread {
+                                        findPreference(paramName.name).summary = "${(resp.first as TimeParameter).fromTime.toString(DateTimeFormat.forPattern("HH:mm"))}, " +
+                                            (resp.first as TimeParameter).toTime.toString(DateTimeFormat.forPattern("HH:mm"))
+                                    }
                                     with(defaultSharedPreferences.edit())
                                     {
-                                        putString(paramName.name, (resp.first as LocationParameter).toJSON())
+                                        putString(paramName.name, (resp.first as TimeParameter).toJSON())
                                         apply()
                                     }
                                 }

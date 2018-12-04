@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import android.util.Log
 import android.view.MenuItem
 import android.view.View
+import android.view.animation.AnimationUtils
 import ap.mnemosyne.http.HttpHelper
 import ap.mnemosyne.resources.ResourceList
 import ap.mnemosyne.resources.Task
@@ -118,6 +119,7 @@ class TaskListActivity : AppCompatActivity()
             uiThread {
                 layout_listTask.isRefreshing = false
                 taskList.layoutManager = LinearLayoutManager(this@TaskListActivity)
+                taskList.layoutAnimation = AnimationUtils.loadLayoutAnimation(this@TaskListActivity, R.anim.slide_from_bottom_animator)
                 taskList.adapter = TaskListAdapter(this@TaskListActivity, taskJSONList)
                 when(resultText)
                 {

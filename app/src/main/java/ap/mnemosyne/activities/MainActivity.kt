@@ -23,6 +23,10 @@ import ap.mnemosyne.uiResources.NumberCard
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import androidx.core.view.GravityCompat
+import ap.mnemosyne.resources.Task
+import ap.mnemosyne.resources.TaskPlaceConstraint
+import ap.mnemosyne.resources.TaskTimeConstraint
+import ap.mnemosyne.tasks.TasksHelper
 import apontini.mnemosyne.R.id.*
 import kotlinx.android.synthetic.main.drawer_header.view.*
 import org.jetbrains.anko.design.longSnackbar
@@ -31,6 +35,7 @@ class MainActivity : AppCompatActivity()
 {
 
     private lateinit var session : SessionHelper
+    private lateinit var tasks : TasksHelper
     private var isViewCreated = false
 
     override fun onCreate(savedInstanceState: Bundle?)
@@ -38,6 +43,7 @@ class MainActivity : AppCompatActivity()
         super.onCreate(savedInstanceState)
         Log.d("LIFECYCLE", "onCreate")
         session = SessionHelper(this)
+        tasks = TasksHelper(this)
         session.checkSessionValidity {
             isViewCreated = true
             createContentView() }
@@ -52,15 +58,38 @@ class MainActivity : AppCompatActivity()
         setToolbar()
         setNavDrawer()
 
-        val cardCreatedList = listOf<Card>(NumberCard(0, "Prova carta 1 text"), NumberCard(57, "Prova carta 2"), NumberCard(2, "Prova carta 3 prova testo lungo"),
-            NumberCard(0, "Prova carta 1 text"), NumberCard(57, "Prova carta 2"), NumberCard(2, "Prova carta 3 prova testo lungo"),
-            NumberCard(0, "Prova carta 1 text"), NumberCard(57, "Prova carta 2"), NumberCard(2, "Prova carta 3 prova testo lungo"),
-            NumberCard(0, "Prova carta 1 text"), NumberCard(57, "Prova carta 2"), NumberCard(2, "Prova carta 3 prova testo lungo"))
+        tasks.updateTasksAndDo {
+            val tasksList : List<Task> = tasks.getLocalTasks() as List<Task> ?: listOf()
+            var constrained = 0
+            var failed = 0
+            var doneToday = 0
+            var timeConstr = 0
+            var placeConstr = 0
 
-        cardList.setHasFixedSize(true)
-        cardList.layoutManager = StaggeredGridLayoutManager(2,StaggeredGridLayoutManager.VERTICAL)
-        cardList.addItemDecoration(SpaceItemDecoration(-8)) //margin is 8dp
-        cardList.adapter = MainCardsAdapter(this@MainActivity, cardCreatedList)
+            tasksList.forEach{
+                if(it.isFailed) failed++
+                if(it.isDoneToday) doneToday++
+                if(it.constr != null)
+                {
+                    constrained++
+                    if(it.constr is TaskPlaceConstraint) placeConstr++
+                    else if (it.constr is TaskTimeConstraint) timeConstr++
+                }
+            }
+
+            val cardCreatedList = listOf<Card>(NumberCard(tasksList.size, "Task registrati"), NumberCard(doneToday, "Task completati oggi"),
+                NumberCard(failed, "Task falliti"), NumberCard(constrained, "Task con vincoli"), NumberCard(timeConstr, "Task con vincoli temporali"),
+                NumberCard(placeConstr, "Task con vincoli di luogo"))
+
+            cardList.setHasFixedSize(true)
+            cardList.layoutManager = StaggeredGridLayoutManager(2,StaggeredGridLayoutManager.VERTICAL)
+            cardList.layoutAnimation = AnimationUtils.loadLayoutAnimation(this, R.anim.slide_from_bottom_animator)
+            cardList.addItemDecoration(SpaceItemDecoration(-8)) //margin is 8dp
+            cardList.adapter = MainCardsAdapter(this@MainActivity, cardCreatedList)
+
+            mainProgress.visibility = View.GONE
+            mainText.visibility = View.GONE
+        }
 
         toolbar.snackbar("Sei collegato come: " + session.user.email).show()
 
@@ -84,7 +113,7 @@ class MainActivity : AppCompatActivity()
     {
         nav_view.getHeaderView(0).header_text.text = session.user.email
         nav_view.setNavigationItemSelectedListener { menuItem ->
-            menuItem.isChecked = true
+            menuItem.isChecked = false
 
             when(menuItem.itemId)
             {

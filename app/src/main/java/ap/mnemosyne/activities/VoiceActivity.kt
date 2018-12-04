@@ -13,6 +13,7 @@ import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
 import android.util.Log
+import android.view.MenuItem
 import android.view.View
 import ap.mnemosyne.enums.ParamsName
 import ap.mnemosyne.http.HttpHelper
@@ -20,6 +21,7 @@ import ap.mnemosyne.permissions.PermissionsHelper
 import ap.mnemosyne.resources.*
 import ap.mnemosyne.session.SessionHelper
 import com.google.android.gms.location.places.ui.PlacePicker
+import com.google.android.material.chip.Chip
 import kotlinx.android.synthetic.main.content_voice.*
 import okhttp3.*
 import org.jetbrains.anko.*
@@ -30,6 +32,8 @@ import java.util.*
 class VoiceActivity : AppCompatActivity()
 {
     private lateinit var session : SessionHelper
+    private var locationManager : LocationManager? = null
+    private var locationListener : LocationListener? = null
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
@@ -38,6 +42,7 @@ class VoiceActivity : AppCompatActivity()
         session = SessionHelper(this)
         setContentView(R.layout.activity_voice)
         setSupportActionBar(toolbar)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         val sessionid = session.user.sessionID
 
@@ -73,14 +78,44 @@ class VoiceActivity : AppCompatActivity()
             if(textSentence.text.toString() != "")
                 sendTask(sessionid)
         }
+
+        chip1.setOnClickListener { onChipClick(it) }
+        chip2.setOnClickListener { onChipClick(it) }
+        chip3.setOnClickListener { onChipClick(it) }
+        chip4.setOnClickListener { onChipClick(it) }
+    }
+
+    private fun onChipClick(chip : View)
+    {
+        textSentence.text?.clear()
+        textSentence.setText((chip as Chip).text)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean
+    {
+        return when (item.itemId)
+        {
+            android.R.id.home -> {
+                finish()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    override fun onDestroy()
+    {
+        if(locationManager != null && locationListener != null)
+            locationManager?.removeUpdates(locationListener)
+        super.onDestroy()
     }
 
     private fun sendTask(sessionid : String)
     {
 
-        val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
-        if(!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER))
+        if(locationManager?.isProviderEnabled(LocationManager.GPS_PROVIDER) == false)
         {
             alert("I servizi di localizzazione non sono abilitati!").show()
             return
@@ -92,12 +127,12 @@ class VoiceActivity : AppCompatActivity()
         saveTaskButton.visibility = View.INVISIBLE
 
         // Define a listener that responds to location updates
-        val locationListener = object : LocationListener
+        locationListener = object : LocationListener
         {
 
             override fun onLocationChanged(location: Location)
             {
-                locationManager.removeUpdates(this)
+                locationManager?.removeUpdates(this)
                 textStatus.text = getString(R.string.text_voice_waitServer)
                 val body = FormBody.Builder().add("sentence", textSentence.text.toString()).add("lat", location.latitude.toString())
                     .add("lon", location.longitude.toString()).build()
@@ -165,7 +200,10 @@ class VoiceActivity : AppCompatActivity()
                                     "PRSR11" -> {
                                         textStatus.text = getString(R.string.text_voice_PRSR11Repeat)
                                         alert(getString(R.string.text_voice_PRSR11, respMessage.errorDetails)){
-                                            yesButton { askParameter(ParamsName.valueOf(respMessage.errorDetails)) }
+                                            yesButton {
+                                                saveTaskButton.isEnabled = false
+                                                askParameter(ParamsName.valueOf(respMessage.errorDetails))
+                                            }
                                         }.show()
                                     }
 
@@ -269,7 +307,7 @@ class VoiceActivity : AppCompatActivity()
         }
 
 
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0f, locationListener)
+        locationManager?.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0f, locationListener)
     }
 
     private fun askParameter(param : ParamsName)
@@ -377,7 +415,7 @@ class VoiceActivity : AppCompatActivity()
                         {
                             201, 200 ->
                             {
-                                snackbar(toolbar, getString(R.string.text_settings_successUpdate)).show()
+                                toolbar.snackbar(getString(R.string.text_settings_successUpdate)).show()
                                 when (requestCode)
                                 {
                                     0, 1 ->
@@ -434,6 +472,10 @@ class VoiceActivity : AppCompatActivity()
                                     alert(getString(R.string.text_general_error, (resp.first as Message).errorDetails)).show()
                                 }
                             }
+                        }
+
+                        uiThread {
+                            saveTaskButton.isEnabled = false
                         }
                     }
                 }

@@ -5,7 +5,6 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginTop="8dp"
-    android:layout_marginBottom="8dp"
     android:background="@drawable/task_list_elem_style"
     android:backgroundTint="@color/colorPrimary"
     android:clickable="true"
@@ -47,7 +46,7 @@
             android:gravity="center_vertical"
             android:minHeight="?android:attr/listPreferredItemHeightSmall"
             android:text="Prova"
-            android:textAppearance="?android:attr/textAppearanceListItemSmall"
+            android:textAppearance="@style/MnemosyneBodyText2"
             android:textColor="@color/onPrimary" />
 
         <TextView
@@ -56,7 +55,7 @@
             android:layout_height="wrap_content"
             android:paddingBottom="8dp"
             android:text="TextView"
-            android:textColor="@color/onPrimary" />
+            android:textAppearance="@style/MnemosyneBodyHelper" />
     </LinearLayout>
 
 </LinearLayout>

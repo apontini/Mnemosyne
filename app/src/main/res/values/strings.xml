@@ -2,13 +2,15 @@
     <string name="app_name">Mnemosyne</string>
     <string name="action_settings">Impostazioni</string>
     <string name="sharedPreferences_user_FILE">apontini.mnemosyne.userSharedPrefs</string>
+    <string name="sharedPreferences_tasks_FILE">apontini.mnemosyne.tasksSharedPrefs</string>
     <string name="title_activity_login">Entra in Mnemosyne</string>
     <string name="login_button">Mnemosyne Login</string>
-    <string name="user_login_hint">email</string>
-    <string name="password_login_hint">password</string>
+    <string name="user_login_hint">Email</string>
+    <string name="password_login_hint">Password</string>
     <string name="sharedPreferences_user_sessionid">JSESSIONID</string>
     <string name="sharedPreferences_user_mail">mail</string>
     <string name="sharedPreferences_user_psw">password</string>
+    <string name="sharedPreferences_tasks_list">task-list</string>
     <string name="text_main_list">Visualizza i miei task</string>
     <string name="text_main_mic">Aggiungi un task a voce!</string>
     <string name="text_main_add">Aggiungi manualmente un task</string>
@@ -76,4 +78,9 @@
     <string name="nav_create_voice">Crea task a voce</string>
     <string name="nav_task_list">Lista Task</string>
     <string name="nav_create_manual">Crea task manualmente</string>
+    <string name="voice_chip_example1">Devo prendere il latte</string>
+    <string name="voice_chip_example2">Devo pagare il bollo entro le 18</string>
+    <string name="voice_chip_example3">Ricordami di fare la lavatrice quanto torno a casa</string>
+    <string name="voice_chip_example4">Ricordami di prendere la medicina a pranzo</string>
+    <string name="main_text_loading">Carico la dashboard..</string>
 </resources>

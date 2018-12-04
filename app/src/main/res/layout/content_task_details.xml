@@ -22,7 +22,7 @@
 
     <androidx.core.widget.NestedScrollView
         android:id="@+id/nestedScrollView"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="match_parent"
         android:fillViewport="true"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -44,66 +44,75 @@
 
             <TableRow
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                android:layout_marginBottom="8dp">
 
                 <TextView
                     android:id="@+id/textNameP1"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="TextView"
+                    android:textAppearance="@style/MnemosyneBodyText2"
                     android:textColor="@color/onSecondary"
                     android:textSize="18sp" />
 
                 <TextView
                     android:id="@+id/textValueP1"
-                    android:layout_width="128dp"
-                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
                     android:paddingLeft="25dp"
                     android:text="TextView"
+                    android:textAppearance="@style/MnemosyneBodyText2"
                     android:textColor="@color/onSecondary"
                     android:textSize="18sp" />
             </TableRow>
 
             <TableRow
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                android:layout_marginBottom="8dp">
 
                 <TextView
                     android:id="@+id/textNameP2"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="TextView"
+                    android:textAppearance="@style/MnemosyneBodyText2"
                     android:textColor="@color/onSecondary"
                     android:textSize="18sp" />
 
                 <TextView
                     android:id="@+id/textValueP2"
-                    android:layout_width="128dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:paddingLeft="25dp"
                     android:text="TextView"
+                    android:textAppearance="@style/MnemosyneBodyText2"
                     android:textColor="@color/onSecondary"
                     android:textSize="18sp" />
             </TableRow>
 
             <TableRow
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                android:layout_marginBottom="8dp">
 
                 <TextView
                     android:id="@+id/textNameP3"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="TextView"
+                    android:textAppearance="@style/MnemosyneBodyText2"
                     android:textColor="@color/onSecondary"
                     android:textSize="18sp" />
 
                 <TextView
                     android:id="@+id/textValueP3"
-                    android:layout_width="128dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:paddingLeft="25dp"
                     android:text="TextView"
+                    android:textAppearance="@style/MnemosyneBodyText2"
                     android:textColor="@color/onSecondary"
                     android:textSize="18sp" />
             </TableRow>
@@ -111,22 +120,24 @@
             <TableRow
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginBottom="30dp">
+                android:layout_marginBottom="8dp">
 
                 <TextView
                     android:id="@+id/textNameP4"
                     android:layout_width="16dp"
                     android:layout_height="wrap_content"
                     android:text="TextView"
+                    android:textAppearance="@style/MnemosyneBodyText2"
                     android:textColor="@color/onSecondary"
                     android:textSize="18sp" />
 
                 <TextView
                     android:id="@+id/textValueP4"
-                    android:layout_width="128dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:paddingLeft="25dp"
                     android:text="TextView"
+                    android:textAppearance="@style/MnemosyneBodyText2"
                     android:textColor="@color/onSecondary"
                     android:textSize="18sp" />
             </TableRow>
@@ -134,22 +145,24 @@
             <TableRow
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginTop="15dp">
+                android:layout_marginTop="16dp">
 
                 <TextView
                     android:id="@+id/textPossibleWork"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Possibile al lavoro:"
+                    android:textAppearance="@style/MnemosyneBodyText2"
                     android:textColor="@color/onSecondary"
                     android:textSize="18sp" />
 
                 <TextView
                     android:id="@+id/textPossibleWorkValue"
-                    android:layout_width="128dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:paddingLeft="25dp"
                     android:text="TextView"
+                    android:textAppearance="@style/MnemosyneBodyText2"
                     android:textColor="@color/onSecondary"
                     android:textSize="18sp" />
 
@@ -158,22 +171,24 @@
             <TableRow
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginTop="15dp">
+                android:layout_marginTop="16dp">
 
                 <TextView
                     android:id="@+id/textRepeatable"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Ripetibile:"
+                    android:textAppearance="@style/MnemosyneBodyText2"
                     android:textColor="@color/onSecondary"
                     android:textSize="18sp" />
 
                 <TextView
                     android:id="@+id/textRepeatableValue"
-                    android:layout_width="128dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:paddingLeft="25dp"
                     android:text="TextView"
+                    android:textAppearance="@style/MnemosyneBodyText2"
                     android:textColor="@color/onSecondary"
                     android:textSize="18sp" />
 
@@ -182,22 +197,24 @@
             <TableRow
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginTop="15dp">
+                android:layout_marginTop="16dp">
 
                 <TextView
                     android:id="@+id/textDoneToday"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Eseguito oggi"
+                    android:textAppearance="@style/MnemosyneBodyText2"
                     android:textColor="@color/onSecondary"
                     android:textSize="18sp" />
 
                 <TextView
                     android:id="@+id/textDoneTodayValue"
-                    android:layout_width="128dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:paddingLeft="25dp"
                     android:text="TextView"
+                    android:textAppearance="@style/MnemosyneBodyText2"
                     android:textColor="@color/onSecondary"
                     android:textSize="18sp" />
 
@@ -206,23 +223,26 @@
             <TableRow
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginTop="15dp"
-                android:layout_marginBottom="30dp">
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="15dp">
 
                 <TextView
                     android:id="@+id/textFailed"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Fallito:"
+                    android:textAppearance="@style/MnemosyneBodyText2"
                     android:textColor="@color/onSecondary"
                     android:textSize="18sp" />
 
                 <TextView
                     android:id="@+id/textFailedValue"
-                    android:layout_width="128dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_span="2"
                     android:paddingLeft="25dp"
                     android:text="TextView"
+                    android:textAppearance="@style/MnemosyneBodyText2"
                     android:textColor="@color/onSecondary"
                     android:textSize="18sp" />
 
@@ -231,7 +251,7 @@
             <TableRow
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginTop="15dp"
+                android:layout_marginTop="16dp"
                 android:layout_marginBottom="30dp"
                 android:gravity="center_horizontal"
                 android:paddingTop="15dp"

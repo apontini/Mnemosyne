@@ -22,7 +22,7 @@ import org.joda.time.format.DateTimeFormatter
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.locks.ReentrantLock
 
-class ParametersHelper(act: Activity)
+class ParametersHelper(val act: Activity)
 {
 
     companion object
@@ -33,7 +33,6 @@ class ParametersHelper(act: Activity)
         val lock by lazy { ReentrantLock() }
     }
 
-    val act = act
     val session = SessionHelper(act)
 
     fun updateParametersAndDo(forceUpdate : Boolean = false, doWhat: () -> (Unit))

@@ -11,66 +11,73 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
+        android:gravity="center_vertical"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <ProgressBar
-            android:id="@+id/loginProgress"
-            style="?android:attr/progressBarStyleHorizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:indeterminate="true"
-            android:visibility="invisible" />
-
         <LinearLayout
             android:id="@+id/layout_login"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:background="@android:color/white"
             android:orientation="vertical"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
-            <EditText
-                android:id="@+id/loginUser"
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/MnemosyneEditText"
+                android:id="@+id/inputLayoutEmail"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_margin="10dp"
-                android:background="@drawable/layout_text_border"
-                android:elevation="?attr/MnemosyneBasicElevation"
-                android:hint="@string/user_login_hint"
-                android:inputType="text"
-                android:textColor="@color/onSecondary"
-                android:textColorHint="@color/black_overlay" />
+                app:errorEnabled="true"
+                app:hintTextAppearance="@style/MnemosyneHintText">
 
-            <EditText
-                android:id="@+id/loginPassword"
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/loginUser"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/user_login_hint"
+                    android:drawableEnd="@drawable/ic_baseline_mail_outline_24px"
+                    android:drawableTint="@color/onPrimaryHelper"
+                    android:inputType="textEmailAddress"
+                    android:textColor="@color/onPrimary" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/MnemosyneEditText"
+                android:id="@+id/inputLayoutPassword"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_margin="10dp"
-                android:background="@drawable/layout_text_border"
-                android:elevation="?attr/MnemosyneBasicElevation"
-                android:hint="@string/password_login_hint"
-                android:inputType="textPassword"
-                android:textColor="@color/onSecondary"
-                android:textColorHint="@color/black_overlay" />
+                app:errorEnabled="true"
+                app:passwordToggleEnabled="true"
+                app:hintTextAppearance="@style/MnemosyneHintText">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/loginPassword"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/password_login_hint"
+                    android:inputType="textPassword"
+                    android:textColor="@color/onPrimary" />
+            </com.google.android.material.textfield.TextInputLayout>
 
             <Button
                 android:id="@+id/loginButton"
                 style="@style/ButtonMnemosyne"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_margin="10dp"
-                android:text="@string/login_button"/>
+                android:text="@string/login_button" />
 
         </LinearLayout>
     </LinearLayout>
