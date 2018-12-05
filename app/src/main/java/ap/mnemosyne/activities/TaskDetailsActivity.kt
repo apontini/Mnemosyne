@@ -7,10 +7,11 @@ import androidx.appcompat.app.AppCompatActivity
 import android.util.Log
 import android.view.MenuItem
 import android.view.View
+import androidx.core.app.ActivityOptionsCompat
 import ap.mnemosyne.http.HttpHelper
 import ap.mnemosyne.resources.*
 import ap.mnemosyne.session.SessionHelper
-import apontini.mnemosyne.R
+import ap.mnemosyne.R
 import com.google.android.gms.maps.*
 
 import kotlinx.android.synthetic.main.content_task_details.*
@@ -20,17 +21,20 @@ import org.jetbrains.anko.design.snackbar
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import kotlinx.android.synthetic.main.activity_task_details.*
+import java.lang.Exception
 
 
 class TaskDetailsActivity : AppCompatActivity(), OnMapReadyCallback
 {
     private lateinit var session : SessionHelper
     private lateinit var task : Task
+    private var focusPlace : Place? = null
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
 
         task = intent.extras.getSerializable("task") as Task
+        focusPlace = try {(intent.extras.getSerializable("focusPlace") as Place)} catch (e : Exception){null}
 
         super.onCreate(savedInstanceState)
         session = SessionHelper(this)
@@ -47,8 +51,10 @@ class TaskDetailsActivity : AppCompatActivity(), OnMapReadyCallback
             map.isClickable = false
             mapFrame.setOnClickListener {
                 val intent = Intent(this, MapsActivity::class.java)
+                val p1 : androidx.core.util.Pair<View, String> = androidx.core.util.Pair(map,"mapView")
+                val options = ActivityOptionsCompat.makeSceneTransitionAnimation(this@TaskDetailsActivity, p1)
                 intent.putExtra("places", task.placesToSatisfy as HashSet<Place>)
-                startActivity(intent)
+                startActivity(intent, options.toBundle())
             }
         }
         else
@@ -63,6 +69,8 @@ class TaskDetailsActivity : AppCompatActivity(), OnMapReadyCallback
                 noButton { }
             }.show()
         }
+
+        taskName.text = task.name.capitalize()
 
         when
         {
@@ -148,10 +156,10 @@ class TaskDetailsActivity : AppCompatActivity(), OnMapReadyCallback
                 p0.addMarker(MarkerOptions().position(latlon).title(it.name).title(it.name ?: "Nome non trovato"))
             }
 
-            if(list.size > 1)
+            if(focusPlace != null)
             {
-                val camera = LatLng(list.elementAt(1).coordinates.lat,
-                    list.elementAt(1).coordinates.lon) //Deserialization seems to meddle with this list order
+                val camera = LatLng((focusPlace as Place).coordinates.lat,
+                    (focusPlace as Place).coordinates.lon)
                 p0.moveCamera(CameraUpdateFactory.newLatLngZoom(camera, 13.0f))
             }
             else
@@ -173,7 +181,7 @@ class TaskDetailsActivity : AppCompatActivity(), OnMapReadyCallback
         return when (item.itemId)
         {
             android.R.id.home -> {
-                finish()
+                supportFinishAfterTransition()
                 true
             }
             else -> super.onOptionsItemSelected(item)

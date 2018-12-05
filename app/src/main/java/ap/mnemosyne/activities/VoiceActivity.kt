@@ -4,7 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity;
-import apontini.mnemosyne.R
+import ap.mnemosyne.R
 
 import kotlinx.android.synthetic.main.activity_voice.*
 import android.speech.RecognizerIntent
@@ -20,6 +20,7 @@ import ap.mnemosyne.http.HttpHelper
 import ap.mnemosyne.permissions.PermissionsHelper
 import ap.mnemosyne.resources.*
 import ap.mnemosyne.session.SessionHelper
+import ap.mnemosyne.tasks.TasksHelper
 import com.google.android.gms.location.places.ui.PlacePicker
 import com.google.android.material.chip.Chip
 import kotlinx.android.synthetic.main.content_voice.*
@@ -32,6 +33,7 @@ import java.util.*
 class VoiceActivity : AppCompatActivity()
 {
     private lateinit var session : SessionHelper
+    private lateinit var tasks : TasksHelper
     private var locationManager : LocationManager? = null
     private var locationListener : LocationListener? = null
 
@@ -40,6 +42,7 @@ class VoiceActivity : AppCompatActivity()
         super.onCreate(savedInstanceState)
 
         session = SessionHelper(this)
+        tasks = TasksHelper(this)
         setContentView(R.layout.activity_voice)
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -122,18 +125,20 @@ class VoiceActivity : AppCompatActivity()
         }
 
         progressBar.visibility = View.VISIBLE
-        textStatus.text = getString(R.string.text_voice_waitPosition)
-        textSentence.visibility = View.INVISIBLE
-        saveTaskButton.visibility = View.INVISIBLE
+        chipView.visibility = View.GONE
+        textStatus.visibility = View.GONE
+        progressStatus.visibility = View.VISIBLE
+        progressStatus.text = getString(R.string.text_voice_waitPosition)
+        name_text_input.visibility = View.GONE
+        saveTaskButton.visibility = View.GONE
 
         // Define a listener that responds to location updates
         locationListener = object : LocationListener
         {
-
             override fun onLocationChanged(location: Location)
             {
                 locationManager?.removeUpdates(this)
-                textStatus.text = getString(R.string.text_voice_waitServer)
+                progressStatus.text = getString(R.string.text_voice_waitServer)
                 val body = FormBody.Builder().add("sentence", textSentence.text.toString()).add("lat", location.latitude.toString())
                     .add("lon", location.longitude.toString()).build()
 
@@ -145,13 +150,17 @@ class VoiceActivity : AppCompatActivity()
 
                 doAsync {
                     val response : Pair<Resource?, Response> = HttpHelper(this@VoiceActivity).request(request, true)
+                    var error = true
                     when(response.second.code())
                     {
                         200->{
-                            val returnIntent = Intent()
-                            returnIntent.putExtra("resultTask", response.first as Task)
-                            setResult(Activity.RESULT_OK, returnIntent)
-                            finish()
+                            error = false
+                            tasks.updateTasksAndDo(true){
+                                val returnIntent = Intent()
+                                returnIntent.putExtra("resultTask", response.first as Task)
+                                setResult(Activity.RESULT_OK, returnIntent)
+                                finish()
+                            }
                         }
 
                         401->{
@@ -273,11 +282,16 @@ class VoiceActivity : AppCompatActivity()
                             textStatus.text =  getString(R.string.text_general_error, respMessage.errorCode + ": " + respMessage.errorDetails)
                         }
                     }
-
-                    uiThread {
-                        progressBar.visibility = View.INVISIBLE
-                        textSentence.visibility = View.VISIBLE
-                        saveTaskButton.visibility = View.VISIBLE
+                    if(error)
+                    {
+                        uiThread {
+                            progressBar.visibility = View.GONE
+                            chipView.visibility = View.VISIBLE
+                            textStatus.visibility = View.VISIBLE
+                            progressStatus.visibility = View.GONE
+                            name_text_input.visibility = View.VISIBLE
+                            saveTaskButton.visibility = View.VISIBLE
+                        }
                     }
                 }
 

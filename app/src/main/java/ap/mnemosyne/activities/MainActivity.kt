@@ -11,7 +11,7 @@ import android.view.MenuItem
 import android.view.View
 import ap.mnemosyne.permissions.PermissionsHelper
 import ap.mnemosyne.session.SessionHelper
-import apontini.mnemosyne.R
+import ap.mnemosyne.R
 
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
@@ -27,7 +27,7 @@ import ap.mnemosyne.resources.Task
 import ap.mnemosyne.resources.TaskPlaceConstraint
 import ap.mnemosyne.resources.TaskTimeConstraint
 import ap.mnemosyne.tasks.TasksHelper
-import apontini.mnemosyne.R.id.*
+import ap.mnemosyne.R.id.*
 import kotlinx.android.synthetic.main.drawer_header.view.*
 import org.jetbrains.anko.design.longSnackbar
 
@@ -57,9 +57,24 @@ class MainActivity : AppCompatActivity()
         setContentView(R.layout.activity_main)
         setToolbar()
         setNavDrawer()
+        setCards()
 
+        toolbar.snackbar("Sei collegato come: " + session.user.email).show()
+
+        fab.setOnClickListener {
+            val intent = Intent(this, VoiceActivity::class.java)
+            intent.putExtra("sessionid", session.user.sessionID)
+            startActivityForResult(intent, 1)
+        }
+    }
+
+    private fun setCards()
+    {
+        mainProgress.visibility = View.VISIBLE
+        mainText.visibility = View.VISIBLE
+        cardList.visibility = View.GONE
         tasks.updateTasksAndDo {
-            val tasksList : List<Task> = tasks.getLocalTasks() as List<Task> ?: listOf()
+            val tasksList : List<Task> = tasks.getLocalTasks() as List<Task>? ?: listOf()
             var constrained = 0
             var failed = 0
             var doneToday = 0
@@ -84,19 +99,12 @@ class MainActivity : AppCompatActivity()
             cardList.setHasFixedSize(true)
             cardList.layoutManager = StaggeredGridLayoutManager(2,StaggeredGridLayoutManager.VERTICAL)
             cardList.layoutAnimation = AnimationUtils.loadLayoutAnimation(this, R.anim.slide_from_bottom_animator)
-            cardList.addItemDecoration(SpaceItemDecoration(-8)) //margin is 8dp
+            if(cardList.itemDecorationCount == 0) cardList.addItemDecoration(SpaceItemDecoration(-8)) //margin is 8dp
             cardList.adapter = MainCardsAdapter(this@MainActivity, cardCreatedList)
 
             mainProgress.visibility = View.GONE
             mainText.visibility = View.GONE
-        }
-
-        toolbar.snackbar("Sei collegato come: " + session.user.email).show()
-
-        fab.setOnClickListener {
-            val intent = Intent(this, VoiceActivity::class.java)
-            intent.putExtra("sessionid", session.user.sessionID)
-            startActivityForResult(intent, 1)
+            cardList.visibility = View.VISIBLE
         }
     }
 
@@ -113,7 +121,6 @@ class MainActivity : AppCompatActivity()
     {
         nav_view.getHeaderView(0).header_text.text = session.user.email
         nav_view.setNavigationItemSelectedListener { menuItem ->
-            menuItem.isChecked = false
 
             when(menuItem.itemId)
             {
@@ -133,6 +140,15 @@ class MainActivity : AppCompatActivity()
                 create_task_manual ->
                 {
                     toolbar.snackbar("Non implementato").show()
+                }
+
+                action_settings ->
+                {
+                    val animation = AnimationUtils.loadAnimation(this, R.anim.spin_around_itself)
+                    findViewById<View>(R.id.action_settings).startAnimation(animation)
+                    val intent = Intent(this, SettingsActivity::class.java)
+                    startActivityForResult(intent, 2)
+                    true
                 }
 
             }
@@ -186,6 +202,7 @@ class MainActivity : AppCompatActivity()
                             toolbar.snackbar("Sei collegato come: " + session.user.email).show()
                             isViewCreated = false
                         }
+                        setCards()
                     }
 
                     else -> {
@@ -199,6 +216,7 @@ class MainActivity : AppCompatActivity()
                when(resultCode)
                {
                    Activity.RESULT_OK -> {
+                       setCards()
                        val intent = Intent(this, TaskDetailsActivity::class.java)
                        intent.putExtra("task", data?.getSerializableExtra("resultTask"))
                        startActivityForResult(intent, 101)

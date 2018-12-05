@@ -45,6 +45,23 @@
             <TableRow
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:layout_marginBottom="16dp">
+
+                <TextView
+                    android:id="@+id/taskName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_span="2"
+                    android:transitionName="taskName"
+                    android:text="TextView"
+                    android:textAppearance="@style/MnemosyneBodyText1"
+                    android:textColor="@color/onSecondary" />
+
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:layout_marginBottom="8dp">
 
                 <TextView
@@ -53,8 +70,7 @@
                     android:layout_height="wrap_content"
                     android:text="TextView"
                     android:textAppearance="@style/MnemosyneBodyText2"
-                    android:textColor="@color/onSecondary"
-                    android:textSize="18sp" />
+                    android:textColor="@color/onSecondary" />
 
                 <TextView
                     android:id="@+id/textValueP1"
@@ -63,8 +79,7 @@
                     android:paddingLeft="25dp"
                     android:text="TextView"
                     android:textAppearance="@style/MnemosyneBodyText2"
-                    android:textColor="@color/onSecondary"
-                    android:textSize="18sp" />
+                    android:textColor="@color/onSecondary" />
             </TableRow>
 
             <TableRow
@@ -78,8 +93,7 @@
                     android:layout_height="wrap_content"
                     android:text="TextView"
                     android:textAppearance="@style/MnemosyneBodyText2"
-                    android:textColor="@color/onSecondary"
-                    android:textSize="18sp" />
+                    android:textColor="@color/onSecondary" />
 
                 <TextView
                     android:id="@+id/textValueP2"
@@ -88,8 +102,7 @@
                     android:paddingLeft="25dp"
                     android:text="TextView"
                     android:textAppearance="@style/MnemosyneBodyText2"
-                    android:textColor="@color/onSecondary"
-                    android:textSize="18sp" />
+                    android:textColor="@color/onSecondary" />
             </TableRow>
 
             <TableRow
@@ -103,8 +116,7 @@
                     android:layout_height="wrap_content"
                     android:text="TextView"
                     android:textAppearance="@style/MnemosyneBodyText2"
-                    android:textColor="@color/onSecondary"
-                    android:textSize="18sp" />
+                    android:textColor="@color/onSecondary" />
 
                 <TextView
                     android:id="@+id/textValueP3"
@@ -113,8 +125,7 @@
                     android:paddingLeft="25dp"
                     android:text="TextView"
                     android:textAppearance="@style/MnemosyneBodyText2"
-                    android:textColor="@color/onSecondary"
-                    android:textSize="18sp" />
+                    android:textColor="@color/onSecondary" />
             </TableRow>
 
             <TableRow
@@ -128,8 +139,7 @@
                     android:layout_height="wrap_content"
                     android:text="TextView"
                     android:textAppearance="@style/MnemosyneBodyText2"
-                    android:textColor="@color/onSecondary"
-                    android:textSize="18sp" />
+                    android:textColor="@color/onSecondary" />
 
                 <TextView
                     android:id="@+id/textValueP4"
@@ -138,8 +148,7 @@
                     android:paddingLeft="25dp"
                     android:text="TextView"
                     android:textAppearance="@style/MnemosyneBodyText2"
-                    android:textColor="@color/onSecondary"
-                    android:textSize="18sp" />
+                    android:textColor="@color/onSecondary" />
             </TableRow>
 
             <TableRow
@@ -153,8 +162,7 @@
                     android:layout_height="wrap_content"
                     android:text="Possibile al lavoro:"
                     android:textAppearance="@style/MnemosyneBodyText2"
-                    android:textColor="@color/onSecondary"
-                    android:textSize="18sp" />
+                    android:textColor="@color/onSecondary" />
 
                 <TextView
                     android:id="@+id/textPossibleWorkValue"
@@ -163,8 +171,7 @@
                     android:paddingLeft="25dp"
                     android:text="TextView"
                     android:textAppearance="@style/MnemosyneBodyText2"
-                    android:textColor="@color/onSecondary"
-                    android:textSize="18sp" />
+                    android:textColor="@color/onSecondary" />
 
             </TableRow>
 
@@ -179,8 +186,7 @@
                     android:layout_height="wrap_content"
                     android:text="Ripetibile:"
                     android:textAppearance="@style/MnemosyneBodyText2"
-                    android:textColor="@color/onSecondary"
-                    android:textSize="18sp" />
+                    android:textColor="@color/onSecondary" />
 
                 <TextView
                     android:id="@+id/textRepeatableValue"
@@ -189,8 +195,7 @@
                     android:paddingLeft="25dp"
                     android:text="TextView"
                     android:textAppearance="@style/MnemosyneBodyText2"
-                    android:textColor="@color/onSecondary"
-                    android:textSize="18sp" />
+                    android:textColor="@color/onSecondary" />
 
             </TableRow>
 
@@ -205,8 +210,7 @@
                     android:layout_height="wrap_content"
                     android:text="Eseguito oggi"
                     android:textAppearance="@style/MnemosyneBodyText2"
-                    android:textColor="@color/onSecondary"
-                    android:textSize="18sp" />
+                    android:textColor="@color/onSecondary" />
 
                 <TextView
                     android:id="@+id/textDoneTodayValue"
@@ -215,8 +219,7 @@
                     android:paddingLeft="25dp"
                     android:text="TextView"
                     android:textAppearance="@style/MnemosyneBodyText2"
-                    android:textColor="@color/onSecondary"
-                    android:textSize="18sp" />
+                    android:textColor="@color/onSecondary" />
 
             </TableRow>
 
@@ -232,8 +235,7 @@
                     android:layout_height="wrap_content"
                     android:text="Fallito:"
                     android:textAppearance="@style/MnemosyneBodyText2"
-                    android:textColor="@color/onSecondary"
-                    android:textSize="18sp" />
+                    android:textColor="@color/onSecondary" />
 
                 <TextView
                     android:id="@+id/textFailedValue"
@@ -243,8 +245,7 @@
                     android:paddingLeft="25dp"
                     android:text="TextView"
                     android:textAppearance="@style/MnemosyneBodyText2"
-                    android:textColor="@color/onSecondary"
-                    android:textSize="18sp" />
+                    android:textColor="@color/onSecondary" />
 
             </TableRow>
 

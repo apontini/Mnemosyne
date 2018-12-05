@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import ap.mnemosyne.activities.TaskListActivity
 import ap.mnemosyne.uiResources.Card
 import ap.mnemosyne.uiResources.NumberCard
-import apontini.mnemosyne.R
+import ap.mnemosyne.R
 import kotlinx.android.synthetic.main.card_number_layout.view.*
 
 class MainCardsAdapter(private val context: Context,

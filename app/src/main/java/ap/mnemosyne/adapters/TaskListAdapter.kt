@@ -12,14 +12,14 @@ import android.widget.TextView
 import ap.mnemosyne.activities.TaskDetailsActivity
 import ap.mnemosyne.resources.Place
 import ap.mnemosyne.resources.Task
-import apontini.mnemosyne.R
+import ap.mnemosyne.R
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMapOptions
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MarkerOptions
-import kotlinx.android.synthetic.main.activity_task_details.*
 import kotlinx.android.synthetic.main.task_list_item.view.*
-import org.jetbrains.anko.alert
+import androidx.core.app.ActivityOptionsCompat
+import com.google.android.gms.maps.model.MarkerOptions
+
 
 class TaskListAdapter(private val context: Context,
                       private val data: List<Task>) : RecyclerView.Adapter<TaskListAdapter.ViewHolder>()
@@ -67,23 +67,36 @@ class TaskListAdapter(private val context: Context,
                 val map = it
                 if(!list.isEmpty())
                 {
+                    list.forEach {
+                        val latlon = LatLng(it.coordinates.lat, it.coordinates.lon)
+                        map.addMarker(MarkerOptions().position(latlon).title(it.name).title(it.name ?: "Nome non trovato"))
+                    }
                     val camera = LatLng(list.first().coordinates.lat, list.first().coordinates.lon)
                     map.moveCamera(CameraUpdateFactory.newLatLngZoom(camera, 13.0f))
                 }
             }
 
             nametext.text = task.name.capitalize()
-            extratext.text = "Fallito: "  + if(task.isFailed) ctx.getString(R.string.text_yes) else ctx.getString(R.string.text_no)
+            extratext.text = "Fallito: ${if(task.isFailed) ctx.getString(R.string.text_yes) else ctx.getString(R.string.text_no)}"
         }
 
         override fun onClick(p0: View?)
         {
             val detailIntent = Intent(p0?.context, TaskDetailsActivity::class.java)
             detailIntent.putExtra("task", task)
+            detailIntent.putExtra("focusPlace", task.placesToSatisfy.first())
             if(ctx is Activity)
-                ctx.startActivityForResult(detailIntent, 101)
+            {
+                val p1 : androidx.core.util.Pair<View, String> = androidx.core.util.Pair(v.findViewById(R.id.map),"mapView")
+                val p2 : androidx.core.util.Pair<View, String> = androidx.core.util.Pair(v.findViewById(R.id.textTaskName),"taskName")
+
+                val options = ActivityOptionsCompat.makeSceneTransitionAnimation(ctx, p1, p2)
+                ctx.startActivityForResult(detailIntent, 101, options.toBundle())
+            }
             else
+            {
                 ctx.startActivity(detailIntent)
+            }
         }
     }
 }

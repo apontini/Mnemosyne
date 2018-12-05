@@ -8,6 +8,39 @@
     tools:context="ap.mnemosyne.activities.TaskListActivity"
     tools:showIn="@layout/activity_task_list">
 
+    <RelativeLayout
+        android:id="@+id/emptyListFrame"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/imageView"
+                android:layout_width="match_parent"
+                android:layout_height="255dp"
+                android:alpha="0.7"
+                android:paddingTop="16dp"
+                android:tint="@color/colorPrimary"
+                app:srcCompat="@drawable/ic_mnemosyne_error" />
+
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:gravity="center_horizontal"
+                android:text="Non hai nessun task!"
+                android:textAppearance="@style/MnemosyneBodyText1" />
+        </LinearLayout>
+
+    </RelativeLayout>
+
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/layout_listTask"
         android:layout_width="match_parent"

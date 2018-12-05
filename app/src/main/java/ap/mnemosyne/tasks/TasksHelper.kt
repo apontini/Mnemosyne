@@ -9,7 +9,7 @@ import ap.mnemosyne.http.HttpHelper
 import ap.mnemosyne.resources.ResourceList
 import ap.mnemosyne.resources.Task
 import ap.mnemosyne.session.SessionHelper
-import apontini.mnemosyne.R
+import ap.mnemosyne.R
 import okhttp3.Request
 import org.jetbrains.anko.alert
 import org.jetbrains.anko.doAsync
@@ -18,7 +18,6 @@ import org.joda.time.LocalDateTime
 import org.joda.time.Minutes
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.format.DateTimeFormatter
-import java.nio.charset.StandardCharsets
 import java.util.concurrent.locks.ReentrantLock
 
 class TasksHelper(val act : Activity)
@@ -26,7 +25,7 @@ class TasksHelper(val act : Activity)
     companion object
     {
         val dateTimeFormat : DateTimeFormatter by lazy { return@lazy DateTimeFormat.forPattern("yyyy-MM-dd HH:mm") }
-        private const val MIN_UPDATE = 1
+        private const val MIN_UPDATE = 3
         const val LAST_REFRESH : String = "last_refresh"
         val lock by lazy { ReentrantLock() }
     }
@@ -42,7 +41,7 @@ class TasksHelper(val act : Activity)
         Log.d("LOCK", refreshed.toString())
         if (forceUpdate || Minutes.minutesBetween(refreshed, now).minutes >= MIN_UPDATE)
         {
-            Log.d("TASKS", "Requesting Parameter Update")
+            Log.d("TASKS", "Requesting Tasks Update")
             doAsync {
                 val request = Request.Builder()
                     .addHeader("Cookie", "JSESSIONID=" + session.user.sessionID)
@@ -66,6 +65,11 @@ class TasksHelper(val act : Activity)
                         with(prefs.edit())
                         {
                             putString(act.getString(R.string.sharedPreferences_tasks_list), (resp.first as ResourceList<Task>).toJSON())
+                            apply()
+                        }
+
+                        with(prefs.edit()) {
+                            putString(LAST_REFRESH, now.toString(dateTimeFormat))
                             apply()
                         }
                     }
@@ -102,9 +106,13 @@ class TasksHelper(val act : Activity)
     fun resetLocalTasks()
     {
         lock.lock()
-        act.getSharedPreferences(act.getString(R.string.sharedPreferences_tasks_FILE), Context.MODE_PRIVATE).edit()
-            .remove(act.getString(R.string.sharedPreferences_tasks_list))
-            .apply()
+        with(act.getSharedPreferences(act.getString(R.string.sharedPreferences_tasks_FILE), Context.MODE_PRIVATE).edit())
+        {
+            remove(act.getString(R.string.sharedPreferences_tasks_list))
+            putString(LAST_REFRESH, "1970-01-01 00:00")
+            apply()
+        }
+
         lock.unlock()
     }
 

@@ -8,7 +8,7 @@ import android.util.Log
 import ap.mnemosyne.activities.LoginActivity
 import ap.mnemosyne.http.HttpHelper
 import ap.mnemosyne.resources.User
-import apontini.mnemosyne.R
+import ap.mnemosyne.R
 import okhttp3.Request
 import org.jetbrains.anko.alert
 import org.jetbrains.anko.doAsync

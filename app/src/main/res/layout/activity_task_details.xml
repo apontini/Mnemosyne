@@ -33,6 +33,7 @@
                     android:id="@+id/map"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:transitionName="mapView"
                     android:theme="@style/MnemosyneElevatingToolbar"
                     map:cameraZoom="15"
                     map:liteMode="true"

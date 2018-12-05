@@ -5,14 +5,17 @@
         <item
             android:id="@+id/create_task_voice"
             android:icon="@drawable/ic_baseline_mic_24px"
+            android:checkable="false"
             android:title="@string/nav_create_voice" />
         <item
             android:id="@+id/task_gallery"
             android:icon="@drawable/ic_baseline_view_list_24px"
+            android:checkable="false"
             android:title="@string/nav_task_list" />
         <item
             android:id="@+id/create_task_manual"
             android:icon="@drawable/ic_baseline_library_add_24px"
+            android:checkable="false"
             android:title="@string/nav_create_manual" />
     </group>
 
@@ -21,6 +24,7 @@
         <item
             android:id="@+id/action_settings"
             android:icon="@drawable/ic_baseline_settings_20px"
+            android:checkable="false"
             android:title="@string/action_settings" />
     </group>
 </menu>

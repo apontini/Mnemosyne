@@ -27,8 +27,18 @@
         style='?android:attr/progressBarStyleHorizontal'
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:indeterminate="true"
         android:visibility="invisible"
         android:layout_below="@id/appbarVoice"/>
+
+    <TextView
+        android:id="@+id/progressStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/progressBar"
+        android:layout_centerHorizontal="true"
+        android:text="TextView"
+        android:visibility="invisible" />
 
     <include layout="@layout/content_voice"
         android:layout_width="match_parent"

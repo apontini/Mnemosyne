@@ -2,7 +2,7 @@ package ap.mnemosyne.activities
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import apontini.mnemosyne.R
+import ap.mnemosyne.R
 
 import kotlinx.android.synthetic.main.activity_login.*
 import android.app.Activity
@@ -17,8 +17,10 @@ import okhttp3.Response
 import ap.mnemosyne.resources.Message
 import ap.mnemosyne.resources.Resource
 import android.view.inputmethod.InputMethodManager
+import ap.mnemosyne.parameters.ParametersHelper
 import ap.mnemosyne.resources.User
 import ap.mnemosyne.session.SessionHelper
+import ap.mnemosyne.tasks.TasksHelper
 import okhttp3.MediaType
 import okhttp3.FormBody
 import org.jetbrains.anko.*
@@ -27,11 +29,15 @@ import org.jetbrains.anko.*
 class LoginActivity : AppCompatActivity()
 {
     private lateinit var session : SessionHelper
+    private lateinit var tasks : TasksHelper
+    private lateinit var params : ParametersHelper
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
         session = SessionHelper(this)
+        tasks = TasksHelper(this)
+        params = ParametersHelper(this)
 
         setContentView(R.layout.activity_login)
         setSupportActionBar(toolbar)
@@ -90,6 +96,8 @@ class LoginActivity : AppCompatActivity()
                 {
                     val returnIntent = Intent()
                     session.user = User((response.first as User).sessionID, loginUser.text.toString())
+                    tasks.resetLocalTasks()
+                    params.resetLocalParameters()
                     setResult(Activity.RESULT_OK, returnIntent)
                     finish()
                 }

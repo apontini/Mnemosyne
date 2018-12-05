@@ -3,7 +3,7 @@ package ap.mnemosyne.activities
 import android.app.Activity
 import android.os.Bundle
 import android.preference.Preference
-import apontini.mnemosyne.R
+import ap.mnemosyne.R
 import android.preference.PreferenceFragment
 import androidx.appcompat.app.AppCompatActivity
 import android.view.MenuItem

@@ -9,7 +9,7 @@ import ap.mnemosyne.http.HttpHelper
 import ap.mnemosyne.resources.Parameter
 import ap.mnemosyne.resources.ResourceList
 import ap.mnemosyne.session.SessionHelper
-import apontini.mnemosyne.R
+import ap.mnemosyne.R
 import okhttp3.Request
 import org.jetbrains.anko.alert
 import org.jetbrains.anko.defaultSharedPreferences
@@ -199,8 +199,6 @@ class ParametersHelper(val act: Activity)
         }
         lock.unlock()
     }
-
-
 
     fun getLocalParameter(p : ParamsName) : Parameter?
     {
