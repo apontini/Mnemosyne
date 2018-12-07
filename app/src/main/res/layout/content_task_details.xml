@@ -51,11 +51,11 @@
                     android:id="@+id/taskName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_span="2"
-                    android:transitionName="taskName"
+                    android:layout_span="3"
                     android:text="TextView"
                     android:textAppearance="@style/MnemosyneBodyText1"
-                    android:textColor="@color/onSecondary" />
+                    android:textColor="@color/onSecondary"
+                    android:transitionName="taskName" />
 
             </TableRow>
 

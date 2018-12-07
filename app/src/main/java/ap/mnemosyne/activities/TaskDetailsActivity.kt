@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.util.Log
 import android.view.MenuItem
 import android.view.View
+import android.view.animation.AnimationUtils
 import androidx.core.app.ActivityOptionsCompat
 import ap.mnemosyne.http.HttpHelper
 import ap.mnemosyne.resources.*
@@ -21,6 +22,8 @@ import org.jetbrains.anko.design.snackbar
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import kotlinx.android.synthetic.main.activity_task_details.*
+import kotlinx.android.synthetic.main.drawer_header.view.*
+import org.jetbrains.anko.design.longSnackbar
 import java.lang.Exception
 
 
@@ -41,6 +44,7 @@ class TaskDetailsActivity : AppCompatActivity(), OnMapReadyCallback
 
         setContentView(R.layout.activity_task_details)
         setSupportActionBar(toolbar)
+        setNavDrawer()
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         if (!task.placesToSatisfy.isEmpty())
@@ -221,6 +225,11 @@ class TaskDetailsActivity : AppCompatActivity(), OnMapReadyCallback
                     error = true
                 }
 
+                HttpHelper.ERROR_NO_CONNECTION ->{
+                    uiThread { alert(getString(R.string.alert_noInternetConnection)) {  }.show() }
+                    error = true
+                }
+
                 else ->{
                     Log.d("MESSAGGIO", resp.second.code().toString())
                     error = true
@@ -234,6 +243,37 @@ class TaskDetailsActivity : AppCompatActivity(), OnMapReadyCallback
                     tableLayout.snackbar((resp.first as Message).errorDetails)
                 }
             }
+        }
+    }
+
+    private fun setNavDrawer()
+    {
+        nav_view.getHeaderView(0).header_text.text = session.user.email
+        nav_view.setNavigationItemSelectedListener { menuItem ->
+
+            when(menuItem.itemId)
+            {
+                R.id.create_task_voice ->
+                {
+                    val intent = Intent(this, VoiceActivity::class.java)
+                    intent.putExtra("sessionid", session.user.sessionID)
+                    startActivityForResult(intent, 1)
+                }
+
+                R.id.task_gallery ->
+                {
+                    val intent = Intent(this, TaskListActivity::class.java)
+                    this.startActivityForResult(intent, 101)
+                }
+
+                R.id.create_task_manual ->
+                {
+                    toolbar.snackbar("Non implementato").show()
+                }
+
+            }
+            drawer_layout.closeDrawers()
+            true
         }
     }
 
@@ -253,6 +293,25 @@ class TaskDetailsActivity : AppCompatActivity(), OnMapReadyCallback
                 {
                     val intent = Intent(this, LoginActivity::class.java)
                     startActivityForResult(intent, SessionHelper.LOGIN_REQUEST_CODE)
+                }
+            }
+
+            1->{
+                when(resultCode)
+                {
+                    Activity.RESULT_OK -> {
+                        val intent = Intent(this, TaskDetailsActivity::class.java)
+                        intent.putExtra("task", data?.getSerializableExtra("resultTask"))
+                        startActivityForResult(intent, 102)
+                    }
+                }
+            }
+
+            102->
+            {
+                if(resultCode == 1000 && data?.getSerializableExtra("deletedTask") != null )
+                {
+                    toolbar.longSnackbar("Rimosso").show()
                 }
             }
         }

@@ -236,8 +236,13 @@ class SettingsActivity : AppCompatActivity()
                         error = true
                     }
 
+                    HttpHelper.ERROR_NO_CONNECTION ->{
+                        uiThread { this@Preferences.activity.alert(this@Preferences.activity.getString(R.string.alert_noInternetConnection)) {  }.show() }
+                        error = true
+                    }
+
                     else ->{
-                        uiThread { this@Preferences.activity.alert(resp.second.code()) {  }.show() }
+                        uiThread { this@Preferences.activity.alert("${resp.second.code()}") {  }.show() }
                         error = true
                     }
                 }
@@ -419,6 +424,13 @@ class SettingsActivity : AppCompatActivity()
                         {
                             uiThread {
                                 alert(this@Preferences.activity.getString(R.string.alert_noInternetPermission)).show()
+                            }
+                        }
+
+                        HttpHelper.ERROR_PERMISSIONS ->
+                        {
+                            uiThread {
+                                alert(this@Preferences.activity.getString(R.string.alert_noInternetConnection)).show()
                             }
                         }
 

@@ -14,7 +14,7 @@
     <string name="text_main_list">Visualizza i miei task</string>
     <string name="text_main_mic">Aggiungi un task a voce!</string>
     <string name="text_main_add">Aggiungi manualmente un task</string>
-    <string name="text_list_loading">Carico la lista..</string>
+    <string name="text_list_loading">Carico la lista...</string>
     <string name="text_list_noJSON">Non ho ricevuto JSON in risposta</string>
     <string name="text_list_401">401 - La sessione non è più valida</string>
     <string name="title_activity_task_details">Dettagli</string>
@@ -31,9 +31,9 @@
     <string name="button_details_viewPlaces">Visualizza luoghi</string>
     <string name="text_yes">Sì</string>
     <string name="text_no">No</string>
-    <string name="title_activity_maps">Puoi soddisfare il task in..</string>
+    <string name="title_activity_maps">Puoi soddisfare il task in...</string>
     <string name="title_activity_voice">Inserisci Task</string>
-    <string name="text_voice_listening">Ascolto..</string>
+    <string name="text_voice_listening">Ascolto...</string>
     <string name="text_voice_button">Salva Task</string>
     <string name="text_voice_error">Qualcosa è andato storto!\nInserisci il testo manualmente</string>
     <string name="alert_noSession">Sessione scaduta o corrotta</string>
@@ -42,11 +42,11 @@
     <string name="alert_voice_vttNotPossible">Non è possibile effettuare il voice-to-text, inserisci il testo manualmente</string>
     <string name="alert_noRecordAudioPermission">Non è stato concesso il permesso per utilizzare il microfono</string>
     <string name="alert_noCoarsePositionPermission">Non è stato concesso il permesso per accedere alla posizione approssimativa</string>
-    <string name="text_voice_waitPosition">Calcolo la tua posizione..</string>
-    <string name="text_voice_waitServer">Creo il task..\n(Potrebbe metterci un po\', abbiate pietà di un Raspberry)</string>
+    <string name="text_voice_waitPosition">Calcolo la tua posizione...</string>
+    <string name="text_voice_waitServer">Creo il task...\n(Potrebbe metterci un po\', abbiate pietà di un Raspberry)</string>
     <string name="text_voice_retry">Reinserisci la tua richiesta</string>
     <string name="button_details_deleteTask">Elimina task</string>
-    <string name="hint_voice_sentence">devo prendere, ricordami di fare..</string>
+    <string name="hint_voice_sentence">devo prendere, ricordami di fare...</string>
     <string name="text_voice_PRSR03">Non ho capito la frase, prova a riformularla</string>
     <string name="text_voice_PRSR04">L\'azione \'%s\' non è stata definita</string>
     <string name="text_voice_PRSR06">Il vincolo \'%s\' non è stato definito</string>
@@ -62,7 +62,7 @@
     <string name="text_voice_understood">OK! Ho capito!</string>
     <string name="alert_settings_parametersChange">Attenzione: se si cambiano i parametri, i task non cambieranno e gli avvisi rimarranno sempre gli stessi, continuare?</string>
     <string name="text_settings_notDefined">Non definito</string>
-    <string name="text_settings_loading">Carico..</string>
+    <string name="text_settings_loading">Carico...</string>
     <string name="text_settings_successUpdate">Parametro aggiornato</string>
     <string name="text_voice_PRSR11Repeat">Esegui nuovamente la richiesta</string>
     <string name="alert_settings_confirm">Sei sicuro?</string>
@@ -82,6 +82,7 @@
     <string name="voice_chip_example2">Devo pagare il bollo entro le 18</string>
     <string name="voice_chip_example3">Ricordami di fare la lavatrice quanto torno a casa</string>
     <string name="voice_chip_example4">Ricordami di prendere la medicina a pranzo</string>
-    <string name="main_text_loading">Carico la dashboard..</string>
+    <string name="main_text_loading">Carico la dashboard...</string>
     <string name="alert_noInternetConnection">Connessione internet non disponibile</string>
+    <string name="alert_noGoogleAPI">Errore, GoogleAPI non disponibili</string>
 </resources>

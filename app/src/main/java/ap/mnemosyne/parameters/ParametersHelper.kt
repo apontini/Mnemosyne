@@ -35,7 +35,7 @@ class ParametersHelper(val act: Activity)
 
     val session = SessionHelper(act)
 
-    fun updateParametersAndDo(forceUpdate : Boolean = false, doWhat: () -> (Unit))
+    fun updateParametersAndDo(forceUpdate : Boolean = false, doWhatError: (Int, String) -> Unit = {_,p1 -> act.alert(p1).show()}, doWhat: () -> (Unit))
     {
         lock.lock()
         val refreshed = LocalDateTime.parse(act.defaultSharedPreferences.getString(ParametersHelper.LAST_REFRESH,
@@ -52,12 +52,13 @@ class ParametersHelper(val act: Activity)
                     .url(HttpHelper.REST_PARAMETER_URL)
                     .build()
                 val resp = HttpHelper(act).request(request, true)
-                var error = false
+                var error = 0
+                var errorString = ""
                 when (resp.second.code())
                 {
                     401 ->
                     {
-                        error = true
+                        error = 401
                         Log.d("SESSION", "Sessione scaduta")
                         val intent = Intent(act, LoginActivity::class.java)
                         act.startActivityForResult(intent, SessionHelper.LOGIN_REQUEST_CODE)
@@ -96,21 +97,34 @@ class ParametersHelper(val act: Activity)
 
                     HttpHelper.ERROR_PERMISSIONS ->
                     {
-                        error = true
-                        uiThread { act.alert(act.getString(R.string.alert_noInternetPermission)) { }.show() }
+                        error = HttpHelper.ERROR_PERMISSIONS
+                        errorString = act.getString(R.string.alert_noInternetPermission)
+
+                    }
+
+                    HttpHelper.ERROR_NO_CONNECTION ->
+                    {
+                        error = HttpHelper.ERROR_PERMISSIONS
+                        errorString = act.getString(R.string.alert_noInternetConnection)
 
                     }
 
                     else ->
                     {
-                        error = true
+                        error = -1
                         uiThread {act.alert("Non ho potuto aggiornare i parametri, codice: " + resp.second.code()) { }.show()  }
                     }
                 }
-                if (!error)
+                if (error == 0)
                 {
                     uiThread {
                         doWhat()
+                    }
+                }
+                else if(error>0)
+                {
+                    uiThread {
+                        doWhatError(error, errorString)
                     }
                 }
             }
@@ -123,7 +137,7 @@ class ParametersHelper(val act: Activity)
         lock.unlock()
     }
 
-    fun updateParameterAndDo(parameter : ParamsName,forceUpdate : Boolean = false, doWhat: () -> (Unit))
+    fun updateParameterAndDo(parameter : ParamsName,forceUpdate : Boolean = false, doWhatError: (Int, String) -> Unit = {_,p1 -> act.alert(p1).show()}, doWhat: () -> (Unit))
     {
         lock.lock()
         val refreshed = LocalDateTime.parse(act.defaultSharedPreferences.getString(ParametersHelper.LAST_REFRESH,
@@ -138,12 +152,13 @@ class ParametersHelper(val act: Activity)
                     .url(HttpHelper.REST_PARAMETER_URL + "/" + parameter.name)
                     .build()
                 val resp = HttpHelper(act).request(request, true)
-                var error = false
+                var error = 0
+                var errorString = ""
                 when (resp.second.code())
                 {
                     401 ->
                     {
-                        error = true
+                        error = 401
                         Log.d("SESSION", "Sessione scaduta")
                         val intent = Intent(act, LoginActivity::class.java)
                         act.startActivityForResult(intent, SessionHelper.LOGIN_REQUEST_CODE)
@@ -160,22 +175,35 @@ class ParametersHelper(val act: Activity)
 
                     HttpHelper.ERROR_PERMISSIONS ->
                     {
-                        error = true
+                        error = HttpHelper.ERROR_PERMISSIONS
                         uiThread { act.alert(act.getString(R.string.alert_noInternetPermission)) { }.show() }
+
+                    }
+
+                    HttpHelper.ERROR_NO_CONNECTION ->
+                    {
+                        error = HttpHelper.ERROR_PERMISSIONS
+                        uiThread { act.alert(act.getString(R.string.alert_noInternetConnection)) { }.show() }
 
                     }
 
                     else ->
                     {
-                        error = true
+                        error = -1
                         uiThread { act.alert("Non ho potuto aggiornare i parametri, codice: " + resp.second.code()) { }.show() }
 
                     }
                 }
-                if (!error)
+                if (error == 0)
                 {
                     uiThread {
                         doWhat()
+                    }
+                }
+                else if(error>0)
+                {
+                    uiThread {
+                        doWhatError(error,errorString)
                     }
                 }
             }

@@ -61,6 +61,10 @@ class MainActivity : AppCompatActivity()
 
         toolbar.snackbar("Sei collegato come: " + session.user.email).show()
 
+        noConnIcon.setOnClickListener {
+            setCards()
+        }
+
         fab.setOnClickListener {
             val intent = Intent(this, VoiceActivity::class.java)
             intent.putExtra("sessionid", session.user.sessionID)
@@ -68,12 +72,24 @@ class MainActivity : AppCompatActivity()
         }
     }
 
+    override fun onPause() {
+        super.onPause()
+        if(mainProgress != null) mainProgress.visibility = View.VISIBLE
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if(mainProgress != null) mainProgress.visibility = View.GONE
+    }
+
     private fun setCards()
     {
+        noConnIcon.visibility = View.GONE
+        fab.isEnabled = true
         mainProgress.visibility = View.VISIBLE
         mainText.visibility = View.VISIBLE
         cardList.visibility = View.GONE
-        tasks.updateTasksAndDo {
+        tasks.updateTasksAndDo(doWhat = {
             val tasksList : List<Task> = tasks.getLocalTasks() as List<Task>? ?: listOf()
             var constrained = 0
             var failed = 0
@@ -105,7 +121,13 @@ class MainActivity : AppCompatActivity()
             mainProgress.visibility = View.GONE
             mainText.visibility = View.GONE
             cardList.visibility = View.VISIBLE
-        }
+        },
+            doWhatError = { p0,p1 ->
+                fab.isEnabled = false
+                noConnIcon.visibility = View.VISIBLE
+                mainProgress.visibility = View.GONE
+                mainText.visibility = View.GONE
+            })
     }
 
     private fun setToolbar()
@@ -156,7 +178,6 @@ class MainActivity : AppCompatActivity()
         }
     }
 
-
     override fun onCreateOptionsMenu(menu: Menu): Boolean
     {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -185,8 +206,9 @@ class MainActivity : AppCompatActivity()
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?)
     {
-       when(requestCode)
-       {
+        if(mainProgress != null) mainProgress.visibility = View.GONE
+        when(requestCode)
+        {
             SessionHelper.LOGIN_REQUEST_CODE->{
                 when(resultCode)
                 {
@@ -211,19 +233,19 @@ class MainActivity : AppCompatActivity()
                 }
             }
 
-           1->{
+            1->{
                when(resultCode)
                {
                    Activity.RESULT_OK -> {
                        setCards()
                        val intent = Intent(this, TaskDetailsActivity::class.java)
                        intent.putExtra("task", data?.getSerializableExtra("resultTask"))
-                       startActivityForResult(intent, 101)
+                       startActivityForResult(intent, 102)
                    }
                }
-           }
+            }
 
-           2->{
+            2->{
                when(resultCode)
                {
                    SettingsActivity.LOGOUT_RESULT_CODE -> {
@@ -232,17 +254,17 @@ class MainActivity : AppCompatActivity()
                        isViewCreated = true
                    }
                }
-           }
+            }
 
-           101->
-           {
-               setCards()
-               if(resultCode == 1000 && data?.getSerializableExtra("deletedTask") != null )
-               {
-                   toolbar.longSnackbar("Rimosso").show()
-               }
-           }
-       }
+            102->
+            {
+                setCards()
+                if(resultCode == 1000 && data?.getSerializableExtra("deletedTask") != null )
+                {
+                     toolbar.longSnackbar("Rimosso").show()
+                }
+            }
+        }
     }
 
     inner class SpaceItemDecoration(private val space: Int) : RecyclerView.ItemDecoration()

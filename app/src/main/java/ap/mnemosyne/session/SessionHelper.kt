@@ -81,8 +81,13 @@ class SessionHelper(act : Activity)
                         error = true
                     }
 
+                    HttpHelper.ERROR_NO_CONNECTION ->{
+                        uiThread { thisAct.alert(thisAct.getString(R.string.alert_noInternetConnection)) {  }.show() }
+                        error = true
+                    }
+
                     else ->{
-                        uiThread { thisAct.alert(resp.second.code()) {  }.show() }
+                        uiThread { thisAct.alert("${resp.second.code()}") {  }.show() }
                     }
                 }
                 uiThread {

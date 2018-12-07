@@ -64,7 +64,7 @@
         <item name="android:fontFamily">@font/rubik</item>
     </style>
 
-    <style name="TaskListAnimation" parent="@android:style/Animation.Activity" xmlns:tools="http://schemas.android.com/tools">
+    <style name="TaskListAnimation" parent="@android:style/Animation.Activity">
         <item name="android:activityOpenEnterAnimation">@anim/slide_in_right</item>
         <item name="android:activityOpenExitAnimation">@anim/slide_out_left</item>
         <item name="android:activityCloseEnterAnimation">@anim/slide_in_left</item>

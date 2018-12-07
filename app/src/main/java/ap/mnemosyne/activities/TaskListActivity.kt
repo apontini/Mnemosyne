@@ -11,10 +11,13 @@ import android.view.animation.AnimationUtils
 import ap.mnemosyne.R
 import kotlinx.android.synthetic.main.content_task_list.*
 import ap.mnemosyne.adapters.TaskListAdapter
+import ap.mnemosyne.http.HttpHelper
+import ap.mnemosyne.permissions.PermissionsHelper
 import ap.mnemosyne.resources.Task
 import ap.mnemosyne.session.SessionHelper
 import ap.mnemosyne.tasks.TasksHelper
 import kotlinx.android.synthetic.main.activity_task_list.*
+import kotlinx.android.synthetic.main.drawer_header.view.*
 import org.jetbrains.anko.design.longSnackbar
 import org.jetbrains.anko.design.snackbar
 
@@ -34,12 +37,19 @@ class TaskListActivity : AppCompatActivity()
         setContentView(R.layout.activity_task_list)
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        setNavDrawer()
 
-        session.checkSessionValidity{loadTasks(false)}
+        noConnIcon.setOnClickListener {
+            loadTasks(false)
+        }
 
         layout_listTask.setOnRefreshListener {
             loadTasks(true)
         }
+
+        loadTasks(false)
+
+
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean
@@ -62,10 +72,11 @@ class TaskListActivity : AppCompatActivity()
 
     fun loadTasks(forceRefresh : Boolean)
     {
-        tasks.updateTasksAndDo(forceRefresh) {
+        noConnIcon.visibility = View.GONE
+        tasks.updateTasksAndDo(forceRefresh, doWhat = {
             if(!layout_listTask.isRefreshing)
             {
-                taskList.visibility = View.GONE
+                layout_listTask.visibility = View.GONE
                 progressList.visibility = View.VISIBLE
                 textProgressList.visibility = View.VISIBLE
                 emptyListFrame.visibility = View.GONE
@@ -83,7 +94,7 @@ class TaskListActivity : AppCompatActivity()
                         AnimationUtils.loadLayoutAnimation(this@TaskListActivity, R.anim.slide_from_bottom_animator)
                 taskList.adapter = TaskListAdapter(this@TaskListActivity, taskJSONList)
                 textProgressList.visibility = View.GONE
-                taskList.visibility = View.VISIBLE
+                layout_listTask.visibility = View.VISIBLE
                 progressList.visibility = View.GONE
             }
             else
@@ -92,6 +103,44 @@ class TaskListActivity : AppCompatActivity()
                 textProgressList.visibility = View.GONE
                 emptyListFrame.visibility = View.VISIBLE
             }
+        },
+            doWhatError = { p0, p1 ->
+                if(p0 == HttpHelper.ERROR_NO_CONNECTION)
+                {
+                    layout_listTask.visibility = View.GONE
+                    progressList.visibility = View.GONE
+                    textProgressList.visibility = View.GONE
+                    noConnIcon.visibility = View.VISIBLE
+                }
+                else if(p0 == HttpHelper.ERROR_PERMISSIONS)
+                {
+                    PermissionsHelper.askInternetPermission(this)
+                }
+            }
+        )
+    }
+
+    private fun setNavDrawer()
+    {
+        nav_view.getHeaderView(0).header_text.text = session.user.email
+        nav_view.setNavigationItemSelectedListener { menuItem ->
+
+            when(menuItem.itemId)
+            {
+                R.id.create_task_voice ->
+                {
+                    val intent = Intent(this, VoiceActivity::class.java)
+                    intent.putExtra("sessionid", session.user.sessionID)
+                    startActivityForResult(intent, 1)
+                }
+
+                R.id.create_task_manual ->
+                {
+                    toolbar.snackbar("Non implementato").show()
+                }
+            }
+            drawer_layout.closeDrawers()
+            true
         }
     }
 
@@ -108,6 +157,18 @@ class TaskListActivity : AppCompatActivity()
                     val pos = taskJSONList.indexOf(tbr)
                     taskJSONList.removeAt(pos)
                     taskList.adapter!!.notifyItemRemoved(pos)
+                }
+            }
+
+            1->{
+                when(resultCode)
+                {
+                    Activity.RESULT_OK -> {
+                        loadTasks(false)
+                        val intent = Intent(this, TaskDetailsActivity::class.java)
+                        intent.putExtra("task", data?.getSerializableExtra("resultTask"))
+                        startActivityForResult(intent, 101)
+                    }
                 }
             }
 

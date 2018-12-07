@@ -12,6 +12,7 @@
         android:id="@+id/cardList"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_marginTop="8dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
     </androidx.recyclerview.widget.RecyclerView>
@@ -32,5 +33,15 @@
         android:layout_centerHorizontal="true"
         android:gravity="center_horizontal"
         android:text="@string/main_text_loading" />
+
+    <ImageView
+        android:id="@+id/noConnIcon"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:alpha="0.6"
+        android:visibility="gone"
+        app:srcCompat="@drawable/ic_baseline_cloud_off_24px" />
 
 </RelativeLayout>

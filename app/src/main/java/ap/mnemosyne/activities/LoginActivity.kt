@@ -108,6 +108,12 @@ class LoginActivity : AppCompatActivity()
                     }
                 }
 
+                HttpHelper.ERROR_NO_CONNECTION ->{
+                    uiThread {
+                        alert(getString(R.string.alert_noInternetConnection)) {  }.show()
+                    }
+                }
+
                 else -> {
                     Snackbar.make(findViewById(R.id.layout_login), response.second.code().toString() + " " + (response.first as Message).errorDetails, Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show()

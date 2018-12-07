@@ -38,6 +38,7 @@ import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.common.api.GoogleApiClient
 import com.google.android.gms.common.api.ResolvableApiException
+import kotlinx.android.synthetic.main.drawer_header.view.*
 import org.jetbrains.anko.design.longSnackbar
 
 
@@ -62,6 +63,7 @@ class VoiceActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks,
         tasks = TasksHelper(this)
         setContentView(R.layout.activity_voice)
         setSupportActionBar(toolbar)
+        setNavDrawer()
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         val sessionid = session.user.sessionID
@@ -125,8 +127,12 @@ class VoiceActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks,
 
     override fun onDestroy()
     {
-        if(googleApiClient != null)
+        try
+        {
             LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, this)
+            googleApiClient.disconnect()
+        }
+        catch (ue : UninitializedPropertyAccessException){}
         super.onDestroy()
     }
 
@@ -137,7 +143,7 @@ class VoiceActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks,
 
         if(resultCode != ConnectionResult.SUCCESS)
         {
-            textStatus.text = "Errore, GoogleAPI non disponibili"
+            textStatus.text = getString(R.string.alert_noGoogleAPI)
             return
         }
 
@@ -190,7 +196,7 @@ class VoiceActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks,
         val client: SettingsClient = LocationServices.getSettingsClient(this)
         val task: com.google.android.gms.tasks.Task<LocationSettingsResponse> = client.checkLocationSettings(builder.build())
 
-        task.addOnSuccessListener { _ ->
+        task.addOnSuccessListener {
             val location = LocationServices.FusedLocationApi.getLastLocation(googleApiClient)
 
             toolbar.longSnackbar("Last location: $location")
@@ -234,6 +240,29 @@ class VoiceActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks,
             {
                 exception.printStackTrace()
             }
+        }
+    }
+
+    private fun setNavDrawer()
+    {
+        nav_view.getHeaderView(0).header_text.text = session.user.email
+        nav_view.setNavigationItemSelectedListener { menuItem ->
+
+            when(menuItem.itemId)
+            {
+                R.id.task_gallery ->
+                {
+                    val intent = Intent(this, TaskListActivity::class.java)
+                    this.startActivityForResult(intent, 101)
+                }
+
+                R.id.create_task_manual ->
+                {
+                    toolbar.snackbar("Non implementato").show()
+                }
+            }
+            drawer_layout.closeDrawers()
+            true
         }
     }
 
@@ -339,11 +368,11 @@ class VoiceActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks,
                             }
 
                             "PRSR08" -> {
-                                textStatus.text = "SQLException: " + respMessage.errorDetails
+                                textStatus.text = "SQLException: ${respMessage.errorDetails}"
                             }
 
                             "PRSR09" -> {
-                                textStatus.text = "ServletException: " + respMessage.errorDetails
+                                textStatus.text = "ServletException: ${respMessage.errorDetails}"
                             }
 
                             else -> {
@@ -379,7 +408,15 @@ class VoiceActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks,
                 }
 
                 HttpHelper.ERROR_PERMISSIONS->{
-                    textStatus.text =  getString(R.string.text_general_error, getString(R.string.alert_noInternetPermission))
+                    uiThread {
+                        textStatus.text =  getString(R.string.text_general_error, getString(R.string.alert_noInternetPermission))
+                    }
+                }
+
+                HttpHelper.ERROR_NO_CONNECTION->{
+                    uiThread {
+                        textStatus.text =  getString(R.string.text_general_error, getString(R.string.alert_noInternetConnection))
+                    }
                 }
 
                 else ->
@@ -563,6 +600,13 @@ class VoiceActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks,
                             {
                                 uiThread {
                                     alert(this@VoiceActivity.getString(R.string.alert_noInternetPermission)).show()
+                                }
+                            }
+
+                            HttpHelper.ERROR_NO_CONNECTION ->
+                            {
+                                uiThread {
+                                    alert(this@VoiceActivity.getString(R.string.alert_noInternetConnection)).show()
                                 }
                             }
 
