@@ -10,14 +10,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import ap.mnemosyne.activities.TaskDetailsActivity
-import ap.mnemosyne.resources.Place
-import ap.mnemosyne.resources.Task
 import ap.mnemosyne.R
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMapOptions
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.android.synthetic.main.task_list_item.view.*
 import androidx.core.app.ActivityOptionsCompat
+import ap.mnemosyne.resources.Place
+import ap.mnemosyne.resources.Task
 import com.google.android.gms.maps.model.MarkerOptions
 
 

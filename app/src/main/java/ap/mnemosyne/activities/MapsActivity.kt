@@ -3,8 +3,8 @@ package ap.mnemosyne.activities
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.MenuItem
-import ap.mnemosyne.resources.Place
 import ap.mnemosyne.R
+import ap.mnemosyne.resources.Place
 
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap

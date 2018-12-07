@@ -23,11 +23,11 @@ import ap.mnemosyne.uiResources.NumberCard
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import androidx.core.view.GravityCompat
-import ap.mnemosyne.resources.Task
 import ap.mnemosyne.resources.TaskPlaceConstraint
-import ap.mnemosyne.resources.TaskTimeConstraint
 import ap.mnemosyne.tasks.TasksHelper
 import ap.mnemosyne.R.id.*
+import ap.mnemosyne.resources.Task
+import ap.mnemosyne.resources.TaskTimeConstraint
 import kotlinx.android.synthetic.main.drawer_header.view.*
 import org.jetbrains.anko.design.longSnackbar
 
@@ -148,7 +148,6 @@ class MainActivity : AppCompatActivity()
                     findViewById<View>(R.id.action_settings).startAnimation(animation)
                     val intent = Intent(this, SettingsActivity::class.java)
                     startActivityForResult(intent, 2)
-                    true
                 }
 
             }
@@ -199,10 +198,10 @@ class MainActivity : AppCompatActivity()
                         }
                         else
                         {
+                            setCards()
                             toolbar.snackbar("Sei collegato come: " + session.user.email).show()
                             isViewCreated = false
                         }
-                        setCards()
                     }
 
                     else -> {
@@ -237,6 +236,7 @@ class MainActivity : AppCompatActivity()
 
            101->
            {
+               setCards()
                if(resultCode == 1000 && data?.getSerializableExtra("deletedTask") != null )
                {
                    toolbar.longSnackbar("Rimosso").show()
@@ -247,8 +247,6 @@ class MainActivity : AppCompatActivity()
 
     inner class SpaceItemDecoration(private val space: Int) : RecyclerView.ItemDecoration()
     {
-
-
         override fun getItemOffsets(outRect: Rect, view: View, parent: RecyclerView, state: RecyclerView.State)
         {
             val position = parent.getChildAdapterPosition(view)

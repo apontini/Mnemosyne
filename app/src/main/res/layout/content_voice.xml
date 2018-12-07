@@ -8,7 +8,22 @@
     tools:context="ap.mnemosyne.activities.VoiceActivity"
     tools:showIn="@layout/activity_voice">
 
+    <RelativeLayout
+        android:id="@+id/voiceAnim"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:visibility="gone">
+
+        <ImageView
+            android:id="@+id/voiceAnimImage"
+            android:layout_width="match_parent"
+            android:layout_height="255dp"
+            app:srcCompat="@drawable/logo_anim" />
+    </RelativeLayout>
+
     <LinearLayout
+        android:id="@+id/voiceMain"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center_vertical"
@@ -64,29 +79,29 @@
                 app:singleLine="true">
 
                 <com.google.android.material.chip.Chip
-                    style="@style/Widget.MaterialComponents.Chip.Action"
                     android:id="@+id/chip1"
+                    style="@style/Widget.MaterialComponents.Chip.Action"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/voice_chip_example1" />
 
                 <com.google.android.material.chip.Chip
-                    style="@style/Widget.MaterialComponents.Chip.Action"
                     android:id="@+id/chip2"
+                    style="@style/Widget.MaterialComponents.Chip.Action"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/voice_chip_example2" />
 
                 <com.google.android.material.chip.Chip
-                    style="@style/Widget.MaterialComponents.Chip.Action"
                     android:id="@+id/chip3"
+                    style="@style/Widget.MaterialComponents.Chip.Action"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/voice_chip_example3" />
 
                 <com.google.android.material.chip.Chip
-                    style="@style/Widget.MaterialComponents.Chip.Action"
                     android:id="@+id/chip4"
+                    style="@style/Widget.MaterialComponents.Chip.Action"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/voice_chip_example4" />

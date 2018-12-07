@@ -8,10 +8,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import android.view.MenuItem
 import android.view.View
 import android.view.animation.AnimationUtils
-import ap.mnemosyne.resources.Task
 import ap.mnemosyne.R
 import kotlinx.android.synthetic.main.content_task_list.*
 import ap.mnemosyne.adapters.TaskListAdapter
+import ap.mnemosyne.resources.Task
 import ap.mnemosyne.session.SessionHelper
 import ap.mnemosyne.tasks.TasksHelper
 import kotlinx.android.synthetic.main.activity_task_list.*
@@ -103,7 +103,9 @@ class TaskListActivity : AppCompatActivity()
                 if(resultCode == 1000 && data?.getSerializableExtra("deletedTask") != null )
                 {
                     toolbar.longSnackbar("Rimosso").show()
-                    val pos = taskJSONList.indexOf(data.getSerializableExtra("deletedTask") as Task)
+                    val tbr = data.getSerializableExtra("deletedTask") as Task
+                    tasks.removeLocalTasks(tbr)
+                    val pos = taskJSONList.indexOf(tbr)
                     taskJSONList.removeAt(pos)
                     taskList.adapter!!.notifyItemRemoved(pos)
                 }

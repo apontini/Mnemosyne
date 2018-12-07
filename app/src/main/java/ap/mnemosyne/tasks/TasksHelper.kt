@@ -6,10 +6,10 @@ import android.content.Intent
 import android.util.Log
 import ap.mnemosyne.activities.LoginActivity
 import ap.mnemosyne.http.HttpHelper
-import ap.mnemosyne.resources.ResourceList
-import ap.mnemosyne.resources.Task
 import ap.mnemosyne.session.SessionHelper
 import ap.mnemosyne.R
+import ap.mnemosyne.resources.ResourceList
+import ap.mnemosyne.resources.Task
 import okhttp3.Request
 import org.jetbrains.anko.alert
 import org.jetbrains.anko.doAsync
@@ -32,7 +32,7 @@ class TasksHelper(val act : Activity)
 
     val session = SessionHelper(act)
 
-    fun updateTasksAndDo(forceUpdate : Boolean = false, doWhat: () -> (Unit))
+    fun updateTasksAndDo(forceUpdate : Boolean = false, doWhatError: (Int, String) -> Unit = {_,p1 -> act.alert(p1).show()}, doWhat: () -> (Unit))
     {
         lock.lock()
         val refreshed = LocalDateTime.parse(act.getSharedPreferences(act.getString(R.string.sharedPreferences_tasks_FILE), Context.MODE_PRIVATE).getString(LAST_REFRESH,
@@ -48,12 +48,13 @@ class TasksHelper(val act : Activity)
                     .url(HttpHelper.REST_TASK_URL)
                     .build()
                 val resp = HttpHelper(act).request(request, true)
-                var error = false
+                var error = 0
+                var errorString = ""
                 when (resp.second.code())
                 {
                     401 ->
                     {
-                        error = true
+                        error = 401
                         Log.d("SESSION", "Sessione scaduta")
                         val intent = Intent(act, LoginActivity::class.java)
                         act.startActivityForResult(intent, SessionHelper.LOGIN_REQUEST_CODE)
@@ -76,21 +77,32 @@ class TasksHelper(val act : Activity)
 
                     HttpHelper.ERROR_PERMISSIONS ->
                     {
-                        error = true
-                        uiThread { act.alert(act.getString(R.string.alert_noInternetPermission)) { }.show() }
+                        error = HttpHelper.ERROR_PERMISSIONS
+                        errorString = act.getString(R.string.alert_noInternetPermission)
+                    }
 
+                    HttpHelper.ERROR_NO_CONNECTION ->
+                    {
+                        error = HttpHelper.ERROR_NO_CONNECTION
+                        errorString = act.getString(R.string.alert_noInternetConnection)
                     }
 
                     else ->
                     {
-                        error = true
+                        error = -1
                         uiThread {act.alert("Non ho potuto aggiornare i task, codice: " + resp.second.code()) { }.show()  }
                     }
                 }
-                if (!error)
+                if (error == 0)
                 {
                     uiThread {
                         doWhat()
+                    }
+                }
+                else if(error > 0)
+                {
+                    uiThread {
+                        doWhatError(error, errorString)
                     }
                 }
             }
@@ -116,7 +128,21 @@ class TasksHelper(val act : Activity)
         lock.unlock()
     }
 
+    fun removeLocalTasks(t : Task)
+    {
+        lock.lock()
+        val list = ResourceList.fromJSON(act.getSharedPreferences(act.getString(R.string.sharedPreferences_tasks_FILE), Context.MODE_PRIVATE)
+                                            .getString(act.getString(R.string.sharedPreferences_tasks_list), "")).list as MutableList<Task>
+        list.remove(t)
 
+        with(act.getSharedPreferences(act.getString(R.string.sharedPreferences_tasks_FILE), Context.MODE_PRIVATE).edit())
+        {
+            putString(act.getString(R.string.sharedPreferences_tasks_list), ResourceList<Task>(list).toJSON())
+            apply()
+        }
+
+        lock.unlock()
+    }
 
     fun getLocalTasks() : Iterable<Task>?
     {

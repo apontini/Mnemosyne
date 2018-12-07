@@ -9,8 +9,8 @@ import ap.mnemosyne.R
 import kotlinx.android.synthetic.main.activity_voice.*
 import android.speech.RecognizerIntent
 import android.content.Intent
-import android.location.Location
-import android.location.LocationListener
+import android.content.IntentSender
+import android.graphics.drawable.AnimatedVectorDrawable
 import android.location.LocationManager
 import android.util.Log
 import android.view.MenuItem
@@ -29,13 +29,30 @@ import org.jetbrains.anko.*
 import org.jetbrains.anko.design.snackbar
 import org.joda.time.LocalTime
 import java.util.*
+import android.graphics.drawable.Drawable
+import android.graphics.drawable.Animatable2
+import android.location.Location
+import com.google.android.gms.common.ConnectionResult
+import com.google.android.gms.location.*
+import com.google.android.gms.common.GoogleApiAvailability
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.common.api.GoogleApiClient
+import com.google.android.gms.common.api.ResolvableApiException
+import org.jetbrains.anko.design.longSnackbar
 
-class VoiceActivity : AppCompatActivity()
+
+class VoiceActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks,
+    GoogleApiClient.OnConnectionFailedListener, LocationListener
 {
     private lateinit var session : SessionHelper
     private lateinit var tasks : TasksHelper
     private var locationManager : LocationManager? = null
-    private var locationListener : LocationListener? = null
+    private var locationCallback : LocationCallback? = null
+    private var fusedLocationClient : FusedLocationProviderClient? = null
+    private lateinit var googleApiClient : GoogleApiClient
+    private lateinit var anim : AnimatedVectorDrawable
+    private lateinit var callback : Animatable2.AnimationCallback
+    private lateinit var locationRequest : LocationRequest
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
@@ -108,206 +125,37 @@ class VoiceActivity : AppCompatActivity()
 
     override fun onDestroy()
     {
-        if(locationManager != null && locationListener != null)
-            locationManager?.removeUpdates(locationListener)
+        if(googleApiClient != null)
+            LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, this)
         super.onDestroy()
     }
 
     private fun sendTask(sessionid : String)
     {
+        val apiAvailability = GoogleApiAvailability.getInstance()
+        val resultCode = apiAvailability.isGooglePlayServicesAvailable(this)
 
-        locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
-
-        if(locationManager?.isProviderEnabled(LocationManager.GPS_PROVIDER) == false)
+        if(resultCode != ConnectionResult.SUCCESS)
         {
-            alert("I servizi di localizzazione non sono abilitati!").show()
+            textStatus.text = "Errore, GoogleAPI non disponibili"
             return
         }
 
-        progressBar.visibility = View.VISIBLE
-        chipView.visibility = View.GONE
-        textStatus.visibility = View.GONE
-        progressStatus.visibility = View.VISIBLE
-        progressStatus.text = getString(R.string.text_voice_waitPosition)
-        name_text_input.visibility = View.GONE
-        saveTaskButton.visibility = View.GONE
+        googleApiClient = GoogleApiClient.Builder(this).addApi(LocationServices.API).addConnectionCallbacks(this)
+            .addOnConnectionFailedListener(this).build()
+        googleApiClient.connect()
+    }
 
-        // Define a listener that responds to location updates
-        locationListener = object : LocationListener
-        {
-            override fun onLocationChanged(location: Location)
-            {
-                locationManager?.removeUpdates(this)
-                progressStatus.text = getString(R.string.text_voice_waitServer)
-                val body = FormBody.Builder().add("sentence", textSentence.text.toString()).add("lat", location.latitude.toString())
-                    .add("lon", location.longitude.toString()).build()
-
-                val request = Request.Builder()
-                    .addHeader("Cookie" , "JSESSIONID=" + sessionid)
-                    .url(HttpHelper.PARSE_URL)
-                    .post(body)
-                    .build()
-
-                doAsync {
-                    val response : Pair<Resource?, Response> = HttpHelper(this@VoiceActivity).request(request, true)
-                    var error = true
-                    when(response.second.code())
-                    {
-                        200->{
-                            error = false
-                            tasks.updateTasksAndDo(true){
-                                val returnIntent = Intent()
-                                returnIntent.putExtra("resultTask", response.first as Task)
-                                setResult(Activity.RESULT_OK, returnIntent)
-                                finish()
-                            }
-                        }
-
-                        401->{
-                            Log.d("SESSION", "Sessione scaduta")
-                            val intent = Intent(this@VoiceActivity, LoginActivity::class.java)
-                            startActivityForResult(intent, SessionHelper.LOGIN_REQUEST_CODE)
-                        }
-
-                        400->{
-                            uiThread {
-                                val respMessage = response.first as Message
-                                when(respMessage.errorCode)
-                                {
-                                    "PRSR01" -> {
-                                        textStatus.text = getString(R.string.text_voice_PRSR01)
-                                    }
-
-                                    "PRSR02" -> {
-                                        textStatus.text = getString(R.string.text_voice_PRSR02)
-                                    }
-
-                                    "PRSR07" -> {
-                                        textStatus.text = getString(R.string.text_voice_PRSR07, respMessage.errorDetails.split(":")[1])
-                                    }
-
-                                    "PRSR10" -> {
-                                        textStatus.text = getString(R.string.text_voice_PRSR10)
-                                    }
-
-                                    else -> {
-                                        textStatus.text = getString(R.string.text_general_error, respMessage.errorCode + ": " + respMessage.errorDetails)
-                                    }
-                                }
-                            }
-                        }
-
-                        404->{
-                            uiThread {
-                                val respMessage = response.first as Message
-                                when(respMessage.errorCode)
-                                {
-                                    "PRSR05" -> {
-                                        textStatus.text = getString(R.string.text_voice_PRSR05, respMessage.errorDetails.split(":")[1])
-                                    }
-
-                                    "PRSR11" -> {
-                                        textStatus.text = getString(R.string.text_voice_PRSR11Repeat)
-                                        alert(getString(R.string.text_voice_PRSR11, respMessage.errorDetails)){
-                                            yesButton {
-                                                saveTaskButton.isEnabled = false
-                                                askParameter(ParamsName.valueOf(respMessage.errorDetails))
-                                            }
-                                        }.show()
-                                    }
-
-                                    else -> {
-                                        textStatus.text = getString(R.string.text_general_error, respMessage.errorCode + ": " + respMessage.errorDetails)
-                                    }
-                                }
-                            }
-                        }
-
-                        500->{
-                            uiThread {
-                                val respMessage = response.first as Message
-                                when(respMessage.errorCode)
-                                {
-                                    "PRSR03" -> {
-                                        textStatus.text = getString(R.string.text_voice_PRSR03)
-                                    }
-
-                                    "PRSR08" -> {
-                                        textStatus.text = "SQLException: " + respMessage.errorDetails
-                                    }
-
-                                    "PRSR09" -> {
-                                        textStatus.text = "ServletException: " + respMessage.errorDetails
-                                    }
-
-                                    else -> {
-                                        textStatus.text = getString(R.string.text_general_error, respMessage.errorCode + ": " + respMessage.errorDetails)
-                                    }
-                                }
-                            }
-                        }
-
-                        501->{
-                            uiThread {
-                                val respMessage = response.first as Message
-                                when(respMessage.errorCode)
-                                {
-                                    "PRSR04" -> {
-                                        textStatus.text = getString(R.string.text_voice_PRSR04, respMessage.errorDetails.split(":")[1])
-                                    }
-
-                                    "PRSR06" -> {
-                                        textStatus.text = getString(R.string.text_voice_PRSR06, respMessage.errorDetails.split(":")[1])
-                                    }
-
-                                    "PRSR13" -> {
-                                        textStatus.text = getString(R.string.text_voice_PRSR13, respMessage.errorDetails.split(":")[1])
-                                    }
-
-                                    else -> {
-                                        textStatus.text = getString(R.string.text_general_error, respMessage.errorCode + ": " + respMessage.errorDetails)
-                                    }
-                                }
-
-                            }
-                        }
-
-                        HttpHelper.ERROR_PERMISSIONS->{
-                            textStatus.text =  getString(R.string.text_general_error, getString(R.string.alert_noInternetPermission))
-                        }
-
-                        else ->
-                        {
-                            val respMessage = response.first as Message
-                            textStatus.text =  getString(R.string.text_general_error, respMessage.errorCode + ": " + respMessage.errorDetails)
-                        }
-                    }
-                    if(error)
-                    {
-                        uiThread {
-                            progressBar.visibility = View.GONE
-                            chipView.visibility = View.VISIBLE
-                            textStatus.visibility = View.VISIBLE
-                            progressStatus.visibility = View.GONE
-                            name_text_input.visibility = View.VISIBLE
-                            saveTaskButton.visibility = View.VISIBLE
-                        }
-                    }
-                }
-
-            }
-
-            override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {}
-
-            override fun onProviderEnabled(provider: String) {}
-
-            override fun onProviderDisabled(provider: String) {}
-        }
+    override fun onConnected(p0: Bundle?)
+    {
 
         if(!PermissionsHelper.checkPositionPermission(this))
         {
             alert(getString(R.string.alert_noPositionPermission)){
-                okButton { finish() }
+                okButton {
+                    finish()
+                    googleApiClient.disconnect()
+                }
             }.show()
             return
         }
@@ -315,13 +163,243 @@ class VoiceActivity : AppCompatActivity()
         if(!PermissionsHelper.checkCoarsePositionPermission(this))
         {
             alert(getString(R.string.alert_noCoarsePositionPermission)){
-                okButton { finish() }
+                okButton {
+                    finish()
+                    googleApiClient.disconnect()
+                }
             }.show()
             return
         }
 
+        locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        if(locationManager?.isProviderEnabled(LocationManager.GPS_PROVIDER) == false)
+        {
+            alert("I servizi di localizzazione non sono abilitati o sono impostati in risparmio energia!").show()
+            googleApiClient.disconnect()
+            return
+        }
 
-        locationManager?.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0f, locationListener)
+        locationRequest = LocationRequest().apply {
+            interval = 1000
+            fastestInterval = 0
+            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+        }
+
+        val builder = LocationSettingsRequest.Builder().addLocationRequest(locationRequest)
+
+        val client: SettingsClient = LocationServices.getSettingsClient(this)
+        val task: com.google.android.gms.tasks.Task<LocationSettingsResponse> = client.checkLocationSettings(builder.build())
+
+        task.addOnSuccessListener { _ ->
+            val location = LocationServices.FusedLocationApi.getLastLocation(googleApiClient)
+
+            toolbar.longSnackbar("Last location: $location")
+
+            LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this)
+
+            progressBar.visibility = View.VISIBLE
+            progressStatus.visibility = View.VISIBLE
+            progressStatus.text = getString(R.string.text_voice_waitPosition)
+            voiceMain.visibility = View.GONE
+            voiceAnim.visibility = View.VISIBLE
+            anim = voiceAnimImage.drawable as AnimatedVectorDrawable
+            callback = object : Animatable2.AnimationCallback()
+            {
+                override fun onAnimationEnd(drawable: Drawable)
+                {
+                    anim.start()
+                }
+            }
+
+            anim.registerAnimationCallback(callback)
+            anim.start()
+        }
+
+        task.addOnFailureListener { exception ->
+            if (exception is ResolvableApiException)
+            {
+                alert("Per favore, imposta la localizzazione su \"Alta precisione\", altrimenti l'applicazione non funzionerà")
+                {
+                    yesButton {
+                        try
+                        {
+                            exception.startResolutionForResult(this@VoiceActivity,1235)
+                        }
+                        catch (sendEx: IntentSender.SendIntentException) { }
+                    }
+                    noButton {  }
+                }.show()
+            }
+            else
+            {
+                exception.printStackTrace()
+            }
+        }
+    }
+
+    override fun onLocationChanged(p0: Location?)
+    {
+        Log.d("POSITION", "results: ${p0.toString()}")
+        p0 ?: return
+        toolbar.snackbar("Posizione acc: ${p0.accuracy}")
+        if(p0.accuracy > 1000f) return
+        LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, this)
+        progressStatus.text = getString(R.string.text_voice_waitServer)
+        val body = FormBody.Builder().add("sentence", textSentence.text.toString()).add("lat", p0.latitude.toString())
+            .add("lon", p0.longitude.toString()).build()
+
+        val request = Request.Builder()
+            .addHeader("Cookie" , "JSESSIONID=" + session.user.sessionID)
+            .url(HttpHelper.PARSE_URL)
+            .post(body)
+            .build()
+
+        doAsync {
+            val response : Pair<Resource?, Response> = HttpHelper(this@VoiceActivity).request(request, true)
+            var error = true
+            when(response.second.code())
+            {
+                200->{
+                    error = false
+                    tasks.updateTasksAndDo(true){
+                        val returnIntent = Intent()
+                        returnIntent.putExtra("resultTask", response.first as Task)
+                        setResult(Activity.RESULT_OK, returnIntent)
+                        finish()
+                    }
+                }
+
+                401->{
+                    Log.d("SESSION", "Sessione scaduta")
+                    val intent = Intent(this@VoiceActivity, LoginActivity::class.java)
+                    startActivityForResult(intent, SessionHelper.LOGIN_REQUEST_CODE)
+                }
+
+                400->{
+                    uiThread {
+                        val respMessage = response.first as Message
+                        when(respMessage.errorCode)
+                        {
+                            "PRSR01" -> {
+                                textStatus.text = getString(R.string.text_voice_PRSR01)
+                            }
+
+                            "PRSR02" -> {
+                                textStatus.text = getString(R.string.text_voice_PRSR02)
+                            }
+
+                            "PRSR07" -> {
+                                textStatus.text = getString(R.string.text_voice_PRSR07, respMessage.errorDetails.split(":")[1])
+                            }
+
+                            "PRSR10" -> {
+                                textStatus.text = getString(R.string.text_voice_PRSR10)
+                            }
+
+                            else -> {
+                                textStatus.text = getString(R.string.text_general_error, respMessage.errorCode + ": " + respMessage.errorDetails)
+                            }
+                        }
+                    }
+                }
+
+                404->{
+                    uiThread {
+                        val respMessage = response.first as Message
+                        when(respMessage.errorCode)
+                        {
+                            "PRSR05" -> {
+                                textStatus.text = getString(R.string.text_voice_PRSR05, respMessage.errorDetails.split(":")[1])
+                            }
+
+                            "PRSR11" -> {
+                                textStatus.text = getString(R.string.text_voice_PRSR11Repeat)
+                                alert(getString(R.string.text_voice_PRSR11, respMessage.errorDetails)){
+                                    yesButton {
+                                        saveTaskButton.isEnabled = false
+                                        askParameter(ParamsName.valueOf(respMessage.errorDetails))
+                                    }
+                                }.show()
+                            }
+
+                            else -> {
+                                textStatus.text = getString(R.string.text_general_error, respMessage.errorCode + ": " + respMessage.errorDetails)
+                            }
+                        }
+                    }
+                }
+
+                500->{
+                    uiThread {
+                        val respMessage = response.first as Message
+                        when(respMessage.errorCode)
+                        {
+                            "PRSR03" -> {
+                                textStatus.text = getString(R.string.text_voice_PRSR03)
+                            }
+
+                            "PRSR08" -> {
+                                textStatus.text = "SQLException: " + respMessage.errorDetails
+                            }
+
+                            "PRSR09" -> {
+                                textStatus.text = "ServletException: " + respMessage.errorDetails
+                            }
+
+                            else -> {
+                                textStatus.text = getString(R.string.text_general_error, respMessage.errorCode + ": " + respMessage.errorDetails)
+                            }
+                        }
+                    }
+                }
+
+                501->{
+                    uiThread {
+                        val respMessage = response.first as Message
+                        when(respMessage.errorCode)
+                        {
+                            "PRSR04" -> {
+                                textStatus.text = getString(R.string.text_voice_PRSR04, respMessage.errorDetails.split(":")[1])
+                            }
+
+                            "PRSR06" -> {
+                                textStatus.text = getString(R.string.text_voice_PRSR06, respMessage.errorDetails.split(":")[1])
+                            }
+
+                            "PRSR13" -> {
+                                textStatus.text = getString(R.string.text_voice_PRSR13, respMessage.errorDetails.split(":")[1])
+                            }
+
+                            else -> {
+                                textStatus.text = getString(R.string.text_general_error, respMessage.errorCode + ": " + respMessage.errorDetails)
+                            }
+                        }
+
+                    }
+                }
+
+                HttpHelper.ERROR_PERMISSIONS->{
+                    textStatus.text =  getString(R.string.text_general_error, getString(R.string.alert_noInternetPermission))
+                }
+
+                else ->
+                {
+                    val respMessage = response.first as Message
+                    textStatus.text =  getString(R.string.text_general_error, respMessage.errorCode + ": " + respMessage.errorDetails)
+                }
+            }
+            if(error)
+            {
+                uiThread {
+                    anim.unregisterAnimationCallback(callback)
+                    anim.stop()
+                    voiceMain.visibility = View.VISIBLE
+                    voiceAnim.visibility = View.GONE
+                    progressBar.visibility = View.GONE
+                    progressStatus.visibility = View.GONE
+                }
+            }
+        }
     }
 
     private fun askParameter(param : ParamsName)
@@ -367,6 +445,14 @@ class VoiceActivity : AppCompatActivity()
         }
     }
 
+    override fun onConnectionFailed(p0: ConnectionResult) {
+
+    }
+
+    override fun onConnectionSuspended(p0: Int) {
+
+    }
+
     private fun startVoiceRecognitionActivity()
     {
         val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
@@ -374,7 +460,7 @@ class VoiceActivity : AppCompatActivity()
             RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault())
         intent.putExtra(RecognizerIntent.EXTRA_PROMPT,
-            "Speech recognition demo")
+            "Dimmi cosa vuoi che ti ricordi")
         startActivityForResult(intent, 1234)
     }
 

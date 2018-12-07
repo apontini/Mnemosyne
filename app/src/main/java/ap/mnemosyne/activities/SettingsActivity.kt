@@ -24,6 +24,9 @@ import org.jetbrains.anko.design.snackbar
 import org.joda.time.LocalTime
 import org.joda.time.format.DateTimeFormat
 import java.nio.charset.StandardCharsets
+import android.location.Geocoder
+import java.util.*
+
 
 class SettingsActivity : AppCompatActivity()
 {
@@ -276,6 +279,22 @@ class SettingsActivity : AppCompatActivity()
                 findPreference("time_work").summary = if(timeWork != null ) "${(timeWork as TimeParameter).fromTime.toString(
                     DateTimeFormat.forPattern("HH:mm"))} - ${(timeWork as TimeParameter).toTime.toString(
                     DateTimeFormat.forPattern("HH:mm"))}"  else getString(R.string.text_settings_notDefined)
+
+                val gcd = Geocoder(context, Locale.getDefault())
+                var addresses = gcd.getFromLocation((locationHouse as LocationParameter).location?.lat!!, (locationHouse as LocationParameter).location?.lon!!, 1)
+                if (addresses.size > 0)
+                {
+                    findPreference("location_house").summary = addresses[0].thoroughfare
+                }
+
+                addresses = gcd.getFromLocation((locationWork as LocationParameter).location?.lat!!, (locationWork as LocationParameter).location?.lon!!, 1)
+                if (addresses.size > 0)
+                {
+                    if(addresses[0].thoroughfare != null)
+                    {
+                        findPreference("location_work").summary = addresses[0].thoroughfare
+                    }
+                }
             }
         }
 

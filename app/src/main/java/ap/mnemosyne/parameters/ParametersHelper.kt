@@ -6,10 +6,10 @@ import android.util.Log
 import ap.mnemosyne.activities.LoginActivity
 import ap.mnemosyne.enums.ParamsName
 import ap.mnemosyne.http.HttpHelper
-import ap.mnemosyne.resources.Parameter
-import ap.mnemosyne.resources.ResourceList
 import ap.mnemosyne.session.SessionHelper
 import ap.mnemosyne.R
+import ap.mnemosyne.resources.Parameter
+import ap.mnemosyne.resources.ResourceList
 import okhttp3.Request
 import org.jetbrains.anko.alert
 import org.jetbrains.anko.defaultSharedPreferences

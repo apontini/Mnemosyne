@@ -17,6 +17,10 @@
         <item name="android:fontFamily">@font/rubik</item>
     </style>
 
+    <style name="SplashTheme" parent="AppTheme.NoActionBar">
+        <item name="android:windowBackground">@drawable/splash</item>
+    </style>
+
     <style name="TaskListTheme" parent="AppTheme.NoActionBar">
         <item name="android:windowAnimationStyle">@style/TaskListAnimation</item>
     </style>

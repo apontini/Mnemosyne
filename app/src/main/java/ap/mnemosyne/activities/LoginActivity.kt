@@ -14,10 +14,10 @@ import ap.mnemosyne.http.HttpHelper
 import kotlinx.android.synthetic.main.content_login.*
 import okhttp3.Request
 import okhttp3.Response
-import ap.mnemosyne.resources.Message
-import ap.mnemosyne.resources.Resource
 import android.view.inputmethod.InputMethodManager
 import ap.mnemosyne.parameters.ParametersHelper
+import ap.mnemosyne.resources.Message
+import ap.mnemosyne.resources.Resource
 import ap.mnemosyne.resources.User
 import ap.mnemosyne.session.SessionHelper
 import ap.mnemosyne.tasks.TasksHelper

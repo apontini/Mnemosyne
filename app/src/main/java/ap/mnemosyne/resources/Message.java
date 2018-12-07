@@ -17,7 +17,6 @@
 package ap.mnemosyne.resources;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -51,7 +50,6 @@ public class Message extends Resource {
 	 * Additional details about the error, if any
 	 */
 	private final String errorDetails;
-
 
 	/**
 	 * Creates an error message.

@@ -8,10 +8,12 @@ import ap.mnemosyne.resources.Resource
 import ap.mnemosyne.resources.ResourceList
 import com.fasterxml.jackson.core.JsonParseException
 import okhttp3.OkHttpClient
+import okhttp3.Protocol
 import okhttp3.Request
 import okhttp3.Response
 import java.io.ByteArrayInputStream
 import java.lang.ClassCastException
+import java.net.UnknownHostException
 import java.util.concurrent.TimeUnit
 
 class HttpHelper(act: Activity)
@@ -32,6 +34,7 @@ class HttpHelper(act: Activity)
         const val PARSE_URL : String = "$BASE_URL/mnemosyne/parse"
         const val REST_PARAMETER_URL : String = "$BASE_URL/mnemosyne/rest/parameter"
         const val ERROR_PERMISSIONS = 999
+        const val ERROR_NO_CONNECTION = 998
     }
 
     val act : Activity = act
@@ -41,13 +44,23 @@ class HttpHelper(act: Activity)
         if(!PermissionsHelper.checkInternetPermission(act))
         {
             //ERROR: permission are not given
-            val res = Response.Builder().code(HttpHelper.ERROR_PERMISSIONS).build()
+            val res = mockupResponse(req, HttpHelper.ERROR_PERMISSIONS)
             return Pair(null, res)
         }
 
         synchronized(httpclient)
         {
-            val resp = httpclient.newCall(req).execute()
+            var resp : Response
+            try
+            {
+                resp = httpclient.newCall(req).execute()
+            }
+            catch (uhe : UnknownHostException)
+            {
+                resp = mockupResponse(req, HttpHelper.ERROR_NO_CONNECTION)
+                return Pair(null, resp)
+            }
+
             lateinit var resRet : Resource
             if(parseRes)
             {
@@ -88,5 +101,10 @@ class HttpHelper(act: Activity)
             }
             return Pair(resRet, resp)
         }
+    }
+
+    private fun mockupResponse(req : Request, code: Int) : Response
+    {
+        return Response.Builder().request(req).protocol(Protocol.HTTP_1_1).message("error").code(HttpHelper.ERROR_NO_CONNECTION).build()
     }
 }
