@@ -48,8 +48,6 @@ class VoiceActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks,
     private lateinit var session : SessionHelper
     private lateinit var tasks : TasksHelper
     private var locationManager : LocationManager? = null
-    private var locationCallback : LocationCallback? = null
-    private var fusedLocationClient : FusedLocationProviderClient? = null
     private lateinit var googleApiClient : GoogleApiClient
     private lateinit var anim : AnimatedVectorDrawable
     private lateinit var callback : Animatable2.AnimationCallback

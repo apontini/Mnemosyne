@@ -2,6 +2,7 @@ package ap.mnemosyne.permissions
 
 import android.Manifest
 import android.app.Activity
+import android.content.Context
 import android.content.pm.PackageManager
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -20,7 +21,7 @@ class PermissionsHelper
             ActivityCompat.requestPermissions(act, permissionsRequired, 0)
         }
 
-        fun checkPositionPermission(act: Activity): Boolean
+        fun checkPositionPermission(act: Context): Boolean
         {
             return ContextCompat.checkSelfPermission(act,
                 Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
@@ -34,7 +35,7 @@ class PermissionsHelper
             }
         }
 
-        fun checkCoarsePositionPermission(act: Activity): Boolean
+        fun checkCoarsePositionPermission(act: Context): Boolean
         {
             return ContextCompat.checkSelfPermission(act,
                 Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
@@ -48,7 +49,7 @@ class PermissionsHelper
             }
         }
 
-        fun checkInternetPermission(act: Activity): Boolean
+        fun checkInternetPermission(act: Context): Boolean
         {
             return ContextCompat.checkSelfPermission(act,
                     Manifest.permission.INTERNET) == PackageManager.PERMISSION_GRANTED
@@ -62,7 +63,7 @@ class PermissionsHelper
             }
         }
 
-        fun checkMicrophonePermission(act: Activity): Boolean
+        fun checkMicrophonePermission(act: Context): Boolean
         {
             return ContextCompat.checkSelfPermission(act,
                 Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED

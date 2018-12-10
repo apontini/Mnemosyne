@@ -7,7 +7,6 @@ import androidx.appcompat.app.AppCompatActivity
 import android.util.Log
 import android.view.MenuItem
 import android.view.View
-import android.view.animation.AnimationUtils
 import androidx.core.app.ActivityOptionsCompat
 import ap.mnemosyne.http.HttpHelper
 import ap.mnemosyne.resources.*
@@ -23,6 +22,8 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import kotlinx.android.synthetic.main.activity_task_details.*
 import kotlinx.android.synthetic.main.drawer_header.view.*
+import okhttp3.MediaType
+import okhttp3.RequestBody
 import org.jetbrains.anko.design.longSnackbar
 import java.lang.Exception
 
@@ -64,6 +65,14 @@ class TaskDetailsActivity : AppCompatActivity(), OnMapReadyCallback
         else
         {
             map.visibility = View.GONE
+        }
+
+        checkPossibleWork.setOnClickListener {
+            updateTask(it)
+        }
+
+        checkRepeatable.setOnClickListener {
+            updateTask(it)
         }
 
         deleteTaskButton.setOnClickListener{
@@ -113,14 +122,8 @@ class TaskDetailsActivity : AppCompatActivity(), OnMapReadyCallback
             }
         }
 
-        textPossibleWorkValue.text = if (task.isPossibleAtWork)
-        {
-            getString(R.string.text_yes)
-        }
-        else
-        {
-            getString(R.string.text_no)
-        }
+        checkPossibleWork.isChecked = task.isPossibleAtWork
+
         textDoneTodayValue.text = if (task.isDoneToday)
         {
             getString(R.string.text_yes)
@@ -129,14 +132,9 @@ class TaskDetailsActivity : AppCompatActivity(), OnMapReadyCallback
         {
             getString(R.string.text_no)
         }
-        textRepeatableValue.text = if (task.isRepeatable)
-        {
-            getString(R.string.text_yes)
-        }
-        else
-        {
-            getString(R.string.text_no)
-        }
+
+        checkRepeatable.isChecked = task.isRepeatable
+
         textFailedValue.text = if (task.isFailed)
         {
             getString(R.string.text_yes)
@@ -177,6 +175,63 @@ class TaskDetailsActivity : AppCompatActivity(), OnMapReadyCallback
         {
             alert("Nessun posto indicato") {}.show()
             finish()
+        }
+    }
+
+    private fun updateTask(v : View)
+    {
+        checkPossibleWork.isEnabled = false
+        checkRepeatable.isEnabled = false
+        progressBar3.visibility = View.VISIBLE
+
+        val newTask = Task(task.id, task.user, task.name, task.constr, checkPossibleWork.isChecked,
+            checkRepeatable.isChecked, task.isDoneToday, task.isFailed, task.placesToSatisfy)
+
+        val request = Request.Builder()
+            .addHeader("Cookie" , "JSESSIONID="+session.user.sessionID)
+            .url(HttpHelper.REST_TASK_URL)
+            .put(RequestBody.create(MediaType.parse("application/json"), newTask.toJSON()))
+            .build()
+
+        doAsync {
+            val resp = HttpHelper(this@TaskDetailsActivity).request(request, true)
+            when(resp.second.code())
+            {
+                401 ->
+                {
+                    Log.d("SESSION", "Sessione scaduta")
+                    val intent = Intent(this@TaskDetailsActivity, LoginActivity::class.java)
+                    startActivityForResult(intent, SessionHelper.LOGIN_REQUEST_CODE)
+                }
+
+                200 ->
+                {
+                    toolbar.snackbar("Task aggiornato con successo")
+                }
+
+                404 ->{
+                    uiThread { alert("Errore durante l'update del task (404)") {  }.show() }
+                }
+
+                HttpHelper.ERROR_PERMISSIONS ->
+                {
+                    uiThread { alert(getString(R.string.alert_noInternetPermission)) {  }.show() }
+                }
+
+                HttpHelper.ERROR_NO_CONNECTION ->
+                {
+                    uiThread { alert(getString(R.string.alert_noInternetConnection)) {  }.show() }
+                }
+
+                else ->{
+                    Log.d("MESSAGGIO", resp.second.code().toString())
+                }
+            }
+            uiThread {
+                checkPossibleWork.isEnabled = true
+                checkRepeatable.isEnabled = true
+                progressBar3.visibility = View.GONE
+            }
         }
     }
 

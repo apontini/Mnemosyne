@@ -49,9 +49,9 @@
 
                 <TextView
                     android:id="@+id/taskName"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_span="3"
+                    android:layout_span="2"
                     android:text="TextView"
                     android:textAppearance="@style/MnemosyneBodyText1"
                     android:textColor="@color/onSecondary"
@@ -156,22 +156,15 @@
                 android:layout_height="match_parent"
                 android:layout_marginTop="16dp">
 
-                <TextView
-                    android:id="@+id/textPossibleWork"
+                <CheckBox
+                    android:id="@+id/checkPossibleWork"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Possibile al lavoro:"
-                    android:textAppearance="@style/MnemosyneBodyText2"
-                    android:textColor="@color/onSecondary" />
-
-                <TextView
-                    android:id="@+id/textPossibleWorkValue"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:paddingLeft="25dp"
-                    android:text="TextView"
-                    android:textAppearance="@style/MnemosyneBodyText2"
-                    android:textColor="@color/onSecondary" />
+                    android:layout_span="2"
+                    android:text="Possibile al lavoro"
+                    android:button="@null"
+                    android:drawableEnd="?android:attr/listChoiceIndicatorMultiple"
+                    android:textAppearance="@style/MnemosyneBodyText2" />
 
             </TableRow>
 
@@ -180,22 +173,15 @@
                 android:layout_height="match_parent"
                 android:layout_marginTop="16dp">
 
-                <TextView
-                    android:id="@+id/textRepeatable"
+                <CheckBox
+                    android:id="@+id/checkRepeatable"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Ripetibile:"
-                    android:textAppearance="@style/MnemosyneBodyText2"
-                    android:textColor="@color/onSecondary" />
-
-                <TextView
-                    android:id="@+id/textRepeatableValue"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:paddingLeft="25dp"
-                    android:text="TextView"
-                    android:textAppearance="@style/MnemosyneBodyText2"
-                    android:textColor="@color/onSecondary" />
+                    android:layout_span="2"
+                    android:button="@null"
+                    android:drawableEnd="?android:attr/listChoiceIndicatorMultiple"
+                    android:text="Eseguito oggi"
+                    android:textAppearance="@style/MnemosyneBodyText2" />
 
             </TableRow>
 
@@ -241,7 +227,6 @@
                     android:id="@+id/textFailedValue"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_span="2"
                     android:paddingLeft="25dp"
                     android:text="TextView"
                     android:textAppearance="@style/MnemosyneBodyText2"

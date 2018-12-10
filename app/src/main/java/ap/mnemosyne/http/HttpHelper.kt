@@ -33,6 +33,7 @@ class HttpHelper(act: Activity)
         const val REST_TASK_URL : String = "$BASE_URL/mnemosyne/rest/task"
         const val PARSE_URL : String = "$BASE_URL/mnemosyne/parse"
         const val REST_PARAMETER_URL : String = "$BASE_URL/mnemosyne/rest/parameter"
+        const val HINTS_URL : String = "$BASE_URL/mnemosyne/hints"
         const val ERROR_PERMISSIONS = 999
         const val ERROR_NO_CONNECTION = 998
     }

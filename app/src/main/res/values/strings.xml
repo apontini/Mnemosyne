@@ -85,4 +85,13 @@
     <string name="main_text_loading">Carico la dashboard...</string>
     <string name="alert_noInternetConnection">Connessione internet non disponibile</string>
     <string name="alert_noGoogleAPI">Errore, GoogleAPI non disponibili</string>
+    <string name="service_title">Mnemosyne è attivo in background</string>
+    <string name="service_descr">Mnemosyne ti notificherà periodicamente dei task da svolgere</string>
+    <string name="notification_permission_description">Per favore, premi su questa notifica e garantisci i permessi</string>
+    <string name="notification_googleapi_notConnected_title">Servizi Google non connessi</string>
+    <string name="notification_googleapi_notConnected_descr">Impossibile connettersi ai servizi Google, prova a riavviare Mnemosyne</string>
+    <string name="notification_noPositionServices_title">I servizi di localizzazione non sono abilitati</string>
+    <string name="notification_noPositionServices_descr">Per favore, attivali e premi su questa notifica per riavviare il servizio</string>
+    <string name="notification_settingsPosition_title">Impostazioni di posizione non corrette</string>
+    <string name="notification_settingsPosition_descr">Per favore, imposta la localizzazione su \"Alta precisione\", altrimenti l\'applicazione non funzionerà</string>
 </resources>

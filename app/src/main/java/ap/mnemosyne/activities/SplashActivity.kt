@@ -10,6 +10,12 @@ import ap.mnemosyne.session.SessionHelper
 import ap.mnemosyne.tasks.TasksHelper
 import org.jetbrains.anko.alert
 import org.jetbrains.anko.okButton
+import android.app.ActivityManager
+import android.content.Context
+import android.content.Context.ACTIVITY_SERVICE
+import android.util.Log
+import ap.mnemosyne.services.HintsService
+
 
 class SplashActivity : AppCompatActivity() {
 
@@ -42,6 +48,13 @@ class SplashActivity : AppCompatActivity() {
     private fun doSplash()
     {
         tasks.updateTasksAndDo(doWhat = {
+            val service = HintsService()
+            if (!isMyServiceRunning(service.javaClass))
+            {
+                val serviceIntent = Intent(this, service.javaClass)
+                serviceIntent.action = HintsService.START
+                startService(serviceIntent)
+            }
             startActivity(Intent(this, MainActivity::class.java))
             overridePendingTransition(android.R.anim.fade_out, android.R.anim.fade_in)
             finish()
@@ -58,5 +71,20 @@ class SplashActivity : AppCompatActivity() {
                     PermissionsHelper.askInternetPermission(this)
                 }
             })
+    }
+
+    private fun isMyServiceRunning(serviceClass: Class<*>): Boolean
+    {
+        val manager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        for (service in manager.getRunningServices(Integer.MAX_VALUE))
+        {
+            if (serviceClass.name == service.service.className)
+            {
+                Log.i("isMyServiceRunning?", "true")
+                return true
+            }
+        }
+        Log.i("isMyServiceRunning?", "false")
+        return false
     }
 }

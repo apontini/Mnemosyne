@@ -25,7 +25,7 @@ class TasksHelper(val act : Activity)
     companion object
     {
         val dateTimeFormat : DateTimeFormatter by lazy { return@lazy DateTimeFormat.forPattern("yyyy-MM-dd HH:mm") }
-        private const val MIN_UPDATE = 3
+        private const val MIN_UPDATE = 8
         const val LAST_REFRESH : String = "last_refresh"
         val lock by lazy { ReentrantLock() }
     }
