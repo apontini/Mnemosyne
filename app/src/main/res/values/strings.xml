@@ -93,5 +93,6 @@
     <string name="notification_noPositionServices_title">I servizi di localizzazione non sono abilitati</string>
     <string name="notification_noPositionServices_descr">Per favore, attivali e premi su questa notifica per riavviare il servizio</string>
     <string name="notification_settingsPosition_title">Impostazioni di posizione non corrette</string>
-    <string name="notification_settingsPosition_descr">Per favore, imposta la localizzazione su \"Alta precisione\", altrimenti l\'applicazione non funzionerà</string>
+    <string name="notification_settingsPosition_descr">La localizzazione non è attiva o le impostazioni non sono corrette, tocca per modificare</string>
+    <string name="alert_positionSettings">La localizzazione non è attiva o le impostazioni non sono corrette, vuoi modificarle?</string>
 </resources>

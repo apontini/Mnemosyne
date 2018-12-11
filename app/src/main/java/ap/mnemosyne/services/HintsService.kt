@@ -4,14 +4,11 @@ import android.annotation.SuppressLint
 import android.app.*
 import android.content.Context
 import android.content.Intent
-import android.os.IBinder
+import android.content.SharedPreferences
 import android.util.Log
 import android.graphics.BitmapFactory
 import android.location.Location
 import android.location.LocationManager
-import android.os.Build
-import android.os.Bundle
-import android.os.Handler
 import androidx.core.app.NotificationCompat
 import ap.mnemosyne.R
 import ap.mnemosyne.activities.ServiceActivity
@@ -22,6 +19,20 @@ import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.common.api.GoogleApiClient
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
+import java.lang.IllegalStateException
+import android.media.RingtoneManager
+import android.os.*
+import android.os.Bundle
+import ap.mnemosyne.http.HttpHelper
+import ap.mnemosyne.resources.Message
+import ap.mnemosyne.resources.Resource
+import ap.mnemosyne.session.SessionHelper
+import okhttp3.FormBody
+import okhttp3.Request
+import okhttp3.Response
+import org.jetbrains.anko.doAsync
+import org.joda.time.LocalTime
+import org.joda.time.format.DateTimeFormat
 
 
 class HintsService : Service(), LocationListener
@@ -42,18 +53,21 @@ class HintsService : Service(), LocationListener
     }
 
     lateinit var handler : Handler
-    private var locationManager : LocationManager? = null
+    private lateinit var sessionid : String
     private lateinit var googleApiClient : GoogleApiClient
     private lateinit var locationRequest : LocationRequest
     var delayCallback = 0L
 
-    override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int
     {
-        when(intent.action)
+        (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).cancelAll()
+        when(intent?.action ?: START)
         {
             START ->
             {
                 Log.d("SERVICE", "Mi avvio...")
+                sessionid = getSharedPreferences(getString(R.string.sharedPreferences_user_FILE), Context.MODE_PRIVATE)
+                        .getString(getString(R.string.sharedPreferences_user_sessionid), "") ?: ""
                 val apiAvailability = GoogleApiAvailability.getInstance()
                 val resultCode = apiAvailability.isGooglePlayServicesAvailable(this)
 
@@ -77,7 +91,7 @@ class HintsService : Service(), LocationListener
                 stopHintsService()
             }
         }
-        return super.onStartCommand(intent, flags, startId)
+        return START_STICKY
     }
 
     private val googleApiConnections = object : GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener
@@ -101,7 +115,7 @@ class HintsService : Service(), LocationListener
 
     private fun checkHints() : Long
     {
-        return 10000L
+        return 15000L
     }
 
     val handlerCallback = object : Runnable {
@@ -116,9 +130,55 @@ class HintsService : Service(), LocationListener
 
     override fun onLocationChanged(p0: Location?)
     {
-        Log.d("SERVICE", "Trovata posizione")
-        createTextNotification("Posizione", "${p0?.latitude ?: "null"} , ${p0?.longitude ?: "null"}")
+        Log.d("SERVICE", "Trovata posizione: ${p0?.latitude ?: "null"} , ${p0?.longitude ?: "null"}, velocità: ${p0?.speed}")
+        //createTextNotification("Posizione", "${p0?.latitude ?: "null"} , ${p0?.longitude ?: "null"}, velocità: ${p0?.speed}")
         LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, this)
+        val time = LocalTime.now().toString(DateTimeFormat.forPattern("HH:mm"))
+        val body = FormBody.Builder().add("lat", p0?.latitude.toString()).add("lon", p0?.longitude.toString())
+            .add("time", time).build()
+
+        val request = Request.Builder()
+            .addHeader("Cookie" , "JSESSIONID=" + sessionid)
+            .url(HttpHelper.HINTS_URL)
+            .post(body)
+            .build()
+
+        doAsync {
+            val response : Pair<Resource?, Response> = HttpHelper(this@HintsService).request(request, true)
+            when(response.second.code())
+            {
+                200->
+                {
+
+                }
+
+                401->
+                {
+                    //TODO chiedere login
+                    val respMessage = response.first as Message
+                    createTextNotification("Errore", respMessage.message)
+                }
+
+                400->
+                {
+                    val respMessage = response.first as Message
+                    createTextNotification("Errore", respMessage.message)
+                }
+
+                406->
+                {
+                    //Per ora non verrà mai restituita
+                    val respMessage = response.first as Message
+                    createTextNotification("Errore", respMessage.message)
+                }
+
+                500 ->
+                {
+                    val respMessage = response.first as Message
+                    createTextNotification("Errore", respMessage.message)
+                }
+            }
+        }
         delayCallback = checkHints()
         handler.postDelayed(handlerCallback, delayCallback)
     }
@@ -153,7 +213,7 @@ class HintsService : Service(), LocationListener
             }
             val killPendingIntent: PendingIntent =
                 PendingIntent.getService(this@HintsService, 9, killIntent, 0)
-            addAction(R.drawable.places_ic_clear, "Kill me (for debug purposes)", killPendingIntent)
+            addAction(R.drawable.places_ic_clear, "Non avvisarmi più", killPendingIntent)
         }
 
         startForeground(1, notification.build())
@@ -170,19 +230,14 @@ class HintsService : Service(), LocationListener
         {
             createPrerequisitesNotification(getString(R.string.alert_noPositionPermission), getString(R.string.notification_permission_description), ACTION_ASK_POSITION_PERMISSION)
             stopHintsService()
+            return
         }
 
         if(!PermissionsHelper.checkCoarsePositionPermission(this@HintsService))
         {
             createPrerequisitesNotification(getString(R.string.alert_noCoarsePositionPermission), getString(R.string.notification_permission_description), ACTION_ASK_COARSE_POSITION_PERMISSION)
             stopHintsService()
-        }
-
-        locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        if(locationManager?.isProviderEnabled(LocationManager.GPS_PROVIDER) == false)
-        {
-            createPrerequisitesNotification(getString(R.string.notification_noPositionServices_title), getString(R.string.notification_noPositionServices_descr), ACTION_ACTIVATE_POSITION)
-            stopHintsService()
+            return
         }
 
         locationRequest = LocationRequest().apply {
@@ -203,7 +258,7 @@ class HintsService : Service(), LocationListener
         task.addOnFailureListener { exception ->
             if (exception is ResolvableApiException)
             {
-                createPrerequisitesNotification(getString(R.string.notification_settingsPosition_title), getString(R.string.notification_settingsPosition_descr), ACTION_CHANGE_POSITION_SETTINGS)
+                createPrerequisitesNotification(getString(R.string.notification_settingsPosition_title), getString(R.string.notification_settingsPosition_descr), ACTION_CHANGE_POSITION_SETTINGS, exception.resolution)
             }
             else
             {
@@ -213,7 +268,7 @@ class HintsService : Service(), LocationListener
         }
     }
 
-    fun createPrerequisitesNotification(title: String, text : String, action : Int)
+    fun createPrerequisitesNotification(title: String, text : String, action : Int, exc : PendingIntent? = null)
     {
         val notification = NotificationCompat.Builder(this, CHANNEL_ID).apply {
             val bigTextStyle = NotificationCompat.BigTextStyle()
@@ -224,17 +279,25 @@ class HintsService : Service(), LocationListener
             setStyle(bigTextStyle)
             setWhen(System.currentTimeMillis())
             setSmallIcon(R.mipmap.ic_mnemosyne_notif)
+            priority = NotificationCompat.PRIORITY_MAX
             val largeIconBitmap = BitmapFactory.decodeResource(resources, R.mipmap.ic_mnemosyne_launcher)
             setLargeIcon(largeIconBitmap)
-            setGroupAlertBehavior(NotificationCompat.GROUP_ALERT_CHILDREN)
+            val uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+            setSound(uri)
+            setVibrate(LongArray(1) {1000L})
             val clickInt = Intent(this@HintsService, ServiceActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                 putExtra("ACTION", action)
+                if(exc != null)
+                {
+                    val bundle = Bundle()
+                    bundle.putParcelable("PIntent", exc)
+                    putExtras(bundle)
+                }
             }
-
             val pendingClickIntent = PendingIntent.getActivity(this@HintsService, 0, clickInt, PendingIntent.FLAG_UPDATE_CURRENT)
-
             setContentIntent(pendingClickIntent)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) setChannelId(CHANNEL_ID)
         }
 
         with(getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager) {
@@ -247,12 +310,21 @@ class HintsService : Service(), LocationListener
         val notification = NotificationCompat.Builder(this, CHANNEL_ID).apply {
             setContentTitle(title)
             setContentText(text)
+            val bigTextStyle = NotificationCompat.BigTextStyle()
+            with(bigTextStyle) {
+                setBigContentTitle(title)
+                bigText(text)
+            }
+            setStyle(bigTextStyle)
             setWhen(System.currentTimeMillis())
-            setAutoCancel(true)
+            setVibrate(LongArray(1) {1000L})
+            priority = NotificationCompat.PRIORITY_MAX
+            val uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+            setSound(uri)
             setSmallIcon(R.mipmap.ic_mnemosyne_notif)
             val largeIconBitmap = BitmapFactory.decodeResource(resources, R.mipmap.ic_mnemosyne_launcher)
             setLargeIcon(largeIconBitmap)
-            setGroupAlertBehavior(NotificationCompat.GROUP_ALERT_CHILDREN)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) setChannelId(CHANNEL_ID)
         }
 
         with(getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager) {
@@ -263,9 +335,9 @@ class HintsService : Service(), LocationListener
     fun stopHintsService()
     {
         Log.d("SERVICE","Mi fermo..")
-        (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).cancelAll()
+        (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).cancel(TEXT_NOTIFICATION_ID)
         try { handler.removeCallbacks(handlerCallback) } catch (ex : UninitializedPropertyAccessException) {}
-        LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, this@HintsService)
+        try{LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, this@HintsService)} catch (ise : IllegalStateException){}
         try { googleApiClient.disconnect() } catch (ex : UninitializedPropertyAccessException) {}
         stopForeground(true)
         stopSelf()
@@ -275,8 +347,7 @@ class HintsService : Service(), LocationListener
     {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val name = CHANNEL_ID
-            val importance = NotificationManager.IMPORTANCE_HIGH
-            val channel = NotificationChannel(CHANNEL_ID, name, importance)
+            val channel = NotificationChannel(CHANNEL_ID, name, NotificationManager.IMPORTANCE_HIGH)
             val notificationManager: NotificationManager =
                 getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(channel)

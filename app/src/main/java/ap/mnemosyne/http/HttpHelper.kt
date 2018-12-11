@@ -1,6 +1,7 @@
 package ap.mnemosyne.http
 
 import android.app.Activity
+import android.content.Context
 import android.util.Log
 import ap.mnemosyne.permissions.PermissionsHelper
 import ap.mnemosyne.resources.Message
@@ -16,7 +17,7 @@ import java.lang.ClassCastException
 import java.net.UnknownHostException
 import java.util.concurrent.TimeUnit
 
-class HttpHelper(act: Activity)
+class HttpHelper(act: Context)
 {
     companion object
     {
@@ -38,7 +39,7 @@ class HttpHelper(act: Activity)
         const val ERROR_NO_CONNECTION = 998
     }
 
-    val act : Activity = act
+    val act : Context = act
 
     fun request(req : Request, parseRes : Boolean = false) : Pair<Resource?, Response>
     {

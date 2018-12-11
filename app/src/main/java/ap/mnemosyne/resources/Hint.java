@@ -13,7 +13,7 @@ import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
-@JsonTypeName("taskID")
+@JsonTypeName("Hint")
 public class Hint extends Resource
 {
 	private int taskID;

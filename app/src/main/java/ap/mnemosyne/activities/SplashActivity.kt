@@ -12,7 +12,7 @@ import org.jetbrains.anko.alert
 import org.jetbrains.anko.okButton
 import android.app.ActivityManager
 import android.content.Context
-import android.content.Context.ACTIVITY_SERVICE
+import android.content.pm.PackageManager
 import android.util.Log
 import ap.mnemosyne.services.HintsService
 
@@ -24,8 +24,8 @@ class SplashActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         tasks = TasksHelper(this)
-
-        doSplash()
+        //Permissions check
+        PermissionsHelper.askPermissions(this)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -45,8 +45,26 @@ class SplashActivity : AppCompatActivity() {
         }
     }
 
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray)
+    {
+        if(requestCode == 0)
+        {
+            val notGranted = grantResults.filter { it != PackageManager.PERMISSION_GRANTED }
+            if(!notGranted.isEmpty())
+            {
+                PermissionsHelper.askPermissions(this)
+            }
+            else
+            {
+                doSplash()
+            }
+        }
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    }
+
     private fun doSplash()
     {
+        //TODO scoprire perché il servizio parte prima del login
         tasks.updateTasksAndDo(doWhat = {
             val service = HintsService()
             if (!isMyServiceRunning(service.javaClass))

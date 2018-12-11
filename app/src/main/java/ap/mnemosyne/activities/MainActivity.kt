@@ -47,8 +47,6 @@ class MainActivity : AppCompatActivity()
         session.checkSessionValidity {
             isViewCreated = true
             createContentView() }
-
-        //Permissions check
         PermissionsHelper.askPermissions(this)
     }
 

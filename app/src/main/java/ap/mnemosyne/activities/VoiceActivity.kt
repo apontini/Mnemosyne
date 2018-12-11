@@ -1,7 +1,6 @@
 package ap.mnemosyne.activities
 
 import android.app.Activity
-import android.content.Context
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity;
 import ap.mnemosyne.R
@@ -47,7 +46,6 @@ class VoiceActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks,
 {
     private lateinit var session : SessionHelper
     private lateinit var tasks : TasksHelper
-    private var locationManager : LocationManager? = null
     private lateinit var googleApiClient : GoogleApiClient
     private lateinit var anim : AnimatedVectorDrawable
     private lateinit var callback : Animatable2.AnimationCallback
@@ -175,13 +173,13 @@ class VoiceActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks,
             return
         }
 
-        locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        /*locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
         if(locationManager?.isProviderEnabled(LocationManager.GPS_PROVIDER) == false)
         {
             alert("I servizi di localizzazione non sono abilitati o sono impostati in risparmio energia!").show()
             googleApiClient.disconnect()
             return
-        }
+        }*/
 
         locationRequest = LocationRequest().apply {
             interval = 1000
@@ -222,7 +220,7 @@ class VoiceActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks,
         task.addOnFailureListener { exception ->
             if (exception is ResolvableApiException)
             {
-                alert("Per favore, imposta la localizzazione su \"Alta precisione\", altrimenti l'applicazione non funzionerà")
+                alert(getString(R.string.alert_positionSettings))
                 {
                     yesButton {
                         try
