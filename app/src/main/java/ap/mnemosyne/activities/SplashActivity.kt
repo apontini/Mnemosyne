@@ -64,7 +64,6 @@ class SplashActivity : AppCompatActivity() {
 
     private fun doSplash()
     {
-        //TODO scoprire perché il servizio parte prima del login
         tasks.updateTasksAndDo(doWhat = {
             val service = HintsService()
             if (!isMyServiceRunning(service.javaClass))

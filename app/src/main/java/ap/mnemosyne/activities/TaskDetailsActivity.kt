@@ -59,6 +59,7 @@ class TaskDetailsActivity : AppCompatActivity(), OnMapReadyCallback
                 val p1 : androidx.core.util.Pair<View, String> = androidx.core.util.Pair(map,"mapView")
                 val options = ActivityOptionsCompat.makeSceneTransitionAnimation(this@TaskDetailsActivity, p1)
                 intent.putExtra("places", task.placesToSatisfy as HashSet<Place>)
+                intent.putExtra("focusPlace", focusPlace)
                 startActivity(intent, options.toBundle())
             }
         }

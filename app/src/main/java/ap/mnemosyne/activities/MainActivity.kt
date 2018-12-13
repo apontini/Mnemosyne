@@ -55,12 +55,12 @@ class MainActivity : AppCompatActivity()
         setContentView(R.layout.activity_main)
         setToolbar()
         setNavDrawer()
-        setCards()
+        setCards(true)
 
         toolbar.snackbar("Sei collegato come: " + session.user.email).show()
 
         noConnIcon.setOnClickListener {
-            setCards()
+            setCards(true)
         }
 
         fab.setOnClickListener {
@@ -80,7 +80,7 @@ class MainActivity : AppCompatActivity()
         if(mainProgress != null) mainProgress.visibility = View.GONE
     }
 
-    private fun setCards()
+    private fun setCards(animate : Boolean)
     {
         noConnIcon.visibility = View.GONE
         fab.isEnabled = true
@@ -112,7 +112,8 @@ class MainActivity : AppCompatActivity()
 
             cardList.setHasFixedSize(true)
             cardList.layoutManager = StaggeredGridLayoutManager(2,StaggeredGridLayoutManager.VERTICAL)
-            cardList.layoutAnimation = AnimationUtils.loadLayoutAnimation(this, R.anim.slide_from_bottom_animator)
+            if(animate) cardList.layoutAnimation = AnimationUtils.loadLayoutAnimation(this, R.anim.slide_from_bottom_animator)
+            else cardList.layoutAnimation = null
             if(cardList.itemDecorationCount == 0) cardList.addItemDecoration(SpaceItemDecoration(-8)) //margin is 8dp
             cardList.adapter = MainCardsAdapter(this@MainActivity, cardCreatedList)
 
@@ -218,7 +219,7 @@ class MainActivity : AppCompatActivity()
                         }
                         else
                         {
-                            setCards()
+                            setCards(true)
                             toolbar.snackbar("Sei collegato come: " + session.user.email).show()
                             isViewCreated = false
                         }
@@ -235,7 +236,7 @@ class MainActivity : AppCompatActivity()
                when(resultCode)
                {
                    Activity.RESULT_OK -> {
-                       setCards()
+                       setCards(false)
                        val intent = Intent(this, TaskDetailsActivity::class.java)
                        intent.putExtra("task", data?.getSerializableExtra("resultTask"))
                        startActivityForResult(intent, 102)
@@ -254,9 +255,14 @@ class MainActivity : AppCompatActivity()
                }
             }
 
+            101->
+            {
+                setCards(false)
+            }
+
             102->
             {
-                setCards()
+                setCards(false)
                 if(resultCode == 1000 && data?.getSerializableExtra("deletedTask") != null )
                 {
                      toolbar.longSnackbar("Rimosso").show()

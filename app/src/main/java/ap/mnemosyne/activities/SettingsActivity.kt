@@ -289,7 +289,10 @@ class SettingsActivity : AppCompatActivity()
                 var addresses = gcd.getFromLocation((locationHouse as LocationParameter).location?.lat!!, (locationHouse as LocationParameter).location?.lon!!, 1)
                 if (addresses.size > 0)
                 {
-                    findPreference("location_house").summary = addresses[0].thoroughfare
+                    if(addresses[0].thoroughfare != null)
+                    {
+                        findPreference("location_house").summary = addresses[0].thoroughfare
+                    }
                 }
 
                 addresses = gcd.getFromLocation((locationWork as LocationParameter).location?.lat!!, (locationWork as LocationParameter).location?.lon!!, 1)

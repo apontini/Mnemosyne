@@ -15,7 +15,7 @@ import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.toast
 import org.jetbrains.anko.uiThread
 
-class SessionHelper(act : Activity)
+class SessionHelper(ctx : Context)
 {
     companion object
     {
@@ -23,23 +23,23 @@ class SessionHelper(act : Activity)
     }
 
 
-    val thisAct = act
+    val thisCtx = ctx
     val sharedPref : SharedPreferences =
-            act.getSharedPreferences(act.getString(R.string.sharedPreferences_user_FILE), Context.MODE_PRIVATE)
+            ctx.getSharedPreferences(ctx.getString(R.string.sharedPreferences_user_FILE), Context.MODE_PRIVATE)
     var user : User
         get()
         {
-            val uemail = sharedPref.getString(thisAct.getString(R.string.sharedPreferences_user_mail),"")
-            val usession = sharedPref.getString(thisAct.getString(R.string.sharedPreferences_user_sessionid), "")
+            val uemail = sharedPref.getString(thisCtx.getString(R.string.sharedPreferences_user_mail),"")
+            val usession = sharedPref.getString(thisCtx.getString(R.string.sharedPreferences_user_sessionid), "")
             return User(usession, uemail)
         }
         set(u)
         {
             with(sharedPref.edit())
             {
-                putString(thisAct.getString(R.string.sharedPreferences_user_sessionid), u.sessionID)
-                putString(thisAct.getString(R.string.sharedPreferences_user_mail), u.email)
-                if(!commit()) thisAct.toast("Errore nel salvare i dati, riavvia l'applicazione").show()
+                putString(thisCtx.getString(R.string.sharedPreferences_user_sessionid), u.sessionID)
+                putString(thisCtx.getString(R.string.sharedPreferences_user_mail), u.email)
+                if(!commit()) thisCtx.toast("Errore nel salvare i dati, riavvia l'applicazione").show()
             }
         }
 
@@ -51,8 +51,8 @@ class SessionHelper(act : Activity)
         if(sessionid == "" || useremail == "")
         {
             Log.d("SESSION", "Preferences non trovate")
-            val intent = Intent(thisAct, LoginActivity::class.java)
-            thisAct.startActivityForResult(intent, SessionHelper.LOGIN_REQUEST_CODE)
+            val intent = Intent(thisCtx, LoginActivity::class.java)
+            if(thisCtx is Activity) thisCtx.startActivityForResult(intent, SessionHelper.LOGIN_REQUEST_CODE)
         }
         else
         {
@@ -62,13 +62,13 @@ class SessionHelper(act : Activity)
                 .build()
             var error = false
             doAsync {
-                val resp = HttpHelper(thisAct).request(request, true)
+                val resp = HttpHelper(thisCtx).request(request, true)
                 when(resp.second.code())
                 {
                     401 -> {
                         Log.d("SESSION", "Sessione scaduta")
-                        val intent = Intent(thisAct, LoginActivity::class.java)
-                        thisAct.startActivityForResult(intent, SessionHelper.LOGIN_REQUEST_CODE)
+                        val intent = Intent(thisCtx, LoginActivity::class.java)
+                        if(thisCtx is Activity) thisCtx.startActivityForResult(intent, SessionHelper.LOGIN_REQUEST_CODE)
                         error = true
                     }
 
@@ -77,17 +77,17 @@ class SessionHelper(act : Activity)
                     }
 
                     HttpHelper.ERROR_PERMISSIONS ->{
-                        uiThread { thisAct.alert(thisAct.getString(R.string.alert_noInternetPermission)) {  }.show() }
+                        uiThread { thisCtx.alert(thisCtx.getString(R.string.alert_noInternetPermission)) {  }.show() }
                         error = true
                     }
 
                     HttpHelper.ERROR_NO_CONNECTION ->{
-                        uiThread { thisAct.alert(thisAct.getString(R.string.alert_noInternetConnection)) {  }.show() }
+                        uiThread { thisCtx.alert(thisCtx.getString(R.string.alert_noInternetConnection)) {  }.show() }
                         error = true
                     }
 
                     else ->{
-                        uiThread { thisAct.alert("${resp.second.code()}") {  }.show() }
+                        uiThread { thisCtx.alert("${resp.second.code()}") {  }.show() }
                     }
                 }
                 uiThread {

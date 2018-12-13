@@ -28,9 +28,13 @@
             android:resource="@array/preloaded_fonts" />
 
         <service
-            android:name=".services.HintsService"
+            android:name="ap.mnemosyne.services.HintsService"
             android:enabled="true"
             android:exported="true" />
+
+        <service
+            android:name="ap.mnemosyne.services.HintsHelperService"
+            android:exported="false"/>
 
         <activity
             android:name=".activities.SplashActivity"
@@ -96,7 +100,8 @@
             android:launchMode="singleTask"
             android:taskAffinity=""
             android:excludeFromRecents="true"
-            android:theme="@style/Theme.Transparent"/>
+            android:theme="@style/Theme.Transparent"
+            android:label=""/>
     </application>
 
 </manifest>

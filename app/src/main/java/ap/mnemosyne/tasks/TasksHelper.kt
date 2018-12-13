@@ -20,7 +20,7 @@ import org.joda.time.format.DateTimeFormat
 import org.joda.time.format.DateTimeFormatter
 import java.util.concurrent.locks.ReentrantLock
 
-class TasksHelper(val act : Activity)
+class TasksHelper(val ctx : Context)
 {
     companion object
     {
@@ -30,12 +30,12 @@ class TasksHelper(val act : Activity)
         val lock by lazy { ReentrantLock() }
     }
 
-    val session = SessionHelper(act)
+    val session = SessionHelper(ctx)
 
-    fun updateTasksAndDo(forceUpdate : Boolean = false, doWhatError: (Int, String) -> Unit = {_,p1 -> act.alert(p1).show()}, doWhat: () -> (Unit))
+    fun updateTasksAndDo(forceUpdate : Boolean = false, doWhatError: (Int, String) -> Unit = {_,p1 -> ctx.alert(p1).show()}, doWhat: () -> (Unit))
     {
         lock.lock()
-        val refreshed = LocalDateTime.parse(act.getSharedPreferences(act.getString(R.string.sharedPreferences_tasks_FILE), Context.MODE_PRIVATE).getString(LAST_REFRESH,
+        val refreshed = LocalDateTime.parse(ctx.getSharedPreferences(ctx.getString(R.string.sharedPreferences_tasks_FILE), Context.MODE_PRIVATE).getString(LAST_REFRESH,
             "1970-01-01 00:00"), dateTimeFormat)
         val now = LocalDateTime.now()
         Log.d("LOCK", refreshed.toString())
@@ -47,7 +47,7 @@ class TasksHelper(val act : Activity)
                     .addHeader("Cookie", "JSESSIONID=" + session.user.sessionID)
                     .url(HttpHelper.REST_TASK_URL)
                     .build()
-                val resp = HttpHelper(act).request(request, true)
+                val resp = HttpHelper(ctx).request(request, true)
                 var error = 0
                 var errorString = ""
                 when (resp.second.code())
@@ -56,16 +56,16 @@ class TasksHelper(val act : Activity)
                     {
                         error = 401
                         Log.d("SESSION", "Sessione scaduta")
-                        val intent = Intent(act, LoginActivity::class.java)
-                        act.startActivityForResult(intent, SessionHelper.LOGIN_REQUEST_CODE)
+                        val intent = Intent(ctx, LoginActivity::class.java)
+                        if(ctx is Activity) ctx.startActivityForResult(intent, SessionHelper.LOGIN_REQUEST_CODE)
                     }
 
                     200 ->
                     {
-                        val prefs = act.getSharedPreferences(act.getString(R.string.sharedPreferences_tasks_FILE), Context.MODE_PRIVATE)
+                        val prefs = ctx.getSharedPreferences(ctx.getString(R.string.sharedPreferences_tasks_FILE), Context.MODE_PRIVATE)
                         with(prefs.edit())
                         {
-                            putString(act.getString(R.string.sharedPreferences_tasks_list), (resp.first as ResourceList<Task>).toJSON())
+                            putString(ctx.getString(R.string.sharedPreferences_tasks_list), (resp.first as ResourceList<Task>).toJSON())
                             apply()
                         }
 
@@ -78,19 +78,19 @@ class TasksHelper(val act : Activity)
                     HttpHelper.ERROR_PERMISSIONS ->
                     {
                         error = HttpHelper.ERROR_PERMISSIONS
-                        errorString = act.getString(R.string.alert_noInternetPermission)
+                        errorString = ctx.getString(R.string.alert_noInternetPermission)
                     }
 
                     HttpHelper.ERROR_NO_CONNECTION ->
                     {
                         error = HttpHelper.ERROR_NO_CONNECTION
-                        errorString = act.getString(R.string.alert_noInternetConnection)
+                        errorString = ctx.getString(R.string.alert_noInternetConnection)
                     }
 
                     else ->
                     {
                         error = -1
-                        uiThread {act.alert("Non ho potuto aggiornare i task, codice: " + resp.second.code()) { }.show()  }
+                        uiThread {ctx.alert("Non ho potuto aggiornare i task, codice: " + resp.second.code()) { }.show()  }
                     }
                 }
                 if (error == 0)
@@ -118,9 +118,9 @@ class TasksHelper(val act : Activity)
     fun resetLocalTasks()
     {
         lock.lock()
-        with(act.getSharedPreferences(act.getString(R.string.sharedPreferences_tasks_FILE), Context.MODE_PRIVATE).edit())
+        with(ctx.getSharedPreferences(ctx.getString(R.string.sharedPreferences_tasks_FILE), Context.MODE_PRIVATE).edit())
         {
-            remove(act.getString(R.string.sharedPreferences_tasks_list))
+            remove(ctx.getString(R.string.sharedPreferences_tasks_list))
             putString(LAST_REFRESH, "1970-01-01 00:00")
             apply()
         }
@@ -131,13 +131,13 @@ class TasksHelper(val act : Activity)
     fun removeLocalTasks(t : Task)
     {
         lock.lock()
-        val list = ResourceList.fromJSON(act.getSharedPreferences(act.getString(R.string.sharedPreferences_tasks_FILE), Context.MODE_PRIVATE)
-                                            .getString(act.getString(R.string.sharedPreferences_tasks_list), "")).list as MutableList<Task>
+        val list = ResourceList.fromJSON(ctx.getSharedPreferences(ctx.getString(R.string.sharedPreferences_tasks_FILE), Context.MODE_PRIVATE)
+                                            .getString(ctx.getString(R.string.sharedPreferences_tasks_list), "")).list as MutableList<Task>
         list.remove(t)
 
-        with(act.getSharedPreferences(act.getString(R.string.sharedPreferences_tasks_FILE), Context.MODE_PRIVATE).edit())
+        with(ctx.getSharedPreferences(ctx.getString(R.string.sharedPreferences_tasks_FILE), Context.MODE_PRIVATE).edit())
         {
-            putString(act.getString(R.string.sharedPreferences_tasks_list), ResourceList<Task>(list).toJSON())
+            putString(ctx.getString(R.string.sharedPreferences_tasks_list), ResourceList<Task>(list).toJSON())
             apply()
         }
 
@@ -150,8 +150,32 @@ class TasksHelper(val act : Activity)
         return try
         {
             ResourceList.fromJSON(
-                act.getSharedPreferences(act.getString(R.string.sharedPreferences_tasks_FILE), Context.MODE_PRIVATE)
-                    .getString(act.getString(R.string.sharedPreferences_tasks_list), "")).list as List<Task>
+                ctx.getSharedPreferences(ctx.getString(R.string.sharedPreferences_tasks_FILE), Context.MODE_PRIVATE)
+                    .getString(ctx.getString(R.string.sharedPreferences_tasks_list), "")).list as List<Task>
+        }
+        catch (e: Exception)
+        {
+            null
+        }
+        finally
+        {
+            lock.unlock()
+        }
+    }
+
+    fun getLocalTask(id : Int) : Task?
+    {
+        lock.lock()
+        return try
+        {
+            val list = ResourceList.fromJSON(
+                ctx.getSharedPreferences(ctx.getString(R.string.sharedPreferences_tasks_FILE), Context.MODE_PRIVATE)
+                    .getString(ctx.getString(R.string.sharedPreferences_tasks_list), "")).list as List<Task>
+            val filtered = list.filter { it.id == id }
+            if(filtered.isEmpty())
+                null
+            else
+                filtered.first()
         }
         catch (e: Exception)
         {

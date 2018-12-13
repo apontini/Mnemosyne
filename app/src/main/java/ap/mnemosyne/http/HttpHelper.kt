@@ -50,59 +50,56 @@ class HttpHelper(act: Context)
             return Pair(null, res)
         }
 
-        synchronized(httpclient)
+        var resp : Response
+        try
         {
-            var resp : Response
-            try
-            {
-                resp = httpclient.newCall(req).execute()
-            }
-            catch (uhe : UnknownHostException)
-            {
-                resp = mockupResponse(req, HttpHelper.ERROR_NO_CONNECTION)
-                return Pair(null, resp)
-            }
-
-            lateinit var resRet : Resource
-            if(parseRes)
-            {
-                val bodyResp: String = resp.body()?.string() ?: Message("Errore", "", "null dal server").toJSON()
-                Log.d("RESPONSE", bodyResp)
-                if(bodyResp.contains("{\"resource-list\":["))
-                {
-                    resRet = try
-                    {
-                        ResourceList.fromJSON(bodyResp)
-                    }
-                    catch (jpe: JsonParseException)
-                    {
-                        Message("JPE", "", jpe.message)
-                    }
-                    catch (cce: ClassCastException)
-                    {
-                        Message("CCE", "", cce.message)
-                    }
-                }
-                else
-                {
-                    val stream = ByteArrayInputStream(bodyResp.toByteArray(Charsets.UTF_8))
-                    resRet = try
-                    {
-                        Resource.fromJSON(stream)
-                    }
-                    catch (jpe: JsonParseException)
-                    {
-                        Message("JPE", "", jpe.message)
-                    }
-                    catch (cce: ClassCastException)
-                    {
-                        Message("CCE", "", cce.message)
-                    }
-                }
-
-            }
-            return Pair(resRet, resp)
+            resp = httpclient.newCall(req).execute()
         }
+        catch (uhe : UnknownHostException)
+        {
+            resp = mockupResponse(req, HttpHelper.ERROR_NO_CONNECTION)
+            return Pair(null, resp)
+        }
+
+        lateinit var resRet : Resource
+        if(parseRes)
+        {
+            val bodyResp: String = resp.body()?.string() ?: Message("Errore", "", "null dal server").toJSON()
+            Log.d("RESPONSE", bodyResp)
+            if(bodyResp.contains("{\"resource-list\":["))
+            {
+                resRet = try
+                {
+                    ResourceList.fromJSON(bodyResp)
+                }
+                catch (jpe: JsonParseException)
+                {
+                    Message("JPE", "", jpe.message)
+                }
+                catch (cce: ClassCastException)
+                {
+                    Message("CCE", "", cce.message)
+                }
+            }
+            else
+            {
+                val stream = ByteArrayInputStream(bodyResp.toByteArray(Charsets.UTF_8))
+                resRet = try
+                {
+                    Resource.fromJSON(stream)
+                }
+                catch (jpe: JsonParseException)
+                {
+                    Message("JPE", "", jpe.message)
+                }
+                catch (cce: ClassCastException)
+                {
+                    Message("CCE", "", cce.message)
+                }
+            }
+
+        }
+        return Pair(resRet, resp)
     }
 
     private fun mockupResponse(req : Request, code: Int) : Response

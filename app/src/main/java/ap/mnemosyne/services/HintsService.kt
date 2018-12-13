@@ -4,11 +4,10 @@ import android.annotation.SuppressLint
 import android.app.*
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.util.Log
 import android.graphics.BitmapFactory
+import android.location.Geocoder
 import android.location.Location
-import android.location.LocationManager
 import androidx.core.app.NotificationCompat
 import ap.mnemosyne.R
 import ap.mnemosyne.activities.ServiceActivity
@@ -23,16 +22,20 @@ import java.lang.IllegalStateException
 import android.media.RingtoneManager
 import android.os.*
 import android.os.Bundle
+import ap.mnemosyne.activities.TaskDetailsActivity
 import ap.mnemosyne.http.HttpHelper
+import ap.mnemosyne.resources.*
 import ap.mnemosyne.resources.Message
-import ap.mnemosyne.resources.Resource
-import ap.mnemosyne.session.SessionHelper
+import ap.mnemosyne.tasks.TasksHelper
 import okhttp3.FormBody
 import okhttp3.Request
 import okhttp3.Response
 import org.jetbrains.anko.doAsync
 import org.joda.time.LocalTime
 import org.joda.time.format.DateTimeFormat
+import java.io.ObjectInputStream
+import java.lang.StringBuilder
+import java.util.*
 
 
 class HintsService : Service(), LocationListener
@@ -47,6 +50,7 @@ class HintsService : Service(), LocationListener
         const val ACTION_CHANGE_POSITION_SETTINGS = 203
         const val TEXT_NOTIFICATION_ID = 2
     }
+
     init {
         Log.d("SERVICE", "Attivato")
         createNotificationChannel()
@@ -54,13 +58,19 @@ class HintsService : Service(), LocationListener
 
     lateinit var handler : Handler
     private lateinit var sessionid : String
+    private lateinit var tasks : TasksHelper
+    private lateinit var snoozed : SnoozeHelper
     private lateinit var googleApiClient : GoogleApiClient
     private lateinit var locationRequest : LocationRequest
+    private lateinit var gcd : Geocoder
     var delayCallback = 0L
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int
     {
         (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).cancelAll()
+        tasks = TasksHelper(this)
+        snoozed = SnoozeHelper(this)
+        gcd = Geocoder(this, Locale.getDefault())
         when(intent?.action ?: START)
         {
             START ->
@@ -113,9 +123,9 @@ class HintsService : Service(), LocationListener
         }
     }
 
-    private fun checkHints() : Long
+    private fun calculateCallbackTime(pos : Location?) : Long
     {
-        return 15000L
+        return 20000L
     }
 
     val handlerCallback = object : Runnable {
@@ -149,7 +159,24 @@ class HintsService : Service(), LocationListener
             {
                 200->
                 {
-
+                    val hints = (response.first as ResourceList<Hint>).list as List<Hint>
+                    var notfound = 0
+                    hints.forEach {
+                        if(tasks.getLocalTask(it.taskID) == null)
+                        {
+                            notfound++
+                        }
+                    }
+                    if(notfound>0)
+                    {
+                        tasks.updateTasksAndDo(true) {
+                            handleTasksNotification(hints)
+                        }
+                    }
+                    else
+                    {
+                        handleTasksNotification(hints)
+                    }
                 }
 
                 401->
@@ -179,7 +206,7 @@ class HintsService : Service(), LocationListener
                 }
             }
         }
-        delayCallback = checkHints()
+        delayCallback = calculateCallbackTime(p0)
         handler.postDelayed(handlerCallback, delayCallback)
     }
 
@@ -229,6 +256,8 @@ class HintsService : Service(), LocationListener
         if(!PermissionsHelper.checkPositionPermission(this@HintsService))
         {
             createPrerequisitesNotification(getString(R.string.alert_noPositionPermission), getString(R.string.notification_permission_description), ACTION_ASK_POSITION_PERMISSION)
+            (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).cancel(
+                ACTION_ASK_POSITION_PERMISSION)
             stopHintsService()
             return
         }
@@ -236,6 +265,8 @@ class HintsService : Service(), LocationListener
         if(!PermissionsHelper.checkCoarsePositionPermission(this@HintsService))
         {
             createPrerequisitesNotification(getString(R.string.alert_noCoarsePositionPermission), getString(R.string.notification_permission_description), ACTION_ASK_COARSE_POSITION_PERMISSION)
+            (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).cancel(
+                ACTION_ASK_COARSE_POSITION_PERMISSION)
             stopHintsService()
             return
         }
@@ -258,6 +289,8 @@ class HintsService : Service(), LocationListener
         task.addOnFailureListener { exception ->
             if (exception is ResolvableApiException)
             {
+                (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).cancel(
+                    ACTION_CHANGE_POSITION_SETTINGS)
                 createPrerequisitesNotification(getString(R.string.notification_settingsPosition_title), getString(R.string.notification_settingsPosition_descr), ACTION_CHANGE_POSITION_SETTINGS, exception.resolution)
             }
             else
@@ -265,6 +298,37 @@ class HintsService : Service(), LocationListener
                 exception.printStackTrace()
             }
             stopHintsService()
+        }
+    }
+
+    fun handleTasksNotification(hints : List<Hint>)
+    {
+
+        hints.forEach {
+            val t : Task? = tasks.getLocalTask(it.taskID)
+            //If task is null, it means that after the service asked for hints and BEFORE their processing, task was deleted
+            if(t!=null)
+            {
+                if (!snoozed.isSnoozed(t.id))
+                {
+                    snoozed.unSnooze(t.id) //To free local space up removing it from the map
+                    val builder = StringBuilder().apply {
+                        if(it.closestPlace?.name != null) append(it.closestPlace?.name + ", ")
+                        if(it.closestPlace?.town != null)
+                        {
+                            append(it.closestPlace?.town)
+                            if(it.closestPlace?.suburb != null) append(" (" + it.closestPlace?.suburb + ")")
+                            append(", ")
+                        }
+
+                        if(it.closestPlace?.road != null) append(it.closestPlace?.road + ", ")
+                        trim()
+                        if(length>0) deleteCharAt(length-2)
+                        else append("Tocca per visualizzare il posto più vicino")
+                    }
+                    createTaskNotification(t.name.capitalize(), builder.toString(), it)
+                }
+            }
         }
     }
 
@@ -302,6 +366,56 @@ class HintsService : Service(), LocationListener
 
         with(getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager) {
             notify(action, notification.build())
+        }
+    }
+
+    fun createTaskNotification(title: String, text : String, hint : Hint)
+    {
+        val notification = NotificationCompat.Builder(this, CHANNEL_ID).apply {
+            val bigTextStyle = NotificationCompat.BigTextStyle()
+            with(bigTextStyle) {
+                setBigContentTitle(title)
+                bigText(text)
+            }
+            setStyle(bigTextStyle)
+            setContentTitle(title)
+            setContentText(text)
+            setWhen(System.currentTimeMillis())
+            setSmallIcon(R.mipmap.ic_mnemosyne_notif)
+            priority = NotificationCompat.PRIORITY_MAX
+            val largeIconBitmap = BitmapFactory.decodeResource(resources, R.mipmap.ic_mnemosyne_launcher)
+            setLargeIcon(largeIconBitmap)
+            val uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+            setSound(uri)
+            setVibrate(LongArray(1) {1000L})
+
+            val clickInt = Intent(this@HintsService, TaskDetailsActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                putExtra("task", tasks.getLocalTask(hint.taskID))
+                putExtra("focusPlace", hint.closestPlace)
+            }
+            val pendingClickIntent = PendingIntent.getActivity(this@HintsService, hint.taskID, clickInt, 0)
+            setContentIntent(pendingClickIntent)
+
+            val snoozeIntent = Intent(this@HintsService, HintsHelperService::class.java).apply {
+                action = HintsHelperService.ACTION_SNOOZE_MIN
+                putExtra("taskID", hint.taskID)
+            }
+            val snoozePendingIntent = PendingIntent.getService(this@HintsService, hint.taskID, snoozeIntent, 0)
+            addAction(android.R.drawable.ic_delete, "Ritarda (15 min)", snoozePendingIntent)
+
+            val snoozeMaxIntent = Intent(this@HintsService, HintsHelperService::class.java).apply {
+                action = HintsHelperService.ACTION_SNOOZE_MAX
+                putExtra("taskID", hint.taskID)
+            }
+            val snoozeMaxPendingIntent = PendingIntent.getService(this@HintsService, hint.taskID, snoozeMaxIntent, 0)
+            addAction(android.R.drawable.ic_delete, "Ritarda (1 ora)", snoozeMaxPendingIntent)
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) setChannelId(CHANNEL_ID)
+        }
+
+        with(getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager) {
+            notify(hint.taskID, notification.build())
         }
     }
 

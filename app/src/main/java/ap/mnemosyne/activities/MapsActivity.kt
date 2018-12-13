@@ -14,15 +14,19 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import kotlinx.android.synthetic.main.activity_maps.*
 import org.jetbrains.anko.alert
+import java.lang.Exception
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback
 {
+    private var focusPlace : Place? = null
     override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_maps)
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        focusPlace = try {(intent.extras.getSerializable("focusPlace") as Place)} catch (e : Exception){null}
+
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         val mapFragment = supportFragmentManager
             .findFragmentById(R.id.map) as SupportMapFragment
@@ -51,8 +55,18 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback
                 googleMap.addMarker(MarkerOptions().position(latlon).title(it.name).title(it.name ?: "Nome non trovato"))
             }
 
-            val camera = LatLng(list.first().coordinates.lat, list.first().coordinates.lon)
-            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(camera, 13.0f))
+            if(focusPlace != null)
+            {
+                val camera = LatLng((focusPlace as Place).coordinates.lat,
+                    (focusPlace as Place).coordinates.lon)
+                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(camera, 13.0f))
+            }
+            else
+            {
+                val camera = LatLng(list.first().coordinates.lat,
+                    list.first().coordinates.lon)
+                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(camera, 13.0f))
+            }
         }
         else
         {
