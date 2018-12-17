@@ -193,9 +193,7 @@ class VoiceActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks,
         val task: com.google.android.gms.tasks.Task<LocationSettingsResponse> = client.checkLocationSettings(builder.build())
 
         task.addOnSuccessListener {
-            val location = LocationServices.FusedLocationApi.getLastLocation(googleApiClient)
-
-            toolbar.longSnackbar("Last location: $location")
+            //val location = LocationServices.FusedLocationApi.getLastLocation(googleApiClient)
 
             LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this)
 

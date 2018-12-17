@@ -34,9 +34,9 @@
             android:id="@+id/tableLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="16dp"
-            android:layout_marginEnd="16dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -52,6 +52,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_span="2"
+                    android:layout_weight="1"
                     android:text="TextView"
                     android:textAppearance="@style/MnemosyneBodyText1"
                     android:textColor="@color/onSecondary"
@@ -68,14 +69,16 @@
                     android:id="@+id/textNameP1"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_weight="1"
                     android:text="TextView"
                     android:textAppearance="@style/MnemosyneBodyText2"
                     android:textColor="@color/onSecondary" />
 
                 <TextView
                     android:id="@+id/textValueP1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
                     android:paddingLeft="25dp"
                     android:text="TextView"
                     android:textAppearance="@style/MnemosyneBodyText2"
@@ -92,13 +95,15 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="TextView"
+                    android:layout_weight="1"
                     android:textAppearance="@style/MnemosyneBodyText2"
                     android:textColor="@color/onSecondary" />
 
                 <TextView
                     android:id="@+id/textValueP2"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_weight="1"
                     android:paddingLeft="25dp"
                     android:text="TextView"
                     android:textAppearance="@style/MnemosyneBodyText2"
@@ -115,13 +120,15 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="TextView"
+                    android:layout_weight="1"
                     android:textAppearance="@style/MnemosyneBodyText2"
                     android:textColor="@color/onSecondary" />
 
                 <TextView
                     android:id="@+id/textValueP3"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_weight="1"
                     android:paddingLeft="25dp"
                     android:text="TextView"
                     android:textAppearance="@style/MnemosyneBodyText2"
@@ -138,13 +145,15 @@
                     android:layout_width="16dp"
                     android:layout_height="wrap_content"
                     android:text="TextView"
+                    android:layout_weight="1"
                     android:textAppearance="@style/MnemosyneBodyText2"
                     android:textColor="@color/onSecondary" />
 
                 <TextView
                     android:id="@+id/textValueP4"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_weight="1"
                     android:paddingLeft="25dp"
                     android:text="TextView"
                     android:textAppearance="@style/MnemosyneBodyText2"
@@ -158,12 +167,13 @@
 
                 <CheckBox
                     android:id="@+id/checkPossibleWork"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_span="2"
-                    android:text="Possibile al lavoro"
+                    android:layout_weight="1"
                     android:button="@null"
                     android:drawableEnd="?android:attr/listChoiceIndicatorMultiple"
+                    android:text="Possibile al lavoro"
                     android:textAppearance="@style/MnemosyneBodyText2" />
 
             </TableRow>
@@ -175,12 +185,13 @@
 
                 <CheckBox
                     android:id="@+id/checkRepeatable"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_span="2"
+                    android:layout_weight="1"
                     android:button="@null"
                     android:drawableEnd="?android:attr/listChoiceIndicatorMultiple"
-                    android:text="Eseguito oggi"
+                    android:text="Ripetibile"
                     android:textAppearance="@style/MnemosyneBodyText2" />
 
             </TableRow>
@@ -195,13 +206,15 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Eseguito oggi"
+                    android:layout_weight="1"
                     android:textAppearance="@style/MnemosyneBodyText2"
                     android:textColor="@color/onSecondary" />
 
                 <TextView
                     android:id="@+id/textDoneTodayValue"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_weight="1"
                     android:paddingLeft="25dp"
                     android:text="TextView"
                     android:textAppearance="@style/MnemosyneBodyText2"
@@ -220,13 +233,15 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Fallito:"
+                    android:layout_weight="1"
                     android:textAppearance="@style/MnemosyneBodyText2"
                     android:textColor="@color/onSecondary" />
 
                 <TextView
                     android:id="@+id/textFailedValue"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_weight="1"
                     android:paddingLeft="25dp"
                     android:text="TextView"
                     android:textAppearance="@style/MnemosyneBodyText2"
@@ -246,6 +261,7 @@
                 <Button
                     android:id="@+id/deleteTaskButton"
                     style="@style/ButtonMnemosyne"
+                    android:layout_weight="1"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"

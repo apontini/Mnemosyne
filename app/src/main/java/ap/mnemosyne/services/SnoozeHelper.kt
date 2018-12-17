@@ -34,7 +34,6 @@ class SnoozeHelper(private val ctx : Context)
         {
             lock.read {
                 val mapString = spref.getString(SNOOZED_PREF, "")?.toByteArray(StandardCharsets.UTF_8) ?: "".toByteArray(StandardCharsets.UTF_8)
-                Log.d("SNOOZE", spref.getString(SNOOZED_PREF, ""))
                 try
                 {
                     val bais = ByteArrayInputStream(Base64.decode(mapString, Base64.DEFAULT))
@@ -76,6 +75,7 @@ class SnoozeHelper(private val ctx : Context)
     fun unSnooze(id : Int)
     {
         lock.write {
+            Log.d("SNOOZE", "Rimuovo il task $id")
             map.remove(id)
             val baos = ByteArrayOutputStream()
             val oos = ObjectOutputStream(baos)

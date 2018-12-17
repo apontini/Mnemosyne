@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import android.graphics.BitmapFactory
-import android.location.Geocoder
 import android.location.Location
 import androidx.core.app.NotificationCompat
 import ap.mnemosyne.R
@@ -20,12 +19,15 @@ import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
 import java.lang.IllegalStateException
 import android.media.RingtoneManager
+import android.net.wifi.WifiManager
 import android.os.*
 import android.os.Bundle
 import ap.mnemosyne.activities.TaskDetailsActivity
 import ap.mnemosyne.http.HttpHelper
+import ap.mnemosyne.receivers.AlarmReceiver
 import ap.mnemosyne.resources.*
 import ap.mnemosyne.resources.Message
+import ap.mnemosyne.session.SessionHelper
 import ap.mnemosyne.tasks.TasksHelper
 import okhttp3.FormBody
 import okhttp3.Request
@@ -33,9 +35,7 @@ import okhttp3.Response
 import org.jetbrains.anko.doAsync
 import org.joda.time.LocalTime
 import org.joda.time.format.DateTimeFormat
-import java.io.ObjectInputStream
 import java.lang.StringBuilder
-import java.util.*
 
 
 class HintsService : Service(), LocationListener
@@ -43,12 +43,14 @@ class HintsService : Service(), LocationListener
     companion object {
         const val START = "START"
         const val STOP = "STOP"
+        const val CHECK_HINTS = "CHECK_HINTS"
         const val CHANNEL_ID = "MNEMOSYNE"
         const val ACTION_ASK_POSITION_PERMISSION = 200
         const val ACTION_ASK_COARSE_POSITION_PERMISSION = 201
         const val ACTION_ACTIVATE_POSITION = 202
         const val ACTION_CHANGE_POSITION_SETTINGS = 203
         const val TEXT_NOTIFICATION_ID = 2
+        const val TEXT_ERROR_ID = 3
     }
 
     init {
@@ -57,41 +59,55 @@ class HintsService : Service(), LocationListener
     }
 
     lateinit var handler : Handler
-    private lateinit var sessionid : String
     private lateinit var tasks : TasksHelper
+    private lateinit var session : SessionHelper
     private lateinit var snoozed : SnoozeHelper
     private lateinit var googleApiClient : GoogleApiClient
     private lateinit var locationRequest : LocationRequest
-    private lateinit var gcd : Geocoder
-    var delayCallback = 0L
+    private lateinit var wakeLock : PowerManager.WakeLock
+    private lateinit var wifiLock : WifiManager.WifiLock
+    private lateinit var alarmMgr: AlarmManager
+    private lateinit var alarmIntent : PendingIntent
+    private var alarmDelay = 10000L
+
+    override fun onCreate()
+    {
+        tasks = TasksHelper(this)
+        snoozed = SnoozeHelper(this)
+        session = SessionHelper(this)
+
+        wakeLock =
+            (getSystemService(Context.POWER_SERVICE) as PowerManager).run {
+                newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MyApp::MyWakelockTag")
+            }
+
+        wifiLock = (applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager).createWifiLock(WifiManager.WIFI_MODE_FULL, "mnemosyne_wifi_lock")
+        super.onCreate()
+    }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int
     {
         (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).cancelAll()
-        tasks = TasksHelper(this)
-        snoozed = SnoozeHelper(this)
-        gcd = Geocoder(this, Locale.getDefault())
         when(intent?.action ?: START)
         {
             START ->
             {
                 Log.d("SERVICE", "Mi avvio...")
-                sessionid = getSharedPreferences(getString(R.string.sharedPreferences_user_FILE), Context.MODE_PRIVATE)
-                        .getString(getString(R.string.sharedPreferences_user_sessionid), "") ?: ""
                 val apiAvailability = GoogleApiAvailability.getInstance()
                 val resultCode = apiAvailability.isGooglePlayServicesAvailable(this)
 
                 if(resultCode != ConnectionResult.SUCCESS)
                 {
                     createTextNotification(getString(R.string.notification_googleapi_notConnected_title), getString(
-                                            R.string.notification_googleapi_notConnected_descr))
+                                            R.string.notification_googleapi_notConnected_descr), true)
                     stopHintsService()
                 }
                 else
                 {
                     Log.d("SERVICE", "Cerco di collegarmi ai servizi google.. ")
+
                     googleApiClient = GoogleApiClient.Builder(this).addApi(LocationServices.API).addConnectionCallbacks(googleApiConnections)
-                        .addOnConnectionFailedListener(googleApiConnections).build()
+                       .addOnConnectionFailedListener(googleApiConnections).build()
                     googleApiClient.connect()
                 }
             }
@@ -99,6 +115,28 @@ class HintsService : Service(), LocationListener
             STOP ->
             {
                 stopHintsService()
+            }
+
+            CHECK_HINTS ->
+            {
+                try
+                {
+                    if(!googleApiClient.isConnected)
+                    {
+                        Log.d("SERVICE", "Called CHECK_HINTS but Google API client is not connected")
+                    }
+                    else
+                    {
+                        checkLocationAndDo {
+                            Log.d("SERVICE", "Inizio calcolo hints")
+                            startCheck()
+                        }
+                    }
+                }
+                catch (un : UninitializedPropertyAccessException)
+                {
+                    Log.d("SERVICE", "Called CHECK_HINTS but START was not called")
+                }
             }
         }
         return START_STICKY
@@ -110,7 +148,7 @@ class HintsService : Service(), LocationListener
         {
             Log.d("SERVICE", "Errore di collegamento ai servizi Google")
             createTextNotification(getString(R.string.notification_googleapi_notConnected_title), getString(
-                R.string.notification_googleapi_notConnected_descr))
+                R.string.notification_googleapi_notConnected_descr), true)
             stopHintsService()
         }
 
@@ -125,15 +163,27 @@ class HintsService : Service(), LocationListener
 
     private fun calculateCallbackTime(pos : Location?) : Long
     {
-        return 20000L
+        return 180000L
     }
 
-    val handlerCallback = object : Runnable {
-        @SuppressLint("MissingPermission")
-        override fun run()
-        {
-            checkLocationAndDo{
-                LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this@HintsService)
+    @SuppressLint("MissingPermission")
+    fun startCheck()
+    {
+        wakeLock.acquire(60000L)
+        wifiLock.acquire()
+        checkLocationAndDo{
+            val lastLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient)
+            if(System.currentTimeMillis() - lastLocation.time > 30000)
+            {
+                Log.d("SERVICE", "Calcolo una nuova posizione")
+                LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient,
+                    locationRequest,
+                    this@HintsService)
+            }
+            else
+            {
+                Log.d("SERVICE", "Uso l'ultima posizione")
+                onLocationChanged(lastLocation)
             }
         }
     }
@@ -148,7 +198,7 @@ class HintsService : Service(), LocationListener
             .add("time", time).build()
 
         val request = Request.Builder()
-            .addHeader("Cookie" , "JSESSIONID=" + sessionid)
+            .addHeader("Cookie" , "JSESSIONID=" + session.user.sessionID)
             .url(HttpHelper.HINTS_URL)
             .post(body)
             .build()
@@ -181,33 +231,40 @@ class HintsService : Service(), LocationListener
 
                 401->
                 {
-                    //TODO chiedere login
                     val respMessage = response.first as Message
-                    createTextNotification("Errore", respMessage.message)
+                    createTextNotification("Errore", "${respMessage.message}, tocca per risolvere", true)
+                    stopHintsService()
                 }
 
                 400->
                 {
                     val respMessage = response.first as Message
-                    createTextNotification("Errore", respMessage.message)
+                    createTextNotification("Errore", respMessage.message, true)
                 }
 
                 406->
                 {
                     //Per ora non verrà mai restituita
                     val respMessage = response.first as Message
-                    createTextNotification("Errore", respMessage.message)
+                    createTextNotification("Errore", respMessage.message, true)
                 }
 
                 500 ->
                 {
                     val respMessage = response.first as Message
-                    createTextNotification("Errore", respMessage.message)
+                    createTextNotification("Errore", respMessage.message, true)
                 }
             }
+
+            alarmDelay = calculateCallbackTime(p0)
+
+            alarmMgr.setAndAllowWhileIdle(
+                AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                SystemClock.elapsedRealtime() + alarmDelay,
+                alarmIntent)
+            wifiLock.release()
+            wakeLock.release()
         }
-        delayCallback = calculateCallbackTime(p0)
-        handler.postDelayed(handlerCallback, delayCallback)
     }
 
     fun startHintsService()
@@ -244,11 +301,15 @@ class HintsService : Service(), LocationListener
         }
 
         startForeground(1, notification.build())
-        checkLocationAndDo {
-            Log.d("SERVICE", "Ok, inizio il callback per la posizione")
-            handler = Handler()
-            handler.postDelayed(handlerCallback, delayCallback)
+        alarmMgr = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        alarmIntent = Intent(this, AlarmReceiver::class.java).let { intent ->
+            PendingIntent.getBroadcast(this, 0, intent, 0)
         }
+
+        alarmMgr.setAndAllowWhileIdle(
+            AlarmManager.ELAPSED_REALTIME_WAKEUP,
+            SystemClock.elapsedRealtime() + alarmDelay,
+            alarmIntent)
     }
 
     fun checkLocationAndDo(doWhat : () -> (Unit))
@@ -309,7 +370,7 @@ class HintsService : Service(), LocationListener
             //If task is null, it means that after the service asked for hints and BEFORE their processing, task was deleted
             if(t!=null)
             {
-                if (!snoozed.isSnoozed(t.id))
+                if (!snoozed.isSnoozed(t.id) || it.isUrgent)
                 {
                     snoozed.unSnooze(t.id) //To free local space up removing it from the map
                     val builder = StringBuilder().apply {
@@ -340,12 +401,12 @@ class HintsService : Service(), LocationListener
                 setBigContentTitle(title)
                 bigText(text)
             }
+            setContentText(text)
+            setContentTitle(title)
             setStyle(bigTextStyle)
             setWhen(System.currentTimeMillis())
             setSmallIcon(R.mipmap.ic_mnemosyne_notif)
             priority = NotificationCompat.PRIORITY_MAX
-            val largeIconBitmap = BitmapFactory.decodeResource(resources, R.mipmap.ic_mnemosyne_launcher)
-            setLargeIcon(largeIconBitmap)
             val uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
             setSound(uri)
             setVibrate(LongArray(1) {1000L})
@@ -383,11 +444,8 @@ class HintsService : Service(), LocationListener
             setWhen(System.currentTimeMillis())
             setSmallIcon(R.mipmap.ic_mnemosyne_notif)
             priority = NotificationCompat.PRIORITY_MAX
-            val largeIconBitmap = BitmapFactory.decodeResource(resources, R.mipmap.ic_mnemosyne_launcher)
-            setLargeIcon(largeIconBitmap)
             val uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
             setSound(uri)
-            setVibrate(LongArray(1) {1000L})
 
             val clickInt = Intent(this@HintsService, TaskDetailsActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -397,19 +455,63 @@ class HintsService : Service(), LocationListener
             val pendingClickIntent = PendingIntent.getActivity(this@HintsService, hint.taskID, clickInt, 0)
             setContentIntent(pendingClickIntent)
 
-            val snoozeIntent = Intent(this@HintsService, HintsHelperService::class.java).apply {
-                action = HintsHelperService.ACTION_SNOOZE_MIN
-                putExtra("taskID", hint.taskID)
-            }
-            val snoozePendingIntent = PendingIntent.getService(this@HintsService, hint.taskID, snoozeIntent, 0)
-            addAction(android.R.drawable.ic_delete, "Ritarda (15 min)", snoozePendingIntent)
+            when
+            {
+                hint.isConfirm ->
+                {
+                    with(bigTextStyle) {
+                        setBigContentTitle(title)
+                        bigText(getString(R.string.notification_completedQuestion))
+                    }
+                    setStyle(bigTextStyle)
+                    setContentText(getString(R.string.notification_completedQuestion))
+                    setVibrate(LongArray(1) {1000L})
+                    setOngoing(true)
+                    val successIntent = Intent(this@HintsService, HintsHelperService::class.java).apply {
+                        action = HintsHelperService.ACTION_COMPLETED_SUCCESS
+                        putExtra("taskID", hint.taskID)
+                    }
+                    val successPendingIntent = PendingIntent.getService(this@HintsService, hint.taskID, successIntent, 0)
+                    addAction(R.drawable.ic_baseline_check_24px, "Sì", successPendingIntent)
 
-            val snoozeMaxIntent = Intent(this@HintsService, HintsHelperService::class.java).apply {
-                action = HintsHelperService.ACTION_SNOOZE_MAX
-                putExtra("taskID", hint.taskID)
+                    val failedIntent = Intent(this@HintsService, HintsHelperService::class.java).apply {
+                        action = HintsHelperService.ACTION_COMPLETED_FAILED
+                        putExtra("taskID", hint.taskID)
+                    }
+                    val failedPendingIntent = PendingIntent.getService(this@HintsService, hint.taskID, failedIntent, 0)
+                    addAction(R.drawable.ic_baseline_clear_24px, "No", failedPendingIntent)
+                }
+
+                hint.isUrgent ->
+                {
+                    with(bigTextStyle) {
+                        setBigContentTitle("URGENTE! ${title.capitalize()}")
+                        bigText(text)
+                    }
+                    setStyle(bigTextStyle)
+                    setContentTitle("URGENTE! ${title.capitalize()}")
+                    setVibrate(LongArray(1) {2000L})
+                    setOngoing(true)
+                }
+
+                else ->
+                {
+                    setVibrate(LongArray(1) {1000L})
+                    val snoozeIntent = Intent(this@HintsService, HintsHelperService::class.java).apply {
+                        action = HintsHelperService.ACTION_SNOOZE_MIN
+                        putExtra("taskID", hint.taskID)
+                    }
+                    val snoozePendingIntent = PendingIntent.getService(this@HintsService, hint.taskID, snoozeIntent, 0)
+                    addAction(R.drawable.ic_baseline_clear_24px, "Ritarda (15 min)", snoozePendingIntent)
+
+                    val snoozeMaxIntent = Intent(this@HintsService, HintsHelperService::class.java).apply {
+                        action = HintsHelperService.ACTION_SNOOZE_MAX
+                        putExtra("taskID", hint.taskID)
+                    }
+                    val snoozeMaxPendingIntent = PendingIntent.getService(this@HintsService, hint.taskID, snoozeMaxIntent, 0)
+                    addAction(R.drawable.ic_baseline_clear_24px, "Ritarda (1 ora)", snoozeMaxPendingIntent)
+                }
             }
-            val snoozeMaxPendingIntent = PendingIntent.getService(this@HintsService, hint.taskID, snoozeMaxIntent, 0)
-            addAction(android.R.drawable.ic_delete, "Ritarda (1 ora)", snoozeMaxPendingIntent)
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) setChannelId(CHANNEL_ID)
         }
@@ -419,7 +521,7 @@ class HintsService : Service(), LocationListener
         }
     }
 
-    fun createTextNotification(title: String, text : String)
+    fun createTextNotification(title: String, text : String, isError : Boolean = false)
     {
         val notification = NotificationCompat.Builder(this, CHANNEL_ID).apply {
             setContentTitle(title)
@@ -435,6 +537,17 @@ class HintsService : Service(), LocationListener
             priority = NotificationCompat.PRIORITY_MAX
             val uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
             setSound(uri)
+
+            val clickInt = Intent(this@HintsService, SplashActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_CLEAR_TASK
+            }
+
+            val pendingClickIntent: PendingIntent = TaskStackBuilder.create(this@HintsService).run {
+                addNextIntentWithParentStack(clickInt)
+                getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT)
+            }
+            setContentIntent(pendingClickIntent)
+
             setSmallIcon(R.mipmap.ic_mnemosyne_notif)
             val largeIconBitmap = BitmapFactory.decodeResource(resources, R.mipmap.ic_mnemosyne_launcher)
             setLargeIcon(largeIconBitmap)
@@ -442,7 +555,9 @@ class HintsService : Service(), LocationListener
         }
 
         with(getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager) {
-            notify(TEXT_NOTIFICATION_ID, notification.build())
+            notify(
+                if(!isError) TEXT_NOTIFICATION_ID else TEXT_ERROR_ID,
+                notification.build())
         }
     }
 
@@ -450,7 +565,7 @@ class HintsService : Service(), LocationListener
     {
         Log.d("SERVICE","Mi fermo..")
         (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).cancel(TEXT_NOTIFICATION_ID)
-        try { handler.removeCallbacks(handlerCallback) } catch (ex : UninitializedPropertyAccessException) {}
+        try { alarmMgr.cancel(alarmIntent) } catch (ex : UninitializedPropertyAccessException) {}
         try{LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, this@HintsService)} catch (ise : IllegalStateException){}
         try { googleApiClient.disconnect() } catch (ex : UninitializedPropertyAccessException) {}
         stopForeground(true)

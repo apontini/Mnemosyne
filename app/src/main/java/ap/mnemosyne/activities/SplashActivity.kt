@@ -64,7 +64,7 @@ class SplashActivity : AppCompatActivity() {
 
     private fun doSplash()
     {
-        tasks.updateTasksAndDo(doWhat = {
+        tasks.updateTasksAndDo(true, doWhat = {
             val service = HintsService()
             if (!isMyServiceRunning(service.javaClass))
             {
@@ -76,7 +76,7 @@ class SplashActivity : AppCompatActivity() {
             overridePendingTransition(android.R.anim.fade_out, android.R.anim.fade_in)
             finish()
         },
-            doWhatError = { p0, p1 ->
+            doWhatError = { p0, _ ->
                 if(p0 == HttpHelper.ERROR_NO_CONNECTION)
                 {
                     alert("Non c'è connettività, premi Ok per riprovare"){

@@ -10,6 +10,8 @@
     <color name="grayBackground">#e0e0e0</color>
     <color name="onPrimary">#cc000000</color>
     <color name="onPrimaryHelper">#90000000</color>
+    <color name="colorError">#B00020</color>
+    <color name="onError">#FFF</color>
 
     <color name="onSecondary">#d7000000</color>
     <color name="onSecondaryHelper">#b0000000</color>

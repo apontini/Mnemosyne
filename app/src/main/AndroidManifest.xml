@@ -8,6 +8,7 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <uses-feature android:name="android.hardware.location.gps" />
     <uses-feature android:name="android.hardware.location.network" />
@@ -27,10 +28,12 @@
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />
 
+        <receiver android:name=".receivers.AlarmReceiver" />
+
         <service
             android:name="ap.mnemosyne.services.HintsService"
             android:enabled="true"
-            android:exported="true" />
+            android:exported="true"/>
 
         <service
             android:name="ap.mnemosyne.services.HintsHelperService"

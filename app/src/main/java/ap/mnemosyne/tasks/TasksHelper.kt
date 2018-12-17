@@ -144,6 +144,23 @@ class TasksHelper(val ctx : Context)
         lock.unlock()
     }
 
+    fun updateLocalTasks(t : Task)
+    {
+        lock.lock()
+        val list = ResourceList.fromJSON(ctx.getSharedPreferences(ctx.getString(R.string.sharedPreferences_tasks_FILE), Context.MODE_PRIVATE)
+            .getString(ctx.getString(R.string.sharedPreferences_tasks_list), "")).list as MutableList<Task>
+        val index = list.indexOf(t)
+        list[index] = t
+
+        with(ctx.getSharedPreferences(ctx.getString(R.string.sharedPreferences_tasks_FILE), Context.MODE_PRIVATE).edit())
+        {
+            putString(ctx.getString(R.string.sharedPreferences_tasks_list), ResourceList<Task>(list).toJSON())
+            apply()
+        }
+
+        lock.unlock()
+    }
+
     fun getLocalTasks() : Iterable<Task>?
     {
         lock.lock()

@@ -95,4 +95,5 @@
     <string name="notification_settingsPosition_title">Impostazioni di posizione non corrette</string>
     <string name="notification_settingsPosition_descr">La localizzazione non è attiva o le impostazioni non sono corrette, tocca per modificare</string>
     <string name="alert_positionSettings">La localizzazione non è attiva o le impostazioni non sono corrette, vuoi modificarle?</string>
+    <string name="notification_completedQuestion">L\'hai completato?</string>
 </resources>

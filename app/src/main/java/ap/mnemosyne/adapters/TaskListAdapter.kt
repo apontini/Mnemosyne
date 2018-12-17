@@ -3,11 +3,13 @@ package ap.mnemosyne.adapters
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.os.Bundle
 import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import android.widget.TextView
 import ap.mnemosyne.activities.TaskDetailsActivity
 import ap.mnemosyne.R
@@ -44,6 +46,7 @@ class TaskListAdapter(private val context: Context,
         val map = view.map
         val nametext = view.textTaskName as TextView
         val extratext = view.textTaskExtra as TextView
+        val extratext2 = view.textTaskExtra2 as TextView
         lateinit var task : Task
         val ctx : Context = ctx
         val v : View = view
@@ -57,7 +60,7 @@ class TaskListAdapter(private val context: Context,
         {
             task = t
             val options = GoogleMapOptions().liteMode(true)
-
+            if(task.isFailed) nametext.setTextColor(ctx.getColor(R.color.colorError))
             map.onCreate(Bundle())
             map.isClickable = false
 
@@ -78,6 +81,7 @@ class TaskListAdapter(private val context: Context,
 
             nametext.text = task.name.capitalize()
             extratext.text = "Fallito: ${if(task.isFailed) ctx.getString(R.string.text_yes) else ctx.getString(R.string.text_no)}"
+            extratext2.text = "Completato: ${if(task.isDoneToday) ctx.getString(R.string.text_yes) else ctx.getString(R.string.text_no)}"
         }
 
         override fun onClick(p0: View?)
