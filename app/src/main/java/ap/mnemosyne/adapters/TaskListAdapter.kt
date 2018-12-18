@@ -80,8 +80,16 @@ class TaskListAdapter(private val context: Context,
             }
 
             nametext.text = task.name.capitalize()
-            extratext.text = "Fallito: ${if(task.isFailed) ctx.getString(R.string.text_yes) else ctx.getString(R.string.text_no)}"
-            extratext2.text = "Completato: ${if(task.isDoneToday) ctx.getString(R.string.text_yes) else ctx.getString(R.string.text_no)}"
+            if(t.isIgnoredToday)
+            {
+                extratext.text = "Non completabile oggi"
+                extratext2.visibility = View.INVISIBLE
+            }
+            else
+            {
+                extratext.text = "Fallito: ${if(task.isFailed) ctx.getString(R.string.text_yes) else ctx.getString(R.string.text_no)}"
+                extratext2.text = "Completato: ${if(task.isDoneToday) ctx.getString(R.string.text_yes) else ctx.getString(R.string.text_no)}"
+            }
         }
 
         override fun onClick(p0: View?)

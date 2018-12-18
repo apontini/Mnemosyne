@@ -1,6 +1,7 @@
 package ap.mnemosyne.activities
 
 import android.app.Activity
+import android.content.Context
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity;
 import ap.mnemosyne.R
@@ -31,6 +32,9 @@ import java.util.*
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.Animatable2
 import android.location.Location
+import android.net.wifi.WifiManager
+import android.os.PowerManager
+import androidx.drawerlayout.widget.DrawerLayout
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.location.*
 import com.google.android.gms.common.GoogleApiAvailability
@@ -39,6 +43,7 @@ import com.google.android.gms.common.api.GoogleApiClient
 import com.google.android.gms.common.api.ResolvableApiException
 import kotlinx.android.synthetic.main.drawer_header.view.*
 import org.jetbrains.anko.design.longSnackbar
+import org.joda.time.format.DateTimeFormat
 
 
 class VoiceActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks,
@@ -50,6 +55,8 @@ class VoiceActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks,
     private lateinit var anim : AnimatedVectorDrawable
     private lateinit var callback : Animatable2.AnimationCallback
     private lateinit var locationRequest : LocationRequest
+    private lateinit var wakeLock : PowerManager.WakeLock
+    private lateinit var wifiLock : WifiManager.WifiLock
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
@@ -61,6 +68,12 @@ class VoiceActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks,
         setSupportActionBar(toolbar)
         setNavDrawer()
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        wakeLock =
+                (getSystemService(Context.POWER_SERVICE) as PowerManager).run {
+                    newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MyApp::MyWakelockTag")
+                }
+
+        wifiLock = (applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager).createWifiLock(WifiManager.WIFI_MODE_FULL, "mnemosyne_wifi_lock")
 
         val sessionid = session.user.sessionID
 
@@ -125,10 +138,25 @@ class VoiceActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks,
     {
         try
         {
+            if(wifiLock.isHeld) wifiLock.release()
+        }
+        catch (ue : UninitializedPropertyAccessException){}
+        try
+        {
+            if(wakeLock.isHeld) wakeLock.release()
+        }
+        catch (ue : UninitializedPropertyAccessException){}
+        try
+        {
             LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, this)
+        }
+        catch (ue : UninitializedPropertyAccessException){}
+        try
+        {
             googleApiClient.disconnect()
         }
         catch (ue : UninitializedPropertyAccessException){}
+        drawer_layout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
         super.onDestroy()
     }
 
@@ -136,10 +164,15 @@ class VoiceActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks,
     {
         val apiAvailability = GoogleApiAvailability.getInstance()
         val resultCode = apiAvailability.isGooglePlayServicesAvailable(this)
-
+        drawer_layout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
+        wakeLock.acquire(240000L)
+        wifiLock.acquire()
         if(resultCode != ConnectionResult.SUCCESS)
         {
             textStatus.text = getString(R.string.alert_noGoogleAPI)
+            drawer_layout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
+            if(wifiLock.isHeld) wifiLock.release()
+            if(wakeLock.isHeld) wakeLock.release()
             return
         }
 
@@ -155,6 +188,9 @@ class VoiceActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks,
         {
             alert(getString(R.string.alert_noPositionPermission)){
                 okButton {
+                    drawer_layout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
+                    if(wifiLock.isHeld) wifiLock.release()
+                    if(wakeLock.isHeld) wakeLock.release()
                     finish()
                     googleApiClient.disconnect()
                 }
@@ -166,6 +202,9 @@ class VoiceActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks,
         {
             alert(getString(R.string.alert_noCoarsePositionPermission)){
                 okButton {
+                    drawer_layout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
+                    if(wifiLock.isHeld) wifiLock.release()
+                    if(wakeLock.isHeld) wakeLock.release()
                     finish()
                     googleApiClient.disconnect()
                 }
@@ -216,6 +255,9 @@ class VoiceActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks,
         }
 
         task.addOnFailureListener { exception ->
+            drawer_layout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
+            if(wifiLock.isHeld) wifiLock.release()
+            if(wakeLock.isHeld) wakeLock.release()
             if (exception is ResolvableApiException)
             {
                 alert(getString(R.string.alert_positionSettings))
@@ -268,8 +310,9 @@ class VoiceActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks,
         if(p0.accuracy > 1000f) return
         LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, this)
         progressStatus.text = getString(R.string.text_voice_waitServer)
+        val time = LocalTime.now().toString(DateTimeFormat.forPattern("HH:mm"))
         val body = FormBody.Builder().add("sentence", textSentence.text.toString()).add("lat", p0.latitude.toString())
-            .add("lon", p0.longitude.toString()).build()
+            .add("lon", p0.longitude.toString()).add("time", time).build()
 
         val request = Request.Builder()
             .addHeader("Cookie" , "JSESSIONID=" + session.user.sessionID)
@@ -413,6 +456,12 @@ class VoiceActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks,
                     }
                 }
 
+                HttpHelper.ERROR_UNKNOWN->{
+                    uiThread {
+                        textStatus.text =  getString(R.string.text_general_error, getString(R.string.alert_generalError))
+                    }
+                }
+
                 else ->
                 {
                     val respMessage = response.first as Message
@@ -430,6 +479,9 @@ class VoiceActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks,
                     progressStatus.visibility = View.GONE
                 }
             }
+            drawer_layout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
+            if(wifiLock.isHeld) wifiLock.release()
+            if(wakeLock.isHeld) wakeLock.release()
         }
     }
 

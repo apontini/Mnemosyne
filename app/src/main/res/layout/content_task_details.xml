@@ -61,6 +61,24 @@
             </TableRow>
 
             <TableRow
+                android:id="@+id/detailsToggle"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="8dp">
+
+                <TextView
+                    android:id="@+id/detailsToggleText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="TextView"
+                    android:textAppearance="@style/MnemosyneBodyText2"
+                    android:textColor="@color/onSecondary" />
+
+            </TableRow>
+
+            <TableRow
+                android:id="@+id/details1"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginBottom="8dp">
@@ -86,6 +104,7 @@
             </TableRow>
 
             <TableRow
+                android:id="@+id/details2"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginBottom="8dp">
@@ -94,8 +113,8 @@
                     android:id="@+id/textNameP2"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="TextView"
                     android:layout_weight="1"
+                    android:text="TextView"
                     android:textAppearance="@style/MnemosyneBodyText2"
                     android:textColor="@color/onSecondary" />
 
@@ -111,6 +130,7 @@
             </TableRow>
 
             <TableRow
+                android:id="@+id/details3"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginBottom="8dp">
@@ -119,8 +139,8 @@
                     android:id="@+id/textNameP3"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="TextView"
                     android:layout_weight="1"
+                    android:text="TextView"
                     android:textAppearance="@style/MnemosyneBodyText2"
                     android:textColor="@color/onSecondary" />
 
@@ -136,6 +156,7 @@
             </TableRow>
 
             <TableRow
+                android:id="@+id/details4"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginBottom="8dp">
@@ -144,8 +165,8 @@
                     android:id="@+id/textNameP4"
                     android:layout_width="16dp"
                     android:layout_height="wrap_content"
-                    android:text="TextView"
                     android:layout_weight="1"
+                    android:text="TextView"
                     android:textAppearance="@style/MnemosyneBodyText2"
                     android:textColor="@color/onSecondary" />
 

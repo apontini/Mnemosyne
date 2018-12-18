@@ -123,6 +123,33 @@ class TaskDetailsActivity : AppCompatActivity(), OnMapReadyCallback
             }
         }
 
+        var hidden = true
+        detailsToggleText.text = getString(R.string.text_details_showDetails)
+        details1.visibility = View.GONE
+        details2.visibility = View.GONE
+        details3.visibility = View.GONE
+        details4.visibility = View.GONE
+
+        detailsToggle.setOnClickListener {
+            if(hidden)
+            {
+                detailsToggleText.text = getString(R.string.text_details_hideDetails)
+                details1.visibility = View.VISIBLE
+                details2.visibility = View.VISIBLE
+                details3.visibility = View.VISIBLE
+                details4.visibility = View.VISIBLE
+            }
+            else
+            {
+                detailsToggleText.text = getString(R.string.text_details_showDetails)
+                details1.visibility = View.GONE
+                details2.visibility = View.GONE
+                details3.visibility = View.GONE
+                details4.visibility = View.GONE
+            }
+            hidden = !hidden
+        }
+
         checkPossibleWork.isChecked = task.isPossibleAtWork
 
         textDoneTodayValue.text = if (task.isDoneToday)
@@ -186,7 +213,7 @@ class TaskDetailsActivity : AppCompatActivity(), OnMapReadyCallback
         progressBar3.visibility = View.VISIBLE
 
         val newTask = Task(task.id, task.user, task.name, task.constr, checkPossibleWork.isChecked,
-            checkRepeatable.isChecked, task.isDoneToday, task.isFailed, task.placesToSatisfy)
+            checkRepeatable.isChecked, task.isDoneToday, task.isFailed, task.isIgnoredToday, task.placesToSatisfy)
 
         val request = Request.Builder()
             .addHeader("Cookie" , "JSESSIONID="+session.user.sessionID)
@@ -285,6 +312,12 @@ class TaskDetailsActivity : AppCompatActivity(), OnMapReadyCallback
                     uiThread { alert(getString(R.string.alert_noInternetConnection)) {  }.show() }
                     error = true
                 }
+
+                HttpHelper.ERROR_UNKNOWN->{
+                uiThread {
+                    alert(getString(R.string.alert_generalError)) {  }.show()
+                }
+            }
 
                 else ->{
                     Log.d("MESSAGGIO", resp.second.code().toString())

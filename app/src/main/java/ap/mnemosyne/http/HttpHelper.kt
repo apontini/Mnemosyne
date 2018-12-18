@@ -37,6 +37,7 @@ class HttpHelper(act: Context)
         const val HINTS_URL : String = "$BASE_URL/mnemosyne/hints"
         const val ERROR_PERMISSIONS = 999
         const val ERROR_NO_CONNECTION = 998
+        const val ERROR_UNKNOWN = 997
     }
 
     val act : Context = act
@@ -58,6 +59,11 @@ class HttpHelper(act: Context)
         catch (uhe : UnknownHostException)
         {
             resp = mockupResponse(req, HttpHelper.ERROR_NO_CONNECTION)
+            return Pair(null, resp)
+        }
+        catch (pe : java.net.ProtocolException)
+        {
+            resp = mockupResponse(req, HttpHelper.ERROR_UNKNOWN)
             return Pair(null, resp)
         }
 

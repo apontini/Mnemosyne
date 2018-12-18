@@ -87,6 +87,12 @@ class TasksHelper(val ctx : Context)
                         errorString = ctx.getString(R.string.alert_noInternetConnection)
                     }
 
+                    HttpHelper.ERROR_UNKNOWN ->
+                    {
+                        error = HttpHelper.ERROR_UNKNOWN
+                        errorString = ctx.getString(R.string.alert_generalError)
+                    }
+
                     else ->
                     {
                         error = -1
@@ -144,7 +150,7 @@ class TasksHelper(val ctx : Context)
         lock.unlock()
     }
 
-    fun updateLocalTasks(t : Task)
+    fun modifyLocalTasks(t : Task)
     {
         lock.lock()
         val list = ResourceList.fromJSON(ctx.getSharedPreferences(ctx.getString(R.string.sharedPreferences_tasks_FILE), Context.MODE_PRIVATE)

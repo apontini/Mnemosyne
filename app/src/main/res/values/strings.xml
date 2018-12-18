@@ -56,7 +56,7 @@
     <string name="text_voice_PRSR01">Non hai specificato la frase!</string>
     <string name="text_voice_PRSR02">Lat o Lon non specificati nella richiesta</string>
     <string name="text_voice_PRSR07">Non ho trovato posti aperti per soddisfare il task all\'ora \'%s\'</string>
-    <string name="text_voice_PRSR10">Il server non ha ricevuto dati dai servizi Places, riprova tra un po\'</string>
+    <string name="text_voice_PRSR10">Il server non ha trovato luoghi per completare l\'azione, riprova tra un po\'</string>
     <string name="text_general_error">ERRORE: %s</string>
     <string name="title_activity_settings">Impostazioni</string>
     <string name="text_voice_understood">OK! Ho capito!</string>
@@ -96,4 +96,8 @@
     <string name="notification_settingsPosition_descr">La localizzazione non è attiva o le impostazioni non sono corrette, tocca per modificare</string>
     <string name="alert_positionSettings">La localizzazione non è attiva o le impostazioni non sono corrette, vuoi modificarle?</string>
     <string name="notification_completedQuestion">L\'hai completato?</string>
+    <string name="text_details_showDetails">Mostra dettagli</string>
+    <string name="text_details_hideDetails">Nascondi Dettagli</string>
+    <string name="alert_generalError">Errore inaspettato, riprova</string>
+    <string name="alert_noConnectivitySplash">Non c\'è connettività, premi Ok per riprovare</string>
 </resources>

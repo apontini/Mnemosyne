@@ -14,6 +14,7 @@ import android.app.ActivityManager
 import android.content.Context
 import android.content.pm.PackageManager
 import android.util.Log
+import ap.mnemosyne.R
 import ap.mnemosyne.services.HintsService
 
 
@@ -79,13 +80,19 @@ class SplashActivity : AppCompatActivity() {
             doWhatError = { p0, _ ->
                 if(p0 == HttpHelper.ERROR_NO_CONNECTION)
                 {
-                    alert("Non c'è connettività, premi Ok per riprovare"){
+                    alert(getString(R.string.alert_noConnectivitySplash)){
                         okButton { doSplash() }
                     }.show()
                 }
                 else if(p0 == HttpHelper.ERROR_PERMISSIONS)
                 {
                     PermissionsHelper.askInternetPermission(this)
+                }
+                else if(p0 == HttpHelper.ERROR_UNKNOWN)
+                {
+                    alert(getString(R.string.alert_generalError)){
+                        okButton { doSplash() }
+                    }.show()
                 }
             })
     }

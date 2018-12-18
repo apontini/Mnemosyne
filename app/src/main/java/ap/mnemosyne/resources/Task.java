@@ -22,12 +22,13 @@ public class Task extends Resource implements Serializable
 	private boolean repeatable;
 	private boolean doneToday;
 	private boolean failed;
+	private boolean ignoredToday;
 	private Set<Place> placesToSatisfy;
 
 	@JsonCreator
 	public Task(@JsonProperty("id") int id,@JsonProperty("user") String user, @JsonProperty("name") String name, @JsonProperty("constr") TaskConstraint constr,
-	            @JsonProperty("possibleAtWork") boolean possibleAtWork, @JsonProperty("repeatable") boolean repeatable, @JsonProperty("doneToday") boolean doneToday,
-	            @JsonProperty("failed") boolean failed, @JsonProperty("placesToSatisfy") Set<Place> placesToSatisfy)
+				@JsonProperty("possibleAtWork") boolean possibleAtWork, @JsonProperty("repeatable") boolean repeatable, @JsonProperty("doneToday") boolean doneToday,
+				@JsonProperty("failed") boolean failed, @JsonProperty("ignoredToday") boolean ignoredToday, @JsonProperty("placesToSatisfy") Set<Place> placesToSatisfy)
 	{
 		this.user = user;
 		this.name = name;
@@ -37,6 +38,7 @@ public class Task extends Resource implements Serializable
 		this.repeatable = repeatable;
 		this.doneToday = doneToday;
 		this.failed = failed;
+		this.ignoredToday = ignoredToday;
 		this.placesToSatisfy = placesToSatisfy;
 	}
 
@@ -80,6 +82,11 @@ public class Task extends Resource implements Serializable
 		return failed;
 	}
 
+	public boolean isIgnoredToday()
+	{
+		return ignoredToday;
+	}
+
 	public Set<Place> getPlacesToSatisfy()
 	{
 		return placesToSatisfy;
@@ -96,6 +103,7 @@ public class Task extends Resource implements Serializable
 				", repeatable=" + repeatable +
 				", doneToday=" + doneToday +
 				", failed=" + failed +
+				", ignoredToday=" + ignoredToday +
 				", placesToSatisfy=" + placesToSatisfy +
 				'}';
 	}

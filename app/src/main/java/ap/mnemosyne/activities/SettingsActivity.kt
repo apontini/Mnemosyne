@@ -430,10 +430,17 @@ class SettingsActivity : AppCompatActivity()
                             }
                         }
 
-                        HttpHelper.ERROR_PERMISSIONS ->
+                        HttpHelper.ERROR_NO_CONNECTION ->
                         {
                             uiThread {
                                 alert(this@Preferences.activity.getString(R.string.alert_noInternetConnection)).show()
+                            }
+                        }
+
+                        HttpHelper.ERROR_UNKNOWN ->
+                        {
+                            uiThread {
+                                alert(this@Preferences.activity.getString(R.string.alert_generalError)).show()
                             }
                         }
 

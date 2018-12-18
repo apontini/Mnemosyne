@@ -73,7 +73,7 @@ class HintsHelperService : IntentService("HintsHelperService")
             .getString(getString(R.string.sharedPreferences_user_sessionid), "") ?: ""
 
         val oldTask = tasks.getLocalTask(id) ?: return
-        val task = Task(oldTask.id, oldTask.user, oldTask.name, oldTask.constr, oldTask.isPossibleAtWork, oldTask.isRepeatable, done, failed, oldTask.placesToSatisfy)
+        val task = Task(oldTask.id, oldTask.user, oldTask.name, oldTask.constr, oldTask.isPossibleAtWork, oldTask.isRepeatable, done, failed, oldTask.isIgnoredToday, oldTask.placesToSatisfy)
 
         val request = Request.Builder()
             .addHeader("Cookie" , "JSESSIONID=" + sessionid)
@@ -87,7 +87,7 @@ class HintsHelperService : IntentService("HintsHelperService")
             {
                 200->
                 {
-                    tasks.updateLocalTasks(task)
+                    tasks.modifyLocalTasks(task)
                     Log.d("SERVICE-INTENT", "Task updated")
                 }
 
