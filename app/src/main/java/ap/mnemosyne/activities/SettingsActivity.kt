@@ -10,6 +10,7 @@ import android.view.MenuItem
 import com.google.android.gms.location.places.ui.PlacePicker
 import kotlinx.android.synthetic.main.activity_settings.*
 import android.content.Intent
+import android.location.Address
 import android.util.Log
 import ap.mnemosyne.enums.ParamsName
 import ap.mnemosyne.http.HttpHelper
@@ -286,21 +287,28 @@ class SettingsActivity : AppCompatActivity()
                     DateTimeFormat.forPattern("HH:mm"))}"  else getString(R.string.text_settings_notDefined)
 
                 val gcd = Geocoder(context, Locale.getDefault())
-                var addresses = gcd.getFromLocation((locationHouse as LocationParameter).location?.lat!!, (locationHouse as LocationParameter).location?.lon!!, 1)
-                if (addresses.size > 0)
+                lateinit var addresses : MutableList<Address>
+                if(locationHouse != null)
                 {
-                    if(addresses[0].thoroughfare != null)
+                    addresses = gcd.getFromLocation((locationHouse as LocationParameter).location?.lat!!, (locationHouse as LocationParameter).location?.lon!!, 1)
+                    if (addresses.size > 0)
                     {
-                        findPreference("location_house").summary = addresses[0].thoroughfare
+                        if(addresses[0].thoroughfare != null)
+                        {
+                            findPreference("location_house").summary = addresses[0].thoroughfare
+                        }
                     }
                 }
 
-                addresses = gcd.getFromLocation((locationWork as LocationParameter).location?.lat!!, (locationWork as LocationParameter).location?.lon!!, 1)
-                if (addresses.size > 0)
+                if(locationWork != null)
                 {
-                    if(addresses[0].thoroughfare != null)
+                    addresses = gcd.getFromLocation((locationWork as LocationParameter).location?.lat!!, (locationWork as LocationParameter).location?.lon!!, 1)
+                    if (addresses.size > 0)
                     {
-                        findPreference("location_work").summary = addresses[0].thoroughfare
+                        if(addresses[0].thoroughfare != null)
+                        {
+                            findPreference("location_work").summary = addresses[0].thoroughfare
+                        }
                     }
                 }
             }

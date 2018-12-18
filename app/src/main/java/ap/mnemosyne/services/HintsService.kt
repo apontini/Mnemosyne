@@ -58,7 +58,6 @@ class HintsService : Service(), LocationListener
         createNotificationChannel()
     }
 
-    lateinit var handler : Handler
     private lateinit var tasks : TasksHelper
     private lateinit var session : SessionHelper
     private lateinit var snoozed : SnoozeHelper
@@ -169,7 +168,7 @@ class HintsService : Service(), LocationListener
     @SuppressLint("MissingPermission")
     fun startCheck()
     {
-        wakeLock.acquire(60000L)
+        wakeLock.acquire(180000L)
         wifiLock.acquire()
         checkLocationAndDo{
             val lastLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient)
@@ -262,8 +261,8 @@ class HintsService : Service(), LocationListener
                 AlarmManager.ELAPSED_REALTIME_WAKEUP,
                 SystemClock.elapsedRealtime() + alarmDelay,
                 alarmIntent)
-            wifiLock.release()
-            wakeLock.release()
+            if(wifiLock.isHeld) wifiLock.release()
+            if(wakeLock.isHeld) wakeLock.release()
         }
     }
 
