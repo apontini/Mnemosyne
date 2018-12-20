@@ -55,7 +55,6 @@ class HintsService : Service(), LocationListener
 
     init {
         Log.d("SERVICE", "Attivato")
-        createNotificationChannel()
     }
 
     private lateinit var tasks : TasksHelper
@@ -74,6 +73,7 @@ class HintsService : Service(), LocationListener
         tasks = TasksHelper(this)
         snoozed = SnoozeHelper(this)
         session = SessionHelper(this)
+        createNotificationChannel()
 
         wakeLock =
             (getSystemService(Context.POWER_SERVICE) as PowerManager).run {
@@ -172,7 +172,7 @@ class HintsService : Service(), LocationListener
         wifiLock.acquire()
         checkLocationAndDo{
             val lastLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient)
-            if(System.currentTimeMillis() - lastLocation.time > 30000)
+            if(lastLocation != null && System.currentTimeMillis() - lastLocation.time > 30000)
             {
                 Log.d("SERVICE", "Calcolo una nuova posizione")
                 LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient,
@@ -565,7 +565,7 @@ class HintsService : Service(), LocationListener
         Log.d("SERVICE","Mi fermo..")
         (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).cancel(TEXT_NOTIFICATION_ID)
         try { alarmMgr.cancel(alarmIntent) } catch (ex : UninitializedPropertyAccessException) {}
-        try{LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, this@HintsService)} catch (ise : IllegalStateException){}
+        try{LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, this@HintsService)} catch (ise : IllegalStateException){} catch (ex : UninitializedPropertyAccessException) {}
         try { googleApiClient.disconnect() } catch (ex : UninitializedPropertyAccessException) {}
         stopForeground(true)
         stopSelf()

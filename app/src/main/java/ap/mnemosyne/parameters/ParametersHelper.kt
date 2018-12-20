@@ -1,6 +1,7 @@
 package ap.mnemosyne.parameters
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.util.Log
 import ap.mnemosyne.activities.LoginActivity
@@ -22,7 +23,7 @@ import org.joda.time.format.DateTimeFormatter
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.locks.ReentrantLock
 
-class ParametersHelper(val act: Activity)
+class ParametersHelper(val ctx: Context)
 {
 
     companion object
@@ -33,12 +34,12 @@ class ParametersHelper(val act: Activity)
         val lock by lazy { ReentrantLock() }
     }
 
-    val session = SessionHelper(act)
+    val session = SessionHelper(ctx)
 
-    fun updateParametersAndDo(forceUpdate : Boolean = false, doWhatError: (Int, String) -> Unit = {_,p1 -> act.alert(p1).show()}, doWhat: () -> (Unit))
+    fun updateParametersAndDo(forceUpdate : Boolean = false, doWhatError: (Int, String) -> Unit = {_,p1 -> ctx.alert(p1).show()}, doWhat: () -> (Unit))
     {
         lock.lock()
-        val refreshed = LocalDateTime.parse(act.defaultSharedPreferences.getString(ParametersHelper.LAST_REFRESH,
+        val refreshed = LocalDateTime.parse(ctx.defaultSharedPreferences.getString(ParametersHelper.LAST_REFRESH,
             "1970-01-01 00:00"), ParametersHelper.dateTimeFormat)
         val now = LocalDateTime.now()
         Log.d("LOCK", refreshed.toString())
@@ -51,7 +52,7 @@ class ParametersHelper(val act: Activity)
                         .sessionID)
                     .url(HttpHelper.REST_PARAMETER_URL)
                     .build()
-                val resp = HttpHelper(act).request(request, true)
+                val resp = HttpHelper(ctx).request(request, true)
                 var error = 0
                 var errorString = ""
                 when (resp.second.code())
@@ -60,8 +61,8 @@ class ParametersHelper(val act: Activity)
                     {
                         error = 401
                         Log.d("SESSION", "Sessione scaduta")
-                        val intent = Intent(act, LoginActivity::class.java)
-                        act.startActivityForResult(intent, SessionHelper.LOGIN_REQUEST_CODE)
+                        val intent = Intent(ctx, LoginActivity::class.java)
+                        if(ctx is Activity) ctx.startActivityForResult(intent, SessionHelper.LOGIN_REQUEST_CODE)
                     }
 
                     200 ->
@@ -75,7 +76,7 @@ class ParametersHelper(val act: Activity)
                         }
 
                         (resp.first as ResourceList<Parameter>).list.forEach {
-                            with(act.defaultSharedPreferences.edit()) {
+                            with(ctx.defaultSharedPreferences.edit()) {
                                 putString(it.name.name, it.toJSON())
                                 map[it.name] = true
                                 apply()
@@ -83,13 +84,13 @@ class ParametersHelper(val act: Activity)
                         }
 
                         map.filter { !it.value }.forEach {
-                            with(act.defaultSharedPreferences.edit()) {
+                            with(ctx.defaultSharedPreferences.edit()) {
                                 putString(it.key.name, "")
                                 apply()
                             }
                         }
 
-                        with(act.defaultSharedPreferences.edit()) {
+                        with(ctx.defaultSharedPreferences.edit()) {
                             putString(LAST_REFRESH, now.toString(dateTimeFormat))
                             apply()
                         }
@@ -98,21 +99,21 @@ class ParametersHelper(val act: Activity)
                     HttpHelper.ERROR_PERMISSIONS ->
                     {
                         error = HttpHelper.ERROR_PERMISSIONS
-                        errorString = act.getString(R.string.alert_noInternetPermission)
+                        errorString = ctx.getString(R.string.alert_noInternetPermission)
 
                     }
 
                     HttpHelper.ERROR_NO_CONNECTION ->
                     {
                         error = HttpHelper.ERROR_PERMISSIONS
-                        errorString = act.getString(R.string.alert_noInternetConnection)
+                        errorString = ctx.getString(R.string.alert_noInternetConnection)
 
                     }
 
                     else ->
                     {
                         error = -1
-                        uiThread {act.alert("Non ho potuto aggiornare i parametri, codice: " + resp.second.code()) { }.show()  }
+                        uiThread {ctx.alert("Non ho potuto aggiornare i parametri, codice: " + resp.second.code()) { }.show()  }
                     }
                 }
                 if (error == 0)
@@ -137,10 +138,10 @@ class ParametersHelper(val act: Activity)
         lock.unlock()
     }
 
-    fun updateParameterAndDo(parameter : ParamsName,forceUpdate : Boolean = false, doWhatError: (Int, String) -> Unit = {_,p1 -> act.alert(p1).show()}, doWhat: () -> (Unit))
+    fun updateParameterAndDo(parameter : ParamsName, forceUpdate : Boolean = false, doWhatError: (Int, String) -> Unit = {_,p1 -> ctx.alert(p1).show()}, doWhat: () -> (Unit))
     {
         lock.lock()
-        val refreshed = LocalDateTime.parse(act.defaultSharedPreferences.getString(ParametersHelper.LAST_REFRESH,
+        val refreshed = LocalDateTime.parse(ctx.defaultSharedPreferences.getString(ParametersHelper.LAST_REFRESH,
             "1970-01-01 00:00"), ParametersHelper.dateTimeFormat)
         val now = LocalDateTime.now()
         if (forceUpdate || Minutes.minutesBetween(refreshed, now).minutes >= MIN_UPDATE)
@@ -151,7 +152,7 @@ class ParametersHelper(val act: Activity)
                         .sessionID)
                     .url(HttpHelper.REST_PARAMETER_URL + "/" + parameter.name)
                     .build()
-                val resp = HttpHelper(act).request(request, true)
+                val resp = HttpHelper(ctx).request(request, true)
                 var error = 0
                 var errorString = ""
                 when (resp.second.code())
@@ -160,14 +161,14 @@ class ParametersHelper(val act: Activity)
                     {
                         error = 401
                         Log.d("SESSION", "Sessione scaduta")
-                        val intent = Intent(act, LoginActivity::class.java)
-                        act.startActivityForResult(intent, SessionHelper.LOGIN_REQUEST_CODE)
+                        val intent = Intent(ctx, LoginActivity::class.java)
+                        if(ctx is Activity) ctx.startActivityForResult(intent, SessionHelper.LOGIN_REQUEST_CODE)
                     }
 
                     200 ->
                     {
                         val param = resp.first as Parameter
-                        with(act.defaultSharedPreferences.edit()) {
+                        with(ctx.defaultSharedPreferences.edit()) {
                             putString(param.name.name, param.toJSON())
                             apply()
                         }
@@ -176,21 +177,21 @@ class ParametersHelper(val act: Activity)
                     HttpHelper.ERROR_PERMISSIONS ->
                     {
                         error = HttpHelper.ERROR_PERMISSIONS
-                        uiThread { act.alert(act.getString(R.string.alert_noInternetPermission)) { }.show() }
+                        uiThread { ctx.alert(ctx.getString(R.string.alert_noInternetPermission)) { }.show() }
 
                     }
 
                     HttpHelper.ERROR_NO_CONNECTION ->
                     {
                         error = HttpHelper.ERROR_PERMISSIONS
-                        uiThread { act.alert(act.getString(R.string.alert_noInternetConnection)) { }.show() }
+                        uiThread { ctx.alert(ctx.getString(R.string.alert_noInternetConnection)) { }.show() }
 
                     }
 
                     else ->
                     {
                         error = -1
-                        uiThread { act.alert("Non ho potuto aggiornare i parametri, codice: " + resp.second.code()) { }.show() }
+                        uiThread { ctx.alert("Non ho potuto aggiornare i parametri, codice: " + resp.second.code()) { }.show() }
 
                     }
                 }
@@ -219,7 +220,7 @@ class ParametersHelper(val act: Activity)
     {
         lock.lock()
         ParamsName.values().forEach {
-            with(act.defaultSharedPreferences.edit()){
+            with(ctx.defaultSharedPreferences.edit()){
                 remove(it.name)
                 putString(LAST_REFRESH, "1970-01-01 00:00")
                 apply()
@@ -233,7 +234,7 @@ class ParametersHelper(val act: Activity)
         lock.lock()
         return try
         {
-            Parameter.fromJSON(act.defaultSharedPreferences.getString(p.name, "").byteInputStream(
+            Parameter.fromJSON(ctx.defaultSharedPreferences.getString(p.name, "").byteInputStream(
             StandardCharsets.UTF_8))
         }
         catch (e: Exception)

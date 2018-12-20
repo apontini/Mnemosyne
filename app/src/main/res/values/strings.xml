@@ -100,4 +100,18 @@
     <string name="text_details_hideDetails">Nascondi Dettagli</string>
     <string name="alert_generalError">Errore inaspettato, riprova</string>
     <string name="alert_noConnectivitySplash">Non c\'è connettività, premi Ok per riprovare</string>
+    <string name="action_next">Next</string>
+    <string name="parameter_lunch">Orario Pranzo</string>
+    <string name="parameter_dinner">Orario Cena</string>
+    <string name="parameter_bed">Orario Letto</string>
+    <string name="parameter_work">Orario di Lavoro</string>
+    <string name="parameter_house">Abitazione</string>
+    <string name="parameter_workplace">Luogo di Lavoro</string>
+    <string name="button_set">Imposta</string>
+    <string name="onboarding1_title">Benvenuto in Mnemosyne</string>
+    <string name="onboarding1_helper">Prima di cominciare devo farti alcune domande</string>
+    <string name="onboarding2_title">Mi serve sapere dove vivi e dove lavori</string>
+    <string name="onboarding3_title">Ora mi serve sapere com\'è organizzata la tua giornata</string>
+    <string name="button_begin">Inizia</string>
+    <string name="onboarding4_title">Tutto sistemato</string>
 </resources>

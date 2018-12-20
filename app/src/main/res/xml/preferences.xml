@@ -20,42 +20,42 @@
 
         <Preference
             android:key="location_house"
-            android:title="Casa"
+            android:title="@string/parameter_house"
             android:icon="@drawable/ic_round_home_24px"
             android:summary="@string/text_settings_loading"
             />
 
         <Preference
             android:key="location_work"
-            android:title="Lavoro"
+            android:title="@string/parameter_workplace"
             android:icon="@drawable/ic_round_work_24px"
             android:summary="@string/text_settings_loading"
             />
 
         <Preference
             android:key="time_lunch"
-            android:title="Orario di pranzo"
+            android:title="@string/parameter_lunch"
             android:icon="@drawable/ic_round_restaurant_24px"
             android:summary="@string/text_settings_loading"
             />
 
         <Preference
             android:key="time_dinner"
-            android:title="Orario di cena"
+            android:title="@string/parameter_dinner"
             android:icon="@drawable/ic_round_restaurant_24px"
             android:summary="@string/text_settings_loading"
             />
 
         <Preference
             android:key="time_bed"
-            android:title="Orario letto"
+            android:title="@string/parameter_bed"
             android:icon="@drawable/ic_round_hotel_24px"
             android:summary="@string/text_settings_loading"
             />
 
         <Preference
             android:key="time_work"
-            android:title="Orario di lavoro"
+            android:title="@string/parameter_work"
             android:icon="@drawable/ic_round_access_time_24px"
             android:summary="@string/text_settings_loading"
             />

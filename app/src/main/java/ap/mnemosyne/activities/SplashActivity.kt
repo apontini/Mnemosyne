@@ -15,29 +15,48 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.util.Log
 import ap.mnemosyne.R
+import ap.mnemosyne.enums.ParamsName
+import ap.mnemosyne.parameters.ParametersHelper
 import ap.mnemosyne.services.HintsService
 
 
 class SplashActivity : AppCompatActivity() {
 
     private lateinit var tasks: TasksHelper
+    private lateinit var params: ParametersHelper
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         tasks = TasksHelper(this)
+        params = ParametersHelper(this)
         //Permissions check
         PermissionsHelper.askPermissions(this)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         when (requestCode) {
-            SessionHelper.LOGIN_REQUEST_CODE -> {
-                when (resultCode) {
-                    Activity.RESULT_OK -> {
+            OnboardingActivity.ONBOARDING_REQUEST_CODE ->
+            {
+                when (resultCode)
+                {
+                    Activity.RESULT_OK ->
+                    {
+                        doSplash()
+                    }
+                }
+            }
+
+            SessionHelper.LOGIN_REQUEST_CODE ->
+            {
+                when (resultCode)
+                {
+                    Activity.RESULT_OK ->
+                    {
                         doSplash()
                     }
 
-                    else -> {
+                    else ->
+                    {
                         val intent = Intent(this, LoginActivity::class.java)
                         startActivityForResult(intent, SessionHelper.LOGIN_REQUEST_CODE)
                     }
@@ -65,36 +84,55 @@ class SplashActivity : AppCompatActivity() {
 
     private fun doSplash()
     {
-        tasks.updateTasksAndDo(true, doWhat = {
-            val service = HintsService()
-            if (!isMyServiceRunning(service.javaClass))
-            {
-                val serviceIntent = Intent(this, service.javaClass)
-                serviceIntent.action = HintsService.START
-                startService(serviceIntent)
-            }
-            startActivity(Intent(this, MainActivity::class.java))
-            overridePendingTransition(android.R.anim.fade_out, android.R.anim.fade_in)
-            finish()
-        },
-            doWhatError = { p0, _ ->
-                if(p0 == HttpHelper.ERROR_NO_CONNECTION)
-                {
-                    alert(getString(R.string.alert_noConnectivitySplash)){
-                        okButton { doSplash() }
-                    }.show()
+        params.updateParametersAndDo(true,
+            doWhat = {
+                var foundNull = false
+                ParamsName.values().forEach {
+                    if(params.getLocalParameter(it) == null)
+                    {
+                        foundNull = true
+                        return@forEach
+                    }
                 }
-                else if(p0 == HttpHelper.ERROR_PERMISSIONS)
+                if(!foundNull)
                 {
-                    PermissionsHelper.askInternetPermission(this)
+                    tasks.updateTasksAndDo(true, doWhat = {
+                        val service = HintsService()
+                        if (!isMyServiceRunning(service.javaClass))
+                        {
+                            val serviceIntent = Intent(this, service.javaClass)
+                            serviceIntent.action = HintsService.START
+                            startService(serviceIntent)
+                        }
+                        startActivity(Intent(this, MainActivity::class.java))
+                        overridePendingTransition(android.R.anim.fade_out, android.R.anim.fade_in)
+                        finish()
+                    },
+                        doWhatError = { p0, p1 -> solveError(p0, p1) })
                 }
-                else if(p0 == HttpHelper.ERROR_UNKNOWN)
+                else
                 {
-                    alert(getString(R.string.alert_generalError)){
-                        okButton { doSplash() }
-                    }.show()
+                    val onboardingIntent = Intent(this, OnboardingActivity::class.java)
+                    startActivityForResult(onboardingIntent, OnboardingActivity.ONBOARDING_REQUEST_CODE)
                 }
-            })
+            },
+            doWhatError = { p0, p1 -> solveError(p0,p1)})
+    }
+
+    private fun solveError(p0 : Int, p1 : String)
+    {
+        when (p0)
+        {
+            HttpHelper.ERROR_NO_CONNECTION -> alert(getString(R.string.alert_noConnectivitySplash)){
+                okButton { doSplash() }
+            }.show()
+
+            HttpHelper.ERROR_PERMISSIONS -> PermissionsHelper.askInternetPermission(this)
+
+            HttpHelper.ERROR_UNKNOWN -> alert(getString(R.string.alert_generalError)){
+                okButton { doSplash() }
+            }.show()
+        }
     }
 
     private fun isMyServiceRunning(serviceClass: Class<*>): Boolean

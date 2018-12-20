@@ -614,7 +614,7 @@ class VoiceActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks,
                                     {
                                         with(defaultSharedPreferences.edit())
                                         {
-                                            putString(paramName.name, (resp.first as LocationParameter).toJSON())
+                                            putString(paramName.name, (resp.first as TimeParameter).toJSON())
                                             apply()
                                         }
                                     }
@@ -665,7 +665,7 @@ class VoiceActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks,
                         }
 
                         uiThread {
-                            saveTaskButton.isEnabled = false
+                            saveTaskButton.isEnabled = true
                         }
                     }
                 }

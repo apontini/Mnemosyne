@@ -31,13 +31,12 @@
         <receiver android:name=".receivers.AlarmReceiver" />
 
         <service
-            android:name="ap.mnemosyne.services.HintsService"
+            android:name=".services.HintsService"
             android:enabled="true"
-            android:exported="true"/>
-
+            android:exported="true" />
         <service
-            android:name="ap.mnemosyne.services.HintsHelperService"
-            android:exported="false"/>
+            android:name=".services.HintsHelperService"
+            android:exported="false" />
 
         <activity
             android:name=".activities.SplashActivity"
@@ -100,11 +99,13 @@
             android:theme="@style/PreferencesTheme" />
         <activity
             android:name=".activities.ServiceActivity"
+            android:excludeFromRecents="true"
+            android:label=""
             android:launchMode="singleTask"
             android:taskAffinity=""
-            android:excludeFromRecents="true"
-            android:theme="@style/Theme.Transparent"
-            android:label=""/>
+            android:theme="@style/Theme.Transparent" />
+        <activity android:name=".activities.OnboardingActivity"
+            android:theme="@style/AppTheme.NoActionBar"/>
     </application>
 
 </manifest>
