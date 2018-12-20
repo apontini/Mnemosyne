@@ -14,8 +14,9 @@ import org.jetbrains.anko.alert
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.toast
 import org.jetbrains.anko.uiThread
+import java.io.Serializable
 
-class SessionHelper(ctx : Context)
+class SessionHelper(ctx : Context) : Serializable
 {
     companion object
     {

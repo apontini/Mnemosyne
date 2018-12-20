@@ -52,7 +52,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback
         {
             list.forEach {
                 val latlon = LatLng(it.coordinates.lat, it.coordinates.lon)
-                googleMap.addMarker(MarkerOptions().position(latlon).title(it.name).title(it.name ?: "Nome non trovato"))
+                googleMap.addMarker(MarkerOptions().position(latlon).title(it.name).title(it.name ?: it.road ?: "Nome non trovato"))
             }
 
             if(focusPlace != null)

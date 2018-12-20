@@ -20,10 +20,11 @@ import org.joda.time.LocalDateTime
 import org.joda.time.Minutes
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.format.DateTimeFormatter
+import java.io.Serializable
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.locks.ReentrantLock
 
-class ParametersHelper(val ctx: Context)
+class ParametersHelper(val ctx: Context) : Serializable
 {
 
     companion object

@@ -87,13 +87,16 @@ class SplashActivity : AppCompatActivity() {
         params.updateParametersAndDo(true,
             doWhat = {
                 var foundNull = false
-                ParamsName.values().forEach {
-                    if(params.getLocalParameter(it) == null)
-                    {
-                        foundNull = true
-                        return@forEach
-                    }
+                if(params.getLocalParameter(ParamsName.time_lunch) == null ||
+                    params.getLocalParameter(ParamsName.time_dinner) == null ||
+                    params.getLocalParameter(ParamsName.time_bed) == null ||
+                    params.getLocalParameter(ParamsName.time_work) == null ||
+                    params.getLocalParameter(ParamsName.location_house) == null ||
+                    params.getLocalParameter(ParamsName.location_work) == null)
+                {
+                    foundNull = true
                 }
+
                 if(!foundNull)
                 {
                     tasks.updateTasksAndDo(true, doWhat = {
