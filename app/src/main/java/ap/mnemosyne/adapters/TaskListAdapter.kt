@@ -3,13 +3,11 @@ package ap.mnemosyne.adapters
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.content.res.ColorStateList
 import android.os.Bundle
 import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.LinearLayout
 import android.widget.TextView
 import ap.mnemosyne.activities.TaskDetailsActivity
 import ap.mnemosyne.R
@@ -21,6 +19,8 @@ import androidx.core.app.ActivityOptionsCompat
 import ap.mnemosyne.resources.Place
 import ap.mnemosyne.resources.Task
 import com.google.android.gms.maps.model.MarkerOptions
+import org.jetbrains.anko.doAsync
+import org.jetbrains.anko.uiThread
 
 
 class TaskListAdapter(private val context: Context,
@@ -66,16 +66,20 @@ class TaskListAdapter(private val context: Context,
 
             map.getMapAsync {
                 it.uiSettings.isMapToolbarEnabled = false
-                val list = t.placesToSatisfy as HashSet<Place>
-                val map = it
-                if(!list.isEmpty())
-                {
-                    list.forEach {
-                        val latlon = LatLng(it.coordinates.lat, it.coordinates.lon)
-                        map.addMarker(MarkerOptions().position(latlon).title(it.name).title(it.name ?: "Nome non trovato"))
+                doAsync {
+                    val list = t.placesToSatisfy as HashSet<Place>
+                    val map = it
+                    if(!list.isEmpty())
+                    {
+                        list.forEach {
+                            val latlon = LatLng(it.coordinates.lat, it.coordinates.lon)
+                            uiThread {
+                                map.addMarker(MarkerOptions().position(latlon))
+                            }
+                        }
+                        val camera = LatLng(list.first().coordinates.lat, list.first().coordinates.lon)
+                        uiThread {map.moveCamera(CameraUpdateFactory.newLatLngZoom(camera, 13.0f))}
                     }
-                    val camera = LatLng(list.first().coordinates.lat, list.first().coordinates.lon)
-                    map.moveCamera(CameraUpdateFactory.newLatLngZoom(camera, 13.0f))
                 }
             }
 
@@ -95,8 +99,8 @@ class TaskListAdapter(private val context: Context,
         override fun onClick(p0: View?)
         {
             val detailIntent = Intent(p0?.context, TaskDetailsActivity::class.java)
-            detailIntent.putExtra("task", task)
-            detailIntent.putExtra("focusPlace", task.placesToSatisfy.first())
+            detailIntent.putExtra("task", task.id)
+            detailIntent.putExtra("focusPlace", try{ task.placesToSatisfy.first()} catch (nsee : NoSuchElementException){null})
             if(ctx is Activity)
             {
                 val p1 : androidx.core.util.Pair<View, String> = androidx.core.util.Pair(v.findViewById(R.id.map),"mapView")

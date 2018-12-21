@@ -61,19 +61,17 @@
             </TableRow>
 
             <TableRow
-                android:id="@+id/detailsToggle"
+                android:id="@+id/detailsToggleRow"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginBottom="8dp">
 
-                <TextView
-                    android:id="@+id/detailsToggleText"
+                <Button
+                    android:id="@+id/detailsToggle"
+                    style="@style/ButtonMnemosyneText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="TextView"
-                    android:textAppearance="@style/MnemosyneBodyText2"
-                    android:textColor="@color/onSecondary" />
+                    android:text="Button" />
 
             </TableRow>
 

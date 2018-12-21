@@ -178,6 +178,7 @@ class TasksHelper(val ctx : Context)
         }
         catch (e: Exception)
         {
+            e.printStackTrace()
             null
         }
         finally

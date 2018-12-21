@@ -283,7 +283,7 @@ class OnboardingActivity : AppCompatActivity()
                                                     {
                                                         if(addresses[0].thoroughfare != null)
                                                         {
-                                                            abitazione.text = addresses[0].thoroughfare
+                                                            uiThread { abitazione.text = addresses[0].thoroughfare }
                                                         }
                                                     }
                                                 }
@@ -295,7 +295,7 @@ class OnboardingActivity : AppCompatActivity()
                                                     {
                                                         if(addresses[0].thoroughfare != null)
                                                         {
-                                                            workplace.text = addresses[0].thoroughfare
+                                                            uiThread { workplace.text = addresses[0].thoroughfare }
                                                         }
                                                     }
                                                 }
@@ -508,30 +508,39 @@ class OnboardingActivity : AppCompatActivity()
                                                 //CAMBIARE FORMATO
                                                 2->
                                                 {
-                                                    lunch.text = "${(data?.getSerializableExtra("fromTime") as LocalTime).toString(
-                                                        DateTimeFormat.forPattern("HH:mm"))} - ${(data?.getSerializableExtra("toTime") as LocalTime).toString(
-                                                        DateTimeFormat.forPattern("HH:mm"))}"
+                                                    uiThread {
+                                                        lunch.text = "${(data?.getSerializableExtra("fromTime") as LocalTime).toString(
+                                                            DateTimeFormat.forPattern("HH:mm"))} - ${(data?.getSerializableExtra("toTime") as LocalTime).toString(
+                                                            DateTimeFormat.forPattern("HH:mm"))}"
+                                                    }
                                                 }
 
                                                 3->
                                                 {
-                                                    dinner.text = "${(data?.getSerializableExtra("fromTime") as LocalTime).toString(
-                                                        DateTimeFormat.forPattern("HH:mm"))} - ${(data?.getSerializableExtra("toTime") as LocalTime).toString(
-                                                        DateTimeFormat.forPattern("HH:mm"))}"
+                                                    uiThread {
+                                                        dinner.text = "${(data?.getSerializableExtra("fromTime") as LocalTime).toString(
+                                                            DateTimeFormat.forPattern("HH:mm"))} - ${(data?.getSerializableExtra("toTime") as LocalTime).toString(
+                                                            DateTimeFormat.forPattern("HH:mm"))}"
+                                                    }
                                                 }
 
                                                 4->
                                                 {
-                                                    bed.text = "${(data?.getSerializableExtra("fromTime") as LocalTime).toString(
-                                                        DateTimeFormat.forPattern("HH:mm"))} - ${(data?.getSerializableExtra("toTime") as LocalTime).toString(
-                                                        DateTimeFormat.forPattern("HH:mm"))}"
+                                                    uiThread {
+                                                        bed.text = "${(data?.getSerializableExtra("fromTime") as LocalTime).toString(
+                                                            DateTimeFormat.forPattern("HH:mm"))} - ${(data?.getSerializableExtra("toTime") as LocalTime).toString(
+                                                            DateTimeFormat.forPattern("HH:mm"))}"
+                                                    }
+
                                                 }
 
                                                 5->
                                                 {
-                                                    work.text = "${(data?.getSerializableExtra("fromTime") as LocalTime).toString(
-                                                        DateTimeFormat.forPattern("HH:mm"))} - ${(data?.getSerializableExtra("toTime") as LocalTime).toString(
-                                                        DateTimeFormat.forPattern("HH:mm"))}"
+                                                    uiThread {
+                                                        work.text = "${(data?.getSerializableExtra("fromTime") as LocalTime).toString(
+                                                            DateTimeFormat.forPattern("HH:mm"))} - ${(data?.getSerializableExtra("toTime") as LocalTime).toString(
+                                                            DateTimeFormat.forPattern("HH:mm"))}"
+                                                    }
                                                 }
                                             }
 

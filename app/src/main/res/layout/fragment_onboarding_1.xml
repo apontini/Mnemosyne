@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:layout_marginStart="16dp"
+    android:layout_marginEnd="16dp">
 
     <TextView
         android:id="@+id/textView2"
@@ -10,6 +12,7 @@
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
         android:text="@string/onboarding1_title"
+        android:textAlignment="center"
         android:textAppearance="@style/MnemosyneBodyText1" />
 
     <TextView
@@ -20,6 +23,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="20dp"
         android:text="@string/onboarding1_helper"
+        android:textAlignment="center"
         android:textAppearance="@style/MnemosyneBodyHelper"
         android:textSize="16sp" />
 

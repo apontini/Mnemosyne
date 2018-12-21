@@ -1,3 +1,6 @@
 package ap.mnemosyne.uiResources
 
-data class TaskCard(val title: String, val descr : String, val isUrgent : Boolean)
+import ap.mnemosyne.resources.Hint
+import ap.mnemosyne.resources.Task
+
+data class TaskCard(val task : Task, val hint : Hint?) : Card

@@ -166,7 +166,7 @@ class TaskListActivity : AppCompatActivity()
                     Activity.RESULT_OK -> {
                         loadTasks(false)
                         val intent = Intent(this, TaskDetailsActivity::class.java)
-                        intent.putExtra("task", data?.getSerializableExtra("resultTask"))
+                        intent.putExtra("task", (data?.getSerializableExtra("resultTask") as Task).id)
                         startActivityForResult(intent, 101)
                     }
                 }

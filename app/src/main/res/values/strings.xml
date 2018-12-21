@@ -114,4 +114,6 @@
     <string name="onboarding3_title">Ora mi serve sapere com\'è organizzata la tua giornata</string>
     <string name="button_begin">Inizia</string>
     <string name="onboarding4_title">Tutto sistemato</string>
+    <string name="sharedPreferences_tasks_hints">task-hints</string>
+    <string name="sharedPreferences_tasks_hints_lastRefresh">hints-last-refresh</string>
 </resources>

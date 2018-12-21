@@ -1,6 +1,7 @@
 package ap.mnemosyne.activities
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.graphics.Rect
 import android.os.Bundle
@@ -23,13 +24,15 @@ import ap.mnemosyne.uiResources.NumberCard
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import androidx.core.view.GravityCompat
-import ap.mnemosyne.resources.TaskPlaceConstraint
 import ap.mnemosyne.tasks.TasksHelper
 import ap.mnemosyne.R.id.*
-import ap.mnemosyne.resources.Task
-import ap.mnemosyne.resources.TaskTimeConstraint
+import ap.mnemosyne.resources.*
+import ap.mnemosyne.uiResources.TaskCard
 import kotlinx.android.synthetic.main.drawer_header.view.*
 import org.jetbrains.anko.design.longSnackbar
+import org.joda.time.LocalDateTime
+import org.joda.time.Minutes
+import java.lang.Exception
 
 class MainActivity : AppCompatActivity()
 {
@@ -106,9 +109,35 @@ class MainActivity : AppCompatActivity()
                 }
             }
 
-            val cardCreatedList = listOf<Card>(NumberCard(tasksList.size, "Task registrati"), NumberCard(doneToday, "Task completati oggi"),
-                NumberCard(failed, "Task falliti"), NumberCard(constrained, "Task con vincoli"), NumberCard(timeConstr, "Task con vincoli temporali"),
-                NumberCard(placeConstr, "Task con vincoli di luogo"))
+            val cardCreatedList = mutableListOf<Card>(NumberCard(tasksList.size, "Task registrati"), NumberCard(doneToday, "Task completati oggi"),
+                NumberCard(failed, "Task falliti"))
+
+            val prefs = getSharedPreferences(getString(R.string.sharedPreferences_tasks_FILE), Context.MODE_PRIVATE)
+            val lastRefr = LocalDateTime.parse(prefs.getString(getString(R.string.sharedPreferences_tasks_hints_lastRefresh), "1970-01-01 00:00"), TasksHelper.dateTimeFormat)
+
+            if(Minutes.minutesBetween(lastRefr, LocalDateTime.now()).minutes <= 15)
+            {
+                try
+                {
+                    val hints = ResourceList.fromJSON(
+                        prefs.getString(getString(R.string.sharedPreferences_tasks_hints), "")
+                    ).list as List<Hint>
+
+                    val defaultTask = Task(-1,"", "Task non trovato", null, false, false, false,
+                        false, false, HashSet<Place>())
+
+                    hints.filter { it.isUrgent }.forEach {
+                        cardCreatedList.add(TaskCard(
+                            tasks.getLocalTask(it.taskID) ?: defaultTask, it))
+                    }
+
+                    hints.filter { !it.isUrgent }.first { cardCreatedList.add(TaskCard(tasks.getLocalTask(it.taskID) ?: defaultTask, it)); true}
+                }
+                catch(e : Exception)
+                {
+                    e.printStackTrace()
+                }
+            }
 
             cardList.setHasFixedSize(true)
             cardList.layoutManager = StaggeredGridLayoutManager(2,StaggeredGridLayoutManager.VERTICAL)
@@ -238,7 +267,7 @@ class MainActivity : AppCompatActivity()
                    Activity.RESULT_OK -> {
                        setCards(false)
                        val intent = Intent(this, TaskDetailsActivity::class.java)
-                       intent.putExtra("task", data?.getSerializableExtra("resultTask"))
+                       intent.putExtra("task", (data?.getSerializableExtra("resultTask") as Task).id)
                        startActivityForResult(intent, 102)
                    }
                }

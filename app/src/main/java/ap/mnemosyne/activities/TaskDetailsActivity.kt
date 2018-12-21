@@ -12,6 +12,7 @@ import ap.mnemosyne.http.HttpHelper
 import ap.mnemosyne.resources.*
 import ap.mnemosyne.session.SessionHelper
 import ap.mnemosyne.R
+import ap.mnemosyne.tasks.TasksHelper
 import com.google.android.gms.maps.*
 
 import kotlinx.android.synthetic.main.content_task_details.*
@@ -32,13 +33,16 @@ class TaskDetailsActivity : AppCompatActivity(), OnMapReadyCallback
 {
     private lateinit var session : SessionHelper
     private lateinit var task : Task
+    private lateinit var tasks : TasksHelper
     private var focusPlace : Place? = null
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
-
-        task = intent.extras.getSerializable("task") as Task
         focusPlace = try {(intent.extras.getSerializable("focusPlace") as Place)} catch (e : Exception){null}
+        tasks = TasksHelper(this)
+        val id = intent.extras?.getInt("task") ?: -1
+        task = tasks.getLocalTask(id) ?: Task(-1,"", "Task non trovato", null, false, false, false,
+            false, false, HashSet<Place>())
 
         super.onCreate(savedInstanceState)
         session = SessionHelper(this)
@@ -47,6 +51,11 @@ class TaskDetailsActivity : AppCompatActivity(), OnMapReadyCallback
         setSupportActionBar(toolbar)
         setNavDrawer()
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
+        if(task.id == -1)
+        {
+            alert("Task non valido"){ okButton { supportFinishAfterTransition() }}.show()
+        }
 
         if (!task.placesToSatisfy.isEmpty())
         {
@@ -69,11 +78,11 @@ class TaskDetailsActivity : AppCompatActivity(), OnMapReadyCallback
         }
 
         checkPossibleWork.setOnClickListener {
-            updateTask(it)
+            updateTask()
         }
 
         checkRepeatable.setOnClickListener {
-            updateTask(it)
+            updateTask()
         }
 
         deleteTaskButton.setOnClickListener{
@@ -124,7 +133,7 @@ class TaskDetailsActivity : AppCompatActivity(), OnMapReadyCallback
         }
 
         var hidden = true
-        detailsToggleText.text = getString(R.string.text_details_showDetails)
+        detailsToggle.text = getString(R.string.text_details_showDetails)
         details1.visibility = View.GONE
         details2.visibility = View.GONE
         details3.visibility = View.GONE
@@ -133,7 +142,7 @@ class TaskDetailsActivity : AppCompatActivity(), OnMapReadyCallback
         detailsToggle.setOnClickListener {
             if(hidden)
             {
-                detailsToggleText.text = getString(R.string.text_details_hideDetails)
+                detailsToggle.text = getString(R.string.text_details_hideDetails)
                 details1.visibility = View.VISIBLE
                 details2.visibility = View.VISIBLE
                 details3.visibility = View.VISIBLE
@@ -141,7 +150,7 @@ class TaskDetailsActivity : AppCompatActivity(), OnMapReadyCallback
             }
             else
             {
-                detailsToggleText.text = getString(R.string.text_details_showDetails)
+                detailsToggle.text = getString(R.string.text_details_showDetails)
                 details1.visibility = View.GONE
                 details2.visibility = View.GONE
                 details3.visibility = View.GONE
@@ -171,7 +180,6 @@ class TaskDetailsActivity : AppCompatActivity(), OnMapReadyCallback
         {
             getString(R.string.text_no)
         }
-
     }
 
     override fun onMapReady(p0: GoogleMap)
@@ -194,9 +202,14 @@ class TaskDetailsActivity : AppCompatActivity(), OnMapReadyCallback
             }
             else
             {
-                val camera = LatLng(list.first().coordinates.lat,
-                    list.first().coordinates.lon)
-                p0.moveCamera(CameraUpdateFactory.newLatLngZoom(camera, 13.0f))
+                if(!list.isEmpty())
+                {
+                    val camera = LatLng(
+                        list.first().coordinates.lat,
+                        list.first().coordinates.lon
+                    )
+                    p0.moveCamera(CameraUpdateFactory.newLatLngZoom(camera, 13.0f))
+                }
             }
         }
         else
@@ -206,7 +219,7 @@ class TaskDetailsActivity : AppCompatActivity(), OnMapReadyCallback
         }
     }
 
-    private fun updateTask(v : View)
+    private fun updateTask()
     {
         checkPossibleWork.isEnabled = false
         checkRepeatable.isEnabled = false
@@ -235,6 +248,7 @@ class TaskDetailsActivity : AppCompatActivity(), OnMapReadyCallback
                 200 ->
                 {
                     toolbar.snackbar("Task aggiornato con successo")
+                    tasks.modifyLocalTasks(newTask)
                 }
 
                 404 ->{
@@ -390,7 +404,7 @@ class TaskDetailsActivity : AppCompatActivity(), OnMapReadyCallback
                 {
                     Activity.RESULT_OK -> {
                         val intent = Intent(this, TaskDetailsActivity::class.java)
-                        intent.putExtra("task", data?.getSerializableExtra("resultTask"))
+                        intent.putExtra("task", (data?.getSerializableExtra("resultTask") as Task).id)
                         startActivityForResult(intent, 102)
                     }
                 }

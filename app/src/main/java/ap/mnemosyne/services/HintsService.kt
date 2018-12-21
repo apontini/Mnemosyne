@@ -33,6 +33,7 @@ import okhttp3.FormBody
 import okhttp3.Request
 import okhttp3.Response
 import org.jetbrains.anko.doAsync
+import org.joda.time.LocalDateTime
 import org.joda.time.LocalTime
 import org.joda.time.format.DateTimeFormat
 import java.lang.StringBuilder
@@ -209,6 +210,12 @@ class HintsService : Service(), LocationListener
                 200->
                 {
                     val hints = (response.first as ResourceList<Hint>).list as List<Hint>
+                    with(getSharedPreferences(getString(R.string.sharedPreferences_tasks_FILE),Context.MODE_PRIVATE).edit())
+                    {
+                        putString(getString(R.string.sharedPreferences_tasks_hints), (response.first as ResourceList<Hint>).toJSON())
+                        putString(getString(R.string.sharedPreferences_tasks_hints_lastRefresh), LocalDateTime.now().toString(TasksHelper.dateTimeFormat))
+                        apply()
+                    }
                     var notfound = 0
                     hints.forEach {
                         if(tasks.getLocalTask(it.taskID) == null)
@@ -448,10 +455,10 @@ class HintsService : Service(), LocationListener
 
             val clickInt = Intent(this@HintsService, TaskDetailsActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                putExtra("task", tasks.getLocalTask(hint.taskID))
+                putExtra("task", hint.taskID)
                 putExtra("focusPlace", hint.closestPlace)
             }
-            val pendingClickIntent = PendingIntent.getActivity(this@HintsService, hint.taskID, clickInt, 0)
+            val pendingClickIntent = PendingIntent.getActivity(this@HintsService, hint.taskID, clickInt, PendingIntent.FLAG_UPDATE_CURRENT)
             setContentIntent(pendingClickIntent)
 
             when
@@ -470,14 +477,14 @@ class HintsService : Service(), LocationListener
                         action = HintsHelperService.ACTION_COMPLETED_SUCCESS
                         putExtra("taskID", hint.taskID)
                     }
-                    val successPendingIntent = PendingIntent.getService(this@HintsService, hint.taskID, successIntent, 0)
+                    val successPendingIntent = PendingIntent.getService(this@HintsService, hint.taskID, successIntent, PendingIntent.FLAG_UPDATE_CURRENT)
                     addAction(R.drawable.ic_baseline_check_24px, "Sì", successPendingIntent)
 
                     val failedIntent = Intent(this@HintsService, HintsHelperService::class.java).apply {
                         action = HintsHelperService.ACTION_COMPLETED_FAILED
                         putExtra("taskID", hint.taskID)
                     }
-                    val failedPendingIntent = PendingIntent.getService(this@HintsService, hint.taskID, failedIntent, 0)
+                    val failedPendingIntent = PendingIntent.getService(this@HintsService, hint.taskID, failedIntent, PendingIntent.FLAG_UPDATE_CURRENT)
                     addAction(R.drawable.ic_baseline_clear_24px, "No", failedPendingIntent)
                 }
 
@@ -500,14 +507,14 @@ class HintsService : Service(), LocationListener
                         action = HintsHelperService.ACTION_SNOOZE_MIN
                         putExtra("taskID", hint.taskID)
                     }
-                    val snoozePendingIntent = PendingIntent.getService(this@HintsService, hint.taskID, snoozeIntent, 0)
+                    val snoozePendingIntent = PendingIntent.getService(this@HintsService, hint.taskID, snoozeIntent, PendingIntent.FLAG_UPDATE_CURRENT)
                     addAction(R.drawable.ic_baseline_clear_24px, "Ritarda (15 min)", snoozePendingIntent)
 
                     val snoozeMaxIntent = Intent(this@HintsService, HintsHelperService::class.java).apply {
                         action = HintsHelperService.ACTION_SNOOZE_MAX
                         putExtra("taskID", hint.taskID)
                     }
-                    val snoozeMaxPendingIntent = PendingIntent.getService(this@HintsService, hint.taskID, snoozeMaxIntent, 0)
+                    val snoozeMaxPendingIntent = PendingIntent.getService(this@HintsService, hint.taskID, snoozeMaxIntent, PendingIntent.FLAG_UPDATE_CURRENT)
                     addAction(R.drawable.ic_baseline_clear_24px, "Ritarda (1 ora)", snoozeMaxPendingIntent)
                 }
             }
