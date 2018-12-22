@@ -214,6 +214,7 @@ class HintsService : Service(), LocationListener
                     {
                         putString(getString(R.string.sharedPreferences_tasks_hints), (response.first as ResourceList<Hint>).toJSON())
                         putString(getString(R.string.sharedPreferences_tasks_hints_lastRefresh), LocalDateTime.now().toString(TasksHelper.dateTimeFormat))
+                        putString(getString(R.string.sharedPreferences_tasks_hints_user), session.user.email)
                         apply()
                     }
                     var notfound = 0

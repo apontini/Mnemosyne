@@ -687,8 +687,9 @@ class VoiceActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks,
             SessionHelper.LOGIN_REQUEST_CODE->{
                 if(resultCode == Activity.RESULT_OK)
                 {
-                    toolbar.snackbar("Sei collegato come: " + session.user.email).show()
-                    textStatus.text = getString(R.string.text_voice_retry)
+                    val splashIntent = Intent(this, SplashActivity::class.java)
+                    splashIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    startActivity(splashIntent)
                 }
                 else
                 {

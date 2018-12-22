@@ -114,8 +114,9 @@ class MainActivity : AppCompatActivity()
 
             val prefs = getSharedPreferences(getString(R.string.sharedPreferences_tasks_FILE), Context.MODE_PRIVATE)
             val lastRefr = LocalDateTime.parse(prefs.getString(getString(R.string.sharedPreferences_tasks_hints_lastRefresh), "1970-01-01 00:00"), TasksHelper.dateTimeFormat)
+            val lastUser = prefs.getString(getString(R.string.sharedPreferences_tasks_hints_user), "")
 
-            if(Minutes.minutesBetween(lastRefr, LocalDateTime.now()).minutes <= 15)
+            if(Minutes.minutesBetween(lastRefr, LocalDateTime.now()).minutes <= 15 && session.user.email == lastUser)
             {
                 try
                 {
@@ -131,7 +132,7 @@ class MainActivity : AppCompatActivity()
                             tasks.getLocalTask(it.taskID) ?: defaultTask, it))
                     }
 
-                    hints.filter { !it.isUrgent }.first { cardCreatedList.add(TaskCard(tasks.getLocalTask(it.taskID) ?: defaultTask, it)); true}
+                    hints.filter { !it.isUrgent }.forEachIndexed{ i, e -> if(i<2) cardCreatedList.add(TaskCard(tasks.getLocalTask(e.taskID) ?: defaultTask, e));}
                 }
                 catch(e : Exception)
                 {
@@ -242,7 +243,11 @@ class MainActivity : AppCompatActivity()
                 {
                     Activity.RESULT_OK ->
                     {
-                        if(!isViewCreated)
+                        isViewCreated = false
+                        val splashIntent = Intent(this, SplashActivity::class.java)
+                        splashIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                        startActivity(splashIntent)
+                        /*if(!isViewCreated)
                         {
                             createContentView()
                         }
@@ -251,7 +256,7 @@ class MainActivity : AppCompatActivity()
                             setCards(true)
                             toolbar.snackbar("Sei collegato come: " + session.user.email).show()
                             isViewCreated = false
-                        }
+                        }*/
                     }
 
                     else -> {

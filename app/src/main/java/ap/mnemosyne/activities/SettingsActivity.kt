@@ -508,7 +508,9 @@ class SettingsActivity : AppCompatActivity()
             {
                 if(resultCode == Activity.RESULT_OK)
                 {
-                    snackbar(this.toolbar, "Sei collegato come: " + session.user.email).show()
+                    val splashIntent = Intent(this, SplashActivity::class.java)
+                    splashIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    startActivity(splashIntent)
                 }
             }
         }

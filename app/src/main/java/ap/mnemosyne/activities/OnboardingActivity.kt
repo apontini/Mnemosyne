@@ -254,7 +254,16 @@ class OnboardingActivity : AppCompatActivity()
                                 val place = PlacePicker.getPlace(this.activity, data)
                                 Log.d("PARAMETER", "Creating parameter")
                                 val param = LocationParameter(paramName, session.user.email, Point(place.latLng.latitude, place.latLng.longitude), -1, null)
-                                bRequest.post(RequestBody.create(MediaType.parse("application/json"), param.toJSON()))
+                                if((this@Page2Fragment.activity as Activity).defaultSharedPreferences.getString(
+                                        if(requestCode == 0) ParamsName.location_house.toString() else ParamsName.location_work.toString(),
+                                        "") != "")
+                                {
+                                    bRequest.put(RequestBody.create(MediaType.parse("application/json"), param.toJSON()))
+                                }
+                                else
+                                {
+                                    bRequest.post(RequestBody.create(MediaType.parse("application/json"), param.toJSON()))
+                                }
                             }
                         }
 
@@ -484,7 +493,30 @@ class OnboardingActivity : AppCompatActivity()
                                 val toTime = data?.getSerializableExtra("toTime") as LocalTime
                                 Log.d("PARAMETER", "Creating parameter")
                                 val param = TimeParameter(paramName, session.user.email, fromTime, toTime)
-                                bRequest.post(RequestBody.create(MediaType.parse("application/json"), param.toJSON()))
+                                if((this@Page3Fragment.activity as Activity).defaultSharedPreferences.getString(
+                                    when (requestCode) {
+                                        2 -> ParamsName.time_lunch.toString()
+                                        3 -> ParamsName.time_dinner.toString()
+                                        4 -> ParamsName.time_bed.toString()
+                                        else -> ParamsName.time_work.toString()
+                                    },
+                                    "") != "") {
+                                    bRequest.put(
+                                        RequestBody.create(
+                                            MediaType.parse("application/json"),
+                                            param.toJSON()
+                                        )
+                                    )
+                                }
+                                else
+                                {
+                                    bRequest.post(
+                                        RequestBody.create(
+                                            MediaType.parse("application/json"),
+                                            param.toJSON()
+                                        )
+                                    )
+                                }
                             }
                         }
 

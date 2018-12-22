@@ -25,7 +25,7 @@ class MainCardsAdapter(private val context: Context,
         when(holder.itemViewType)
         {
             0 -> (holder as ViewHolderNumber).setItem(data[position])
-            1 -> (holder as ViewHolderTask).setItem(data[position])
+            1,2 -> (holder as ViewHolderTask).setItem(data[position])
         }
     }
 
@@ -35,13 +35,18 @@ class MainCardsAdapter(private val context: Context,
         {
             0 -> ViewHolderNumber(LayoutInflater.from(context).inflate(R.layout.card_number_layout, parent, false), context)
             1 -> ViewHolderTask(LayoutInflater.from(context).inflate(R.layout.card_task_layout, parent, false), context)
+            2 -> ViewHolderTask(LayoutInflater.from(context).inflate(R.layout.card_task_layout_urgent, parent, false), context)
             else -> ViewHolderNumber(LayoutInflater.from(context).inflate(R.layout.card_number_layout, parent, false), context)
         }
     }
 
     override fun getItemViewType(position: Int): Int
     {
-        return if(data[position] is NumberCard) 0 else 1
+        return if(data[position] is NumberCard) 0
+        else
+        {
+            if((data[position] as TaskCard).hint?.isUrgent == true) 2 else 1
+        }
     }
 
     override fun getItemCount(): Int
@@ -103,7 +108,7 @@ class MainCardsAdapter(private val context: Context,
                         ctx.startActivity(detailIntent)
                 }
                 title.text = c.task.name.capitalize()
-                road.text = "${c.hint?.closestPlace ?: ""}"
+                road.text = "${c.hint?.closestPlace?.road ?: ""}"
 
                 if(c.hint?.isUrgent == true)
                 {
