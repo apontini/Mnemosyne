@@ -67,7 +67,7 @@ class HintsService : Service(), LocationListener
     private lateinit var wifiLock : WifiManager.WifiLock
     private lateinit var alarmMgr: AlarmManager
     private lateinit var alarmIntent : PendingIntent
-    private var alarmDelay = 10000L
+    private var alarmFirstDelay = 10000L
 
     override fun onCreate()
     {
@@ -78,7 +78,7 @@ class HintsService : Service(), LocationListener
 
         wakeLock =
             (getSystemService(Context.POWER_SERVICE) as PowerManager).run {
-                newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MyApp::MyWakelockTag")
+                newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "Mnemosyne::WakelockTag")
             }
 
         wifiLock = (applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager).createWifiLock(WifiManager.WIFI_MODE_FULL, "mnemosyne_wifi_lock")
@@ -163,7 +163,30 @@ class HintsService : Service(), LocationListener
 
     private fun calculateCallbackTime(pos : Location?) : Long
     {
-        return 180000L
+        val maxT = 240
+        val minT = 40
+        val diff = maxT-minT
+        var k = 1000
+        var speed : Float = pos?.speed ?: 0.0F
+
+        var y : Long = (k*diff/(speed*diff+k)+minT).toLong()
+
+        /*Log.d("CALCOLI","speed: $speed -> $y")
+        speed = 8.33F
+        y = (k*diff/(speed*diff+k)+minT).toLong()
+        Log.d("CALCOLI","speed: $speed -> $y")
+        speed = 13.9F
+        y = (k*diff/(speed*diff+k)+minT).toLong()
+        Log.d("CALCOLI","speed: $speed -> $y")
+        speed = 19.4F
+        y = (k*diff/(speed*diff+k)+minT).toLong()
+        Log.d("CALCOLI","speed: $speed -> $y")
+        speed = 25F
+        y = (k*diff/(speed*diff+k)+minT).toLong()
+        Log.d("CALCOLI","speed: $speed -> $y")*/
+        Log.d("SERVICE", "Next hint will be in $y seconds")
+        return y * 1000
+        //return 32000L
     }
 
     @SuppressLint("MissingPermission")
@@ -173,7 +196,11 @@ class HintsService : Service(), LocationListener
         wifiLock.acquire()
         checkLocationAndDo{
             val lastLocation = LocationServices.FusedLocationApi.getLastLocation(googleApiClient)
-            if(lastLocation != null && System.currentTimeMillis() - lastLocation.time > 30000)
+            Log.d("SERVICE", "Calcolo una nuova posizione")
+            LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient,
+                locationRequest,
+                this@HintsService)
+            /*if(lastLocation != null && System.currentTimeMillis() - lastLocation.time > 30000)
             {
                 Log.d("SERVICE", "Calcolo una nuova posizione")
                 LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient,
@@ -182,9 +209,9 @@ class HintsService : Service(), LocationListener
             }
             else
             {
-                Log.d("SERVICE", "Uso l'ultima posizione")
+                Log.d("SERVICE", "Uso l'ultima posizione (time diff: ${System.currentTimeMillis() - lastLocation.time})")
                 onLocationChanged(lastLocation)
-            }
+            }*/
         }
     }
 
@@ -263,11 +290,9 @@ class HintsService : Service(), LocationListener
                 }
             }
 
-            alarmDelay = calculateCallbackTime(p0)
-
             alarmMgr.setAndAllowWhileIdle(
                 AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                SystemClock.elapsedRealtime() + alarmDelay,
+                SystemClock.elapsedRealtime() + calculateCallbackTime(p0),
                 alarmIntent)
             if(wifiLock.isHeld) wifiLock.release()
             if(wakeLock.isHeld) wakeLock.release()
@@ -315,7 +340,7 @@ class HintsService : Service(), LocationListener
 
         alarmMgr.setAndAllowWhileIdle(
             AlarmManager.ELAPSED_REALTIME_WAKEUP,
-            SystemClock.elapsedRealtime() + alarmDelay,
+            SystemClock.elapsedRealtime() + alarmFirstDelay,
             alarmIntent)
     }
 
@@ -392,12 +417,13 @@ class HintsService : Service(), LocationListener
                         if(it.closestPlace?.road != null) append(it.closestPlace?.road + ", ")
                         trim()
                         if(length>0) deleteCharAt(length-2)
-                        else append("Tocca per visualizzare il posto più vicino")
+                        else append(getString(R.string.notification_touchToDetails))
                     }
                     createTaskNotification(t.name.capitalize(), builder.toString(), it)
                 }
             }
         }
+
     }
 
     fun createPrerequisitesNotification(title: String, text : String, action : Int, exc : PendingIntent? = null)
@@ -437,7 +463,7 @@ class HintsService : Service(), LocationListener
         }
     }
 
-    fun createTaskNotification(title: String, text : String, hint : Hint)
+    fun createTaskNotification(title: String, text : String, hint : Hint, sound : Boolean = true)
     {
         val notification = NotificationCompat.Builder(this, CHANNEL_ID).apply {
             val bigTextStyle = NotificationCompat.BigTextStyle()

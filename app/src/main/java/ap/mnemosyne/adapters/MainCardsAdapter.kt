@@ -110,6 +110,8 @@ class MainCardsAdapter(private val context: Context,
                 title.text = c.task.name.capitalize()
                 road.text = "${c.hint?.closestPlace?.road ?: ""}"
 
+                if(road.text == "") road.visibility = View.GONE
+
                 if(c.hint?.isUrgent == true)
                 {
                     descr.text = "URGENTE!"

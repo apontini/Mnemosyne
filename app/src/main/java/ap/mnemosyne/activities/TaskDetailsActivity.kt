@@ -1,6 +1,8 @@
 package ap.mnemosyne.activities
 
 import android.app.Activity
+import android.app.NotificationManager
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
@@ -41,7 +43,7 @@ class TaskDetailsActivity : AppCompatActivity(), OnMapReadyCallback
         focusPlace = try {(intent.extras.getSerializable("focusPlace") as Place)} catch (e : Exception){null}
         tasks = TasksHelper(this)
         val id = intent.extras?.getInt("task") ?: -1
-        task = tasks.getLocalTask(id) ?: Task(-1,"", "Task non trovato", null, false, false, false,
+        task = tasks.getLocalTask(id) ?: Task(-1,"", "Task non trovato", null, false, false, false, false,
             false, false, HashSet<Place>())
 
         super.onCreate(savedInstanceState)
@@ -225,7 +227,7 @@ class TaskDetailsActivity : AppCompatActivity(), OnMapReadyCallback
         checkRepeatable.isEnabled = false
         progressBar3.visibility = View.VISIBLE
 
-        val newTask = Task(task.id, task.user, task.name, task.constr, checkPossibleWork.isChecked,
+        val newTask = Task(task.id, task.user, task.name, task.constr, checkPossibleWork.isChecked, task.isCritical,
             checkRepeatable.isChecked, task.isDoneToday, task.isFailed, task.isIgnoredToday, task.placesToSatisfy)
 
         val request = Request.Builder()
@@ -311,6 +313,7 @@ class TaskDetailsActivity : AppCompatActivity(), OnMapReadyCallback
                 }
 
                 200 -> {
+                    (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).cancel(task.id)
                     val returnIntent = Intent()
                     returnIntent.putExtra("deletedTask", task)
                     setResult(1000, returnIntent)

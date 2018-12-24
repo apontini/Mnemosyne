@@ -117,4 +117,5 @@
     <string name="sharedPreferences_tasks_hints">task-hints</string>
     <string name="sharedPreferences_tasks_hints_lastRefresh">hints-last-refresh</string>
     <string name="sharedPreferences_tasks_hints_user">hints-user</string>
+    <string name="notification_touchToDetails">Tocca per visualizzare i dettagli</string>
 </resources>

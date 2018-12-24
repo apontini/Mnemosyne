@@ -124,10 +124,10 @@ class MainActivity : AppCompatActivity()
                         prefs.getString(getString(R.string.sharedPreferences_tasks_hints), "")
                     ).list as List<Hint>
 
-                    val defaultTask = Task(-1,"", "Task non trovato", null, false, false, false,
+                    val defaultTask = Task(-1,"", "Task non trovato", null, false, false, false, false,
                         false, false, HashSet<Place>())
 
-                    hints.filter { it.isUrgent }.forEach {
+                    hints.filter { it.isUrgent && !it.isConfirm }.forEach {
                         cardCreatedList.add(TaskCard(
                             tasks.getLocalTask(it.taskID) ?: defaultTask, it))
                     }

@@ -19,6 +19,7 @@ public class Task extends Resource implements Serializable
 	private String name;
 	private TaskConstraint constr;
 	private boolean possibleAtWork;
+	private boolean critical;
 	private boolean repeatable;
 	private boolean doneToday;
 	private boolean failed;
@@ -27,7 +28,7 @@ public class Task extends Resource implements Serializable
 
 	@JsonCreator
 	public Task(@JsonProperty("id") int id,@JsonProperty("user") String user, @JsonProperty("name") String name, @JsonProperty("constr") TaskConstraint constr,
-				@JsonProperty("possibleAtWork") boolean possibleAtWork, @JsonProperty("repeatable") boolean repeatable, @JsonProperty("doneToday") boolean doneToday,
+				@JsonProperty("possibleAtWork") boolean possibleAtWork, @JsonProperty("critical") boolean critical, @JsonProperty("repeatable") boolean repeatable, @JsonProperty("doneToday") boolean doneToday,
 				@JsonProperty("failed") boolean failed, @JsonProperty("ignoredToday") boolean ignoredToday, @JsonProperty("placesToSatisfy") Set<Place> placesToSatisfy)
 	{
 		this.user = user;
@@ -35,6 +36,7 @@ public class Task extends Resource implements Serializable
 		this.constr = constr;
 		this.id = id;
 		this.possibleAtWork = possibleAtWork;
+		this.critical = critical;
 		this.repeatable = repeatable;
 		this.doneToday = doneToday;
 		this.failed = failed;
@@ -65,6 +67,11 @@ public class Task extends Resource implements Serializable
 	public boolean isPossibleAtWork()
 	{
 		return possibleAtWork;
+	}
+
+	public boolean isCritical()
+	{
+		return critical;
 	}
 
 	public boolean isRepeatable()
@@ -100,6 +107,7 @@ public class Task extends Resource implements Serializable
 				", constr=" + constr +
 				", id=" + id +
 				", possibleAtWork=" + possibleAtWork +
+				", critical=" + critical +
 				", repeatable=" + repeatable +
 				", doneToday=" + doneToday +
 				", failed=" + failed +
@@ -120,7 +128,7 @@ public class Task extends Resource implements Serializable
 	@Override
 	public int hashCode()
 	{
-		return Objects.hash(id, user, name, constr, possibleAtWork, repeatable, doneToday, failed, placesToSatisfy);
+		return Objects.hash(id, user, name, constr, possibleAtWork, critical, repeatable, doneToday, failed, placesToSatisfy);
 	}
 
 	@Override
