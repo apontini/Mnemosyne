@@ -163,25 +163,12 @@ class TaskDetailsActivity : AppCompatActivity(), OnMapReadyCallback
 
         checkPossibleWork.isChecked = task.isPossibleAtWork
 
-        textDoneTodayValue.text = if (task.isDoneToday)
-        {
-            getString(R.string.text_yes)
-        }
-        else
-        {
-            getString(R.string.text_no)
-        }
+        textDoneTodayValue.text = if (task.isDoneToday) { getString(R.string.text_yes) } else { getString(R.string.text_no) }
 
         checkRepeatable.isChecked = task.isRepeatable
 
-        textFailedValue.text = if (task.isFailed)
-        {
-            getString(R.string.text_yes)
-        }
-        else
-        {
-            getString(R.string.text_no)
-        }
+        textFailedValue.text = if (task.isFailed) { getString(R.string.text_yes) } else { getString(R.string.text_no) }
+        textCriticalValue.text = if (task.isCritical) { getString(R.string.text_yes) } else { getString(R.string.text_no) }
     }
 
     override fun onMapReady(p0: GoogleMap)

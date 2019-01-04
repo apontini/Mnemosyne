@@ -218,14 +218,40 @@
             <TableRow
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginTop="16dp">
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="15dp">
+
+                <TextView
+                    android:id="@+id/textCritical"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Critico:"
+                    android:textAppearance="@style/MnemosyneBodyText2"
+                    android:textColor="@color/onSecondary" />
+
+                <TextView
+                    android:id="@+id/textCriticalValue"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:paddingLeft="25dp"
+                    android:text="TextView"
+                    android:textAppearance="@style/MnemosyneBodyText2"
+                    android:textColor="@color/onSecondary" />
+
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
 
                 <TextView
                     android:id="@+id/textDoneToday"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Eseguito oggi"
                     android:layout_weight="1"
+                    android:text="Eseguito oggi:"
                     android:textAppearance="@style/MnemosyneBodyText2"
                     android:textColor="@color/onSecondary" />
 
@@ -283,6 +309,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
+                    android:layout_marginStart="24dp"
+                    android:layout_marginEnd="24dp"
                     android:layout_weight="1"
                     android:text="@string/button_details_deleteTask" />
 

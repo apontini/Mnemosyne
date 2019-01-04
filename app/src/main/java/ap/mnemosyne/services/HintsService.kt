@@ -290,7 +290,7 @@ class HintsService : Service(), LocationListener
                 }
             }
 
-            alarmMgr.setAndAllowWhileIdle(
+            alarmMgr.setExactAndAllowWhileIdle(
                 AlarmManager.ELAPSED_REALTIME_WAKEUP,
                 SystemClock.elapsedRealtime() + calculateCallbackTime(p0),
                 alarmIntent)
@@ -338,7 +338,7 @@ class HintsService : Service(), LocationListener
             PendingIntent.getBroadcast(this, 0, intent, 0)
         }
 
-        alarmMgr.setAndAllowWhileIdle(
+        alarmMgr.setExactAndAllowWhileIdle(
             AlarmManager.ELAPSED_REALTIME_WAKEUP,
             SystemClock.elapsedRealtime() + alarmFirstDelay,
             alarmIntent)
@@ -524,6 +524,12 @@ class HintsService : Service(), LocationListener
                     setStyle(bigTextStyle)
                     setContentTitle("URGENTE! ${title.capitalize()}")
                     setVibrate(LongArray(1) {2000L})
+                    val doneIntent = Intent(this@HintsService, HintsHelperService::class.java).apply {
+                        action = HintsHelperService.ACTION_COMPLETED_SUCCESS
+                        putExtra("taskID", hint.taskID)
+                    }
+                    val donePendingIntent = PendingIntent.getService(this@HintsService, hint.taskID, doneIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+                    addAction(R.drawable.ic_baseline_clear_24px, "L'ho completato", donePendingIntent)
                     setOngoing(true)
                 }
 
@@ -543,6 +549,13 @@ class HintsService : Service(), LocationListener
                     }
                     val snoozeMaxPendingIntent = PendingIntent.getService(this@HintsService, hint.taskID, snoozeMaxIntent, PendingIntent.FLAG_UPDATE_CURRENT)
                     addAction(R.drawable.ic_baseline_clear_24px, "Ritarda (1 ora)", snoozeMaxPendingIntent)
+
+                    val doneIntent = Intent(this@HintsService, HintsHelperService::class.java).apply {
+                        action = HintsHelperService.ACTION_COMPLETED_SUCCESS
+                        putExtra("taskID", hint.taskID)
+                    }
+                    val donePendingIntent = PendingIntent.getService(this@HintsService, hint.taskID, doneIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+                    addAction(R.drawable.ic_baseline_clear_24px, "Completato", donePendingIntent)
                 }
             }
 
