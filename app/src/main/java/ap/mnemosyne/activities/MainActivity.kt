@@ -128,8 +128,8 @@ class MainActivity : AppCompatActivity()
                         false, false, HashSet<Place>())
 
                     hints.filter { it.isUrgent && !it.isConfirm }.forEach {
-                        cardCreatedList.add(TaskCard(
-                            tasks.getLocalTask(it.taskID) ?: defaultTask, it))
+                        var curTask = tasks.getLocalTask(it.taskID)
+                        if(curTask != null) cardCreatedList.add(TaskCard(curTask, it))
                     }
 
                     hints.filter { !it.isUrgent }.forEachIndexed{ i, e -> if(i<2) cardCreatedList.add(TaskCard(tasks.getLocalTask(e.taskID) ?: defaultTask, e));}

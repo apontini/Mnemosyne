@@ -186,7 +186,7 @@ class HintsService : Service(), LocationListener
         Log.d("CALCOLI","speed: $speed -> $y")*/
         Log.d("SERVICE", "Next hint will be in $y seconds")
         return y * 1000
-        //return 32000L
+        //return 30000L
     }
 
     @SuppressLint("MissingPermission")

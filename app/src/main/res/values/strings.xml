@@ -80,7 +80,7 @@
     <string name="nav_create_manual">Crea task manualmente</string>
     <string name="voice_chip_example1">Devo prendere il latte</string>
     <string name="voice_chip_example2">Devo pagare il bollo entro le 18</string>
-    <string name="voice_chip_example3">Ricordami di fare la lavatrice quanto torno a casa</string>
+    <string name="voice_chip_example3">Ricordami di fare la lavatrice quando torno a casa</string>
     <string name="voice_chip_example4">Ricordami di prendere la medicina a pranzo</string>
     <string name="main_text_loading">Carico la dashboard…</string>
     <string name="alert_noInternetConnection">Connessione internet non disponibile</string>
