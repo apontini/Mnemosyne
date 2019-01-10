@@ -40,9 +40,9 @@
 
     <style name="Alert" parent="Theme.MaterialComponents.Dialog.Alert">
         <item name="colorPrimary">@android:color/transparent</item>
-        <item name="android:colorAccent">@android:color/transparent</item>
+        <item name="colorOnPrimary">@color/colorPrimary</item>
+        <item name="android:windowTitleStyle">@style/MnemosyneTitleText</item>
         <item name="android:textColorPrimary">@color/onPrimary</item>
-        <item name="android:buttonBarStyle">@style/ButtonMnemosyneText</item>
     </style>
 
     <style name="Theme.Transparent" parent="Theme.AppCompat.Light.DarkActionBar">
@@ -55,7 +55,7 @@
     </style>
 
     <style name="PreferencesTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
-        <item name="colorAccent">@color/colorSecondary</item>
+        <item name="colorAccent">@color/colorPrimaryDark</item>
         <item name="android:statusBarColor">@color/statusBarColor</item>
         <item name="android:textColorPrimary">@color/onSecondary</item>
         <item name="android:textColorSecondary">@color/onSecondary</item>

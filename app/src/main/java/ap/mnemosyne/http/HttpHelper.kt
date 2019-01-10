@@ -31,6 +31,7 @@ class HttpHelper(act: Context)
         const val BASE_URL : String = "https://pintini.ddns.net:8443"
         const val AUTH_URL : String = "$BASE_URL/mnemosyne/auth"
         const val REST_USER_URL : String = "$BASE_URL/mnemosyne/rest/user"
+        const val REST_USER_PASSWORD_URL : String = "$BASE_URL/mnemosyne/rest/user/password"
         const val REST_TASK_URL : String = "$BASE_URL/mnemosyne/rest/task"
         const val PARSE_URL : String = "$BASE_URL/mnemosyne/parse"
         const val REST_PARAMETER_URL : String = "$BASE_URL/mnemosyne/rest/parameter"
@@ -50,6 +51,8 @@ class HttpHelper(act: Context)
             val res = mockupResponse(req, HttpHelper.ERROR_PERMISSIONS)
             return Pair(null, res)
         }
+
+        Log.d("REQUEST", req.toString())
 
         var resp : Response
         try

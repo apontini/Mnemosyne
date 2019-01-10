@@ -118,4 +118,9 @@
     <string name="sharedPreferences_tasks_hints_lastRefresh">hints-last-refresh</string>
     <string name="sharedPreferences_tasks_hints_user">hints-user</string>
     <string name="notification_touchToDetails">Tocca per visualizzare i dettagli</string>
+    <string name="psw_old_hint">Vecchia password</string>
+    <string name="psw_new_1">Nuova password</string>
+    <string name="psw_new_2">Conferma password</string>
+    <string name="psw_button_confirm">Conferma</string>
+    <string name="psw_button_cancel">Annulla</string>
 </resources>

@@ -26,6 +26,7 @@ import org.joda.time.LocalTime
 import org.joda.time.format.DateTimeFormat
 import java.nio.charset.StandardCharsets
 import android.location.Geocoder
+import org.jetbrains.anko.design.textInputEditText
 import java.util.*
 
 
@@ -196,7 +197,8 @@ class SettingsActivity : AppCompatActivity()
 
             findPreference("password").onPreferenceClickListener = Preference.OnPreferenceClickListener{
 
-                alert("Non implementato") {  }.show()
+                val intent = Intent(this@Preferences.activity, PasswordChangeActivity::class.java)
+                startActivityForResult(intent, PasswordChangeActivity.PSW_RESULT_CODE)
                 true
             }
 
@@ -469,8 +471,16 @@ class SettingsActivity : AppCompatActivity()
                     {
                         if(resultCode == Activity.RESULT_OK)
                         {
-                            snackbar(this.activity.toolbar, "Sei collegato come: " + session.user.email).show()
+                            this.activity.toolbar.snackbar("Sei collegato come: " + session.user.email).show()
                             printParameters()
+                        }
+                    }
+
+                    PasswordChangeActivity.PSW_RESULT_CODE ->
+                    {
+                        if(resultCode == Activity.RESULT_OK)
+                        {
+                            this.activity.toolbar.snackbar("Password modificata").show()
                         }
                     }
                 }
