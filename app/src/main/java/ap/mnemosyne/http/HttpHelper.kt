@@ -28,7 +28,7 @@ class HttpHelper(act: Context)
             return@lazy b.build()
         }
 
-        const val BASE_URL : String = "http://pintini.ddns.net:8080"
+        const val BASE_URL : String = "https://pintini.ddns.net:8443"
         const val AUTH_URL : String = "$BASE_URL/mnemosyne/auth"
         const val REST_USER_URL : String = "$BASE_URL/mnemosyne/rest/user"
         const val REST_TASK_URL : String = "$BASE_URL/mnemosyne/rest/task"
