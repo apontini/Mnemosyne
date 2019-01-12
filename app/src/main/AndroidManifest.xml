@@ -50,7 +50,6 @@
             android:theme="@style/SplashTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -113,6 +112,7 @@
         <activity
             android:name=".activities.OnboardingActivity"
             android:theme="@style/AppTheme.NoActionBar" />
+
         <activity android:name=".activities.PasswordChangeActivity"
             android:parentActivityName=".activities.SettingsActivity"
             android:screenOrientation="portrait"

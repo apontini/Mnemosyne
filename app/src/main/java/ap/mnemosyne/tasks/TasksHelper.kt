@@ -3,6 +3,7 @@ package ap.mnemosyne.tasks
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.util.Base64
 import android.util.Log
 import ap.mnemosyne.activities.LoginActivity
 import ap.mnemosyne.http.HttpHelper
@@ -15,10 +16,16 @@ import org.jetbrains.anko.alert
 import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
 import org.joda.time.LocalDateTime
+import org.joda.time.LocalTime
 import org.joda.time.Minutes
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.format.DateTimeFormatter
-import java.util.concurrent.locks.ReentrantLock
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import java.io.ObjectInputStream
+import java.io.ObjectOutputStream
+import java.nio.charset.StandardCharsets
+import java.util.concurrent.locks.ReentrantReadWriteLock
 
 class TasksHelper(val ctx : Context)
 {
@@ -27,14 +34,16 @@ class TasksHelper(val ctx : Context)
         val dateTimeFormat : DateTimeFormatter by lazy { return@lazy DateTimeFormat.forPattern("yyyy-MM-dd HH:mm") }
         private const val MIN_UPDATE = 8
         const val LAST_REFRESH : String = "last_refresh"
-        val lock by lazy { ReentrantLock() }
+        val lock by lazy { ReentrantReadWriteLock() }
+        val readLock by lazy { lock.readLock() }
+        val writeLock by lazy { lock.writeLock() }
     }
 
     val session = SessionHelper(ctx)
 
     fun updateTasksAndDo(forceUpdate : Boolean = false, doWhatError: (Int, String) -> Unit = {_,p1 -> ctx.alert(p1).show()}, doWhat: () -> (Unit))
     {
-        lock.lock()
+        writeLock.lock()
         val refreshed = LocalDateTime.parse(ctx.getSharedPreferences(ctx.getString(R.string.sharedPreferences_tasks_FILE), Context.MODE_PRIVATE).getString(LAST_REFRESH,
             "1970-01-01 00:00"), dateTimeFormat)
         val now = LocalDateTime.now()
@@ -63,9 +72,18 @@ class TasksHelper(val ctx : Context)
                     200 ->
                     {
                         val prefs = ctx.getSharedPreferences(ctx.getString(R.string.sharedPreferences_tasks_FILE), Context.MODE_PRIVATE)
+                        val taskmap = mutableMapOf<Int,Task>()
+                        (resp.first as ResourceList<Task>).list.forEach{
+                            taskmap[it.id] = it
+                        }
+
+                        val baos = ByteArrayOutputStream()
+                        val oos = ObjectOutputStream(baos)
+                        oos.writeObject(taskmap)
+                        oos.flush()
                         with(prefs.edit())
                         {
-                            putString(ctx.getString(R.string.sharedPreferences_tasks_list), (resp.first as ResourceList<Task>).toJSON())
+                            putString(ctx.getString(R.string.sharedPreferences_tasks_map), android.util.Base64.encodeToString(baos.toByteArray(), android.util.Base64.DEFAULT))
                             apply()
                         }
 
@@ -118,96 +136,135 @@ class TasksHelper(val ctx : Context)
             Log.d("TASK", "No need to update")
             doWhat()
         }
-        lock.unlock()
+        writeLock.unlock()
     }
 
     fun resetLocalTasks()
     {
-        lock.lock()
+        writeLock.lock()
         with(ctx.getSharedPreferences(ctx.getString(R.string.sharedPreferences_tasks_FILE), Context.MODE_PRIVATE).edit())
         {
-            remove(ctx.getString(R.string.sharedPreferences_tasks_list))
+            remove(ctx.getString(R.string.sharedPreferences_tasks_map))
             putString(LAST_REFRESH, "1970-01-01 00:00")
             apply()
         }
 
-        lock.unlock()
+        writeLock.unlock()
     }
 
     fun removeLocalTasks(t : Task)
     {
-        lock.lock()
-        val list = ResourceList.fromJSON(ctx.getSharedPreferences(ctx.getString(R.string.sharedPreferences_tasks_FILE), Context.MODE_PRIVATE)
-                                            .getString(ctx.getString(R.string.sharedPreferences_tasks_list), "")).list as MutableList<Task>
-        list.remove(t)
+        writeLock.lock()
+        val mapString = ctx.getSharedPreferences(ctx.getString(R.string.sharedPreferences_tasks_FILE), Context.MODE_PRIVATE)
+            .getString(ctx.getString(R.string.sharedPreferences_tasks_map), "")?.toByteArray(StandardCharsets.UTF_8)
+            ?: "".toByteArray(StandardCharsets.UTF_8)
 
-        with(ctx.getSharedPreferences(ctx.getString(R.string.sharedPreferences_tasks_FILE), Context.MODE_PRIVATE).edit())
+        try
         {
-            putString(ctx.getString(R.string.sharedPreferences_tasks_list), ResourceList<Task>(list).toJSON())
-            apply()
+            val bais = ByteArrayInputStream(Base64.decode(mapString, Base64.DEFAULT))
+            val inputStream = ObjectInputStream(bais)
+            val map = inputStream.readObject() as MutableMap<Int, Task>
+            map.remove(t.id)
+            val baos = ByteArrayOutputStream()
+            val oos = ObjectOutputStream(baos)
+            oos.writeObject(map)
+            oos.flush()
+            with(ctx.getSharedPreferences(ctx.getString(R.string.sharedPreferences_tasks_FILE), Context.MODE_PRIVATE).edit())
+            {
+                putString(ctx.getString(R.string.sharedPreferences_tasks_map), android.util.Base64.encodeToString(baos.toByteArray(), android.util.Base64.DEFAULT))
+                apply()
+            }
         }
-
-        lock.unlock()
+        catch (e : java.lang.Exception)
+        {
+            e.printStackTrace()
+        }
+        finally
+        {
+            writeLock.unlock()
+        }
     }
 
     fun modifyLocalTasks(t : Task)
     {
-        lock.lock()
-        val list = ResourceList.fromJSON(ctx.getSharedPreferences(ctx.getString(R.string.sharedPreferences_tasks_FILE), Context.MODE_PRIVATE)
-            .getString(ctx.getString(R.string.sharedPreferences_tasks_list), "")).list as MutableList<Task>
-        val index = list.indexOf(t)
-        list[index] = t
+        writeLock.lock()
+        val mapString = ctx.getSharedPreferences(ctx.getString(R.string.sharedPreferences_tasks_FILE), Context.MODE_PRIVATE)
+            .getString(ctx.getString(R.string.sharedPreferences_tasks_map), "")?.toByteArray(StandardCharsets.UTF_8)
+            ?: "".toByteArray(StandardCharsets.UTF_8)
 
-        with(ctx.getSharedPreferences(ctx.getString(R.string.sharedPreferences_tasks_FILE), Context.MODE_PRIVATE).edit())
+        try
         {
-            putString(ctx.getString(R.string.sharedPreferences_tasks_list), ResourceList<Task>(list).toJSON())
-            apply()
+            val bais = ByteArrayInputStream(Base64.decode(mapString, Base64.DEFAULT))
+            val inputStream = ObjectInputStream(bais)
+            val map = inputStream.readObject() as MutableMap<Int, Task>
+            map[t.id] = t
+            val baos = ByteArrayOutputStream()
+            val oos = ObjectOutputStream(baos)
+            oos.writeObject(map)
+            oos.flush()
+            with(ctx.getSharedPreferences(ctx.getString(R.string.sharedPreferences_tasks_FILE), Context.MODE_PRIVATE).edit())
+            {
+                putString(ctx.getString(R.string.sharedPreferences_tasks_map), android.util.Base64.encodeToString(baos.toByteArray(), android.util.Base64.DEFAULT))
+                apply()
+            }
         }
-
-        lock.unlock()
+        catch (e : java.lang.Exception)
+        {
+            e.printStackTrace()
+        }
+        finally
+        {
+            writeLock.unlock()
+        }
     }
 
-    fun getLocalTasks() : Iterable<Task>?
+    fun getLocalTasks() : Map<Int, Task>?
     {
-        lock.lock()
+        readLock.lock()
+        val mapString = ctx.getSharedPreferences(ctx.getString(R.string.sharedPreferences_tasks_FILE), Context.MODE_PRIVATE)
+            .getString(ctx.getString(R.string.sharedPreferences_tasks_map), "")?.toByteArray(StandardCharsets.UTF_8)
+            ?: "".toByteArray(StandardCharsets.UTF_8)
+
         return try
         {
-            ResourceList.fromJSON(
-                ctx.getSharedPreferences(ctx.getString(R.string.sharedPreferences_tasks_FILE), Context.MODE_PRIVATE)
-                    .getString(ctx.getString(R.string.sharedPreferences_tasks_list), "")).list as List<Task>
+            val bais = ByteArrayInputStream(Base64.decode(mapString, Base64.DEFAULT))
+            val inputStream = ObjectInputStream(bais)
+            val map = inputStream.readObject() as MutableMap<Int, Task>
+            map
         }
-        catch (e: Exception)
+        catch (e : java.lang.Exception)
         {
             e.printStackTrace()
             null
         }
         finally
         {
-            lock.unlock()
+            readLock.unlock()
         }
     }
 
     fun getLocalTask(id : Int) : Task?
     {
-        lock.lock()
+        readLock.lock()
+        val mapString = ctx.getSharedPreferences(ctx.getString(R.string.sharedPreferences_tasks_FILE), Context.MODE_PRIVATE)
+            .getString(ctx.getString(R.string.sharedPreferences_tasks_map), "")?.toByteArray(StandardCharsets.UTF_8)
+            ?: "".toByteArray(StandardCharsets.UTF_8)
+
         return try
         {
-            val list = ResourceList.fromJSON(
-                ctx.getSharedPreferences(ctx.getString(R.string.sharedPreferences_tasks_FILE), Context.MODE_PRIVATE)
-                    .getString(ctx.getString(R.string.sharedPreferences_tasks_list), "")).list as List<Task>
-            val filtered = list.filter { it.id == id }
-            if(filtered.isEmpty())
-                null
-            else
-                filtered.first()
+            val bais = ByteArrayInputStream(Base64.decode(mapString, Base64.DEFAULT))
+            val inputStream = ObjectInputStream(bais)
+            val map = inputStream.readObject() as MutableMap<Int, Task>
+            map[id]
         }
-        catch (e: Exception)
+        catch (e : java.lang.Exception)
         {
+            e.printStackTrace()
             null
         }
         finally
         {
-            lock.unlock()
+            readLock.unlock()
         }
     }
 }

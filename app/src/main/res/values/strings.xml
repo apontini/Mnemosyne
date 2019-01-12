@@ -10,7 +10,7 @@
     <string name="sharedPreferences_user_sessionid">JSESSIONID</string>
     <string name="sharedPreferences_user_mail">mail</string>
     <string name="sharedPreferences_user_psw">password</string>
-    <string name="sharedPreferences_tasks_list">task-list</string>
+    <string name="sharedPreferences_tasks_map">task-map</string>
     <string name="text_main_list">Visualizza i miei task</string>
     <string name="text_main_mic">Aggiungi un task a voce!</string>
     <string name="text_main_add">Aggiungi manualmente un task</string>

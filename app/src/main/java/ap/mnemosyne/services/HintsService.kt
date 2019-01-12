@@ -237,6 +237,7 @@ class HintsService : Service(), LocationListener
                 200->
                 {
                     val hints = (response.first as ResourceList<Hint>).list as List<Hint>
+                    Log.d("SERVICE", "writing hints to preferences...")
                     with(getSharedPreferences(getString(R.string.sharedPreferences_tasks_FILE),Context.MODE_PRIVATE).edit())
                     {
                         putString(getString(R.string.sharedPreferences_tasks_hints), (response.first as ResourceList<Hint>).toJSON())
@@ -244,7 +245,9 @@ class HintsService : Service(), LocationListener
                         putString(getString(R.string.sharedPreferences_tasks_hints_user), session.user.email)
                         apply()
                     }
+                    Log.d("SERVICE", "Hints written")
                     var notfound = 0
+                    Log.d("SERVICE", "Checking missing tasks...")
                     hints.forEach {
                         if(tasks.getLocalTask(it.taskID) == null)
                         {
@@ -253,12 +256,15 @@ class HintsService : Service(), LocationListener
                     }
                     if(notfound>0)
                     {
+                        Log.d("SERVICE", "Found some, requesting...")
                         tasks.updateTasksAndDo(true) {
+                            Log.d("SERVICE", "Managing notifications")
                             handleTasksNotification(hints)
                         }
                     }
                     else
                     {
+                        Log.d("SERVICE", "No task missing, managing notifications")
                         handleTasksNotification(hints)
                     }
                 }
@@ -402,6 +408,7 @@ class HintsService : Service(), LocationListener
             //If task is null, it means that after the service asked for hints and BEFORE their processing, task was deleted
             if(t!=null)
             {
+                Log.d("SERVICE", "Managing task ${t.id}...")
                 if (!snoozed.isSnoozed(t.id) || it.isUrgent)
                 {
                     snoozed.unSnooze(t.id) //To free local space up removing it from the map

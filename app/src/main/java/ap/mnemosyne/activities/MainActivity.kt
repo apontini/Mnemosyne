@@ -91,25 +91,25 @@ class MainActivity : AppCompatActivity()
         mainText.visibility = View.VISIBLE
         cardList.visibility = View.GONE
         tasks.updateTasksAndDo(doWhat = {
-            val tasksList : List<Task> = tasks.getLocalTasks() as List<Task>? ?: listOf()
+            val tasksMap : Map<Int, Task> = tasks.getLocalTasks() ?: mapOf()
             var constrained = 0
             var failed = 0
             var doneToday = 0
             var timeConstr = 0
             var placeConstr = 0
 
-            tasksList.forEach{
-                if(it.isFailed) failed++
-                if(it.isDoneToday) doneToday++
-                if(it.constr != null)
+            tasksMap.entries.forEach{
+                if(it.value.isFailed) failed++
+                if(it.value.isDoneToday) doneToday++
+                if(it.value.constr != null)
                 {
                     constrained++
-                    if(it.constr is TaskPlaceConstraint) placeConstr++
-                    else if (it.constr is TaskTimeConstraint) timeConstr++
+                    if(it.value.constr is TaskPlaceConstraint) placeConstr++
+                    else if (it.value.constr is TaskTimeConstraint) timeConstr++
                 }
             }
 
-            val cardCreatedList = mutableListOf<Card>(NumberCard(tasksList.size, "Task registrati"), NumberCard(doneToday, "Task completati oggi"),
+            val cardCreatedList = mutableListOf<Card>(NumberCard(tasksMap.size, "Task registrati"), NumberCard(doneToday, "Task completati oggi"),
                 NumberCard(failed, "Task falliti"))
 
             val prefs = getSharedPreferences(getString(R.string.sharedPreferences_tasks_FILE), Context.MODE_PRIVATE)
@@ -118,6 +118,7 @@ class MainActivity : AppCompatActivity()
 
             if(Minutes.minutesBetween(lastRefr, LocalDateTime.now()).minutes <= 15 && session.user.email == lastUser)
             {
+                Log.d("CARDS", "Checking hints...")
                 try
                 {
                     val hints = ResourceList.fromJSON(
@@ -133,6 +134,8 @@ class MainActivity : AppCompatActivity()
                     }
 
                     hints.filter { !it.isUrgent }.forEachIndexed{ i, e -> if(i<2) cardCreatedList.add(TaskCard(tasks.getLocalTask(e.taskID) ?: defaultTask, e));}
+                    Log.d("CARDS", "Hints checked")
+
                 }
                 catch(e : Exception)
                 {

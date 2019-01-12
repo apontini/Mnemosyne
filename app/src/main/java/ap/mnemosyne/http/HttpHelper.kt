@@ -79,7 +79,9 @@ class HttpHelper(act: Context)
             {
                 resRet = try
                 {
+                    Log.d("RESPONSE", "Parsing resource...")
                     ResourceList.fromJSON(bodyResp)
+
                 }
                 catch (jpe: JsonParseException)
                 {
@@ -89,12 +91,17 @@ class HttpHelper(act: Context)
                 {
                     Message("CCE", "", cce.message)
                 }
+                finally
+                {
+                    Log.d("RESPONSE", "Parsed")
+                }
             }
             else
             {
                 val stream = ByteArrayInputStream(bodyResp.toByteArray(Charsets.UTF_8))
                 resRet = try
                 {
+                    Log.d("RESPONSE", "Parsing resource...")
                     Resource.fromJSON(stream)
                 }
                 catch (jpe: JsonParseException)
@@ -104,6 +111,10 @@ class HttpHelper(act: Context)
                 catch (cce: ClassCastException)
                 {
                     Message("CCE", "", cce.message)
+                }
+                finally
+                {
+                    Log.d("RESPONSE", "Parsed")
                 }
             }
 

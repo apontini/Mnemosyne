@@ -83,8 +83,8 @@ class TaskListActivity : AppCompatActivity()
             }
 
             taskJSONList.clear()
-            (tasks.getLocalTasks() as List<Task>).forEach {
-                taskJSONList.add(it)
+            (tasks.getLocalTasks() as Map<Int, Task>).entries.forEach {
+                taskJSONList.add(it.value)
             }
             if(!taskJSONList.isEmpty())
             {
