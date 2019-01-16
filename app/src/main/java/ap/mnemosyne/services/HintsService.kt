@@ -218,7 +218,7 @@ class HintsService : Service(), LocationListener
     override fun onLocationChanged(p0: Location?)
     {
         Log.d("SERVICE", "Trovata posizione: ${p0?.latitude ?: "null"} , ${p0?.longitude ?: "null"}, velocità: ${p0?.speed}")
-        //createTextNotification("Posizione", "${p0?.latitude ?: "null"} , ${p0?.longitude ?: "null"}, velocità: ${p0?.speed}")
+        createTextNotification("Posizione", "${p0?.latitude ?: "null"} , ${p0?.longitude ?: "null"}, velocità: ${p0?.speed}")
         LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, this)
         val time = LocalTime.now().toString(DateTimeFormat.forPattern("HH:mm"))
         val body = FormBody.Builder().add("lat", p0?.latitude.toString()).add("lon", p0?.longitude.toString())

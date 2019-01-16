@@ -28,6 +28,9 @@ class SnoozeHelper(private val ctx : Context)
     private var spref : SharedPreferences =
         ctx.getSharedPreferences(ctx.getString(R.string.sharedPreferences_tasks_FILE), Context.MODE_PRIVATE)
 
+    private var stat : SharedPreferences =
+        ctx.getSharedPreferences("apontini.mnemosyne.statsSharedPrefs", Context.MODE_PRIVATE)
+
     init
     {
         if(map.isEmpty())
@@ -67,6 +70,14 @@ class SnoozeHelper(private val ctx : Context)
             with(spref.edit())
             {
                 putString(SNOOZED_PREF,Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT))
+                apply()
+            }
+
+            val curSnooze = stat.getString(id.toString(), 0.toString())?.toInt() ?: 0
+
+            with(stat.edit())
+            {
+                putString(id.toString(), (curSnooze+1).toString())
                 apply()
             }
         }

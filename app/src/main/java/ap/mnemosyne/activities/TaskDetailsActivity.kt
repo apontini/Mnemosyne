@@ -87,6 +87,10 @@ class TaskDetailsActivity : AppCompatActivity(), OnMapReadyCallback
             updateTask()
         }
 
+        checkNotToday.setOnClickListener {
+            updateTask()
+        }
+
         deleteTaskButton.setOnClickListener{
 
             alert("Sei sicuro?"){
@@ -162,11 +166,10 @@ class TaskDetailsActivity : AppCompatActivity(), OnMapReadyCallback
         }
 
         checkPossibleWork.isChecked = task.isPossibleAtWork
+        checkRepeatable.isChecked = task.isRepeatable
+        checkNotToday.isChecked = task.isIgnoredToday
 
         textDoneTodayValue.text = if (task.isDoneToday) { getString(R.string.text_yes) } else { getString(R.string.text_no) }
-
-        checkRepeatable.isChecked = task.isRepeatable
-
         textFailedValue.text = if (task.isFailed) { getString(R.string.text_yes) } else { getString(R.string.text_no) }
         textCriticalValue.text = if (task.isCritical) { getString(R.string.text_yes) } else { getString(R.string.text_no) }
     }
@@ -212,10 +215,11 @@ class TaskDetailsActivity : AppCompatActivity(), OnMapReadyCallback
     {
         checkPossibleWork.isEnabled = false
         checkRepeatable.isEnabled = false
+        checkNotToday.isEnabled = false
         progressBar3.visibility = View.VISIBLE
 
         val newTask = Task(task.id, task.user, task.name, task.constr, checkPossibleWork.isChecked, task.isCritical,
-            checkRepeatable.isChecked, task.isDoneToday, task.isFailed, task.isIgnoredToday, task.placesToSatisfy)
+            checkRepeatable.isChecked, task.isDoneToday, task.isFailed, checkNotToday.isChecked, task.placesToSatisfy)
 
         val request = Request.Builder()
             .addHeader("Cookie" , "JSESSIONID="+session.user.sessionID)
@@ -261,6 +265,7 @@ class TaskDetailsActivity : AppCompatActivity(), OnMapReadyCallback
             uiThread {
                 checkPossibleWork.isEnabled = true
                 checkRepeatable.isEnabled = true
+                checkNotToday.isEnabled = true
                 progressBar3.visibility = View.GONE
             }
         }
