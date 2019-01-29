@@ -44,7 +44,7 @@
                     android:id="@+id/loginUser"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="@string/user_login_hint"
+                    android:hint="@string/login_userHint"
                     android:drawableEnd="@drawable/ic_baseline_mail_outline_24px"
                     android:drawableTint="@color/onPrimaryHelper"
                     android:inputType="textEmailAddress"
@@ -65,7 +65,7 @@
                     android:id="@+id/loginPassword"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="@string/password_login_hint"
+                    android:hint="@string/login_passwordHint"
                     android:inputType="textPassword"
                     android:textColor="@color/onPrimary" />
             </com.google.android.material.textfield.TextInputLayout>

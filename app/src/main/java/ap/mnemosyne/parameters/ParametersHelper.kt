@@ -24,7 +24,7 @@ import java.io.Serializable
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.locks.ReentrantLock
 
-class ParametersHelper(val ctx: Context) : Serializable
+class ParametersHelper(private val ctx: Context) : Serializable
 {
 
     companion object
@@ -35,7 +35,7 @@ class ParametersHelper(val ctx: Context) : Serializable
         val lock by lazy { ReentrantLock() }
     }
 
-    val session = SessionHelper(ctx)
+    private val session = SessionHelper(ctx)
 
     fun updateParametersAndDo(forceUpdate : Boolean = false, doWhatError: (Int, String) -> Unit = {_,p1 -> ctx.alert(p1).show()}, doWhat: () -> (Unit))
     {
@@ -114,7 +114,7 @@ class ParametersHelper(val ctx: Context) : Serializable
                     else ->
                     {
                         error = -1
-                        uiThread {ctx.alert("Non ho potuto aggiornare i parametri, codice: " + resp.second.code()) { }.show()  }
+                        uiThread {ctx.alert(ctx.getString(R.string.error_updateParameters, resp.second.code())) { }.show()  }
                     }
                 }
                 if (error == 0)
@@ -192,7 +192,7 @@ class ParametersHelper(val ctx: Context) : Serializable
                     else ->
                     {
                         error = -1
-                        uiThread { ctx.alert("Non ho potuto aggiornare i parametri, codice: " + resp.second.code()) { }.show() }
+                        uiThread { ctx.alert(ctx.getString(R.string.error_updateParameters,resp.second.code())) { }.show() }
 
                     }
                 }

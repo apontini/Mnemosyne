@@ -1,8 +1,8 @@
 package ap.mnemosyne.http
 
-import android.app.Activity
 import android.content.Context
 import android.util.Log
+import ap.mnemosyne.R
 import ap.mnemosyne.permissions.PermissionsHelper
 import ap.mnemosyne.resources.Message
 import ap.mnemosyne.resources.Resource
@@ -14,10 +14,11 @@ import okhttp3.Request
 import okhttp3.Response
 import java.io.ByteArrayInputStream
 import java.lang.ClassCastException
+import java.net.ConnectException
 import java.net.UnknownHostException
 import java.util.concurrent.TimeUnit
 
-class HttpHelper(act: Context)
+class HttpHelper(ctx: Context)
 {
     companion object
     {
@@ -41,11 +42,11 @@ class HttpHelper(act: Context)
         const val ERROR_UNKNOWN = 997
     }
 
-    val act : Context = act
+    private val ctx : Context = ctx
 
     fun request(req : Request, parseRes : Boolean = false) : Pair<Resource?, Response>
     {
-        if(!PermissionsHelper.checkInternetPermission(act))
+        if(!PermissionsHelper.checkInternetPermission(ctx))
         {
             //ERROR: permission are not given
             val res = mockupResponse(req, HttpHelper.ERROR_PERMISSIONS)
@@ -73,7 +74,8 @@ class HttpHelper(act: Context)
         lateinit var resRet : Resource
         if(parseRes)
         {
-            val bodyResp: String = resp.body()?.string() ?: Message("Errore", "", "null dal server").toJSON()
+            val bodyResp: String = resp.body()?.string() ?: Message(ctx.getString(R.string.error), "", ctx.getString(
+                            R.string.error_nullResponse)).toJSON()
             Log.d("RESPONSE", bodyResp)
             if(bodyResp.contains("{\"resource-list\":["))
             {
@@ -90,6 +92,10 @@ class HttpHelper(act: Context)
                 catch (cce: ClassCastException)
                 {
                     Message("CCE", "", cce.message)
+                }
+                catch(ce : ConnectException)
+                {
+                    Message("ConnectException", "", ce.message)
                 }
                 finally
                 {

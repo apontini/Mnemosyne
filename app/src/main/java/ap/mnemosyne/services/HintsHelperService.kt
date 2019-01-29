@@ -4,6 +4,7 @@ import android.content.Intent
 import android.app.IntentService
 import android.app.NotificationManager
 import android.content.Context
+import android.content.res.Resources
 import android.graphics.BitmapFactory
 import android.os.Build
 import android.util.Log
@@ -94,19 +95,19 @@ class HintsHelperService : IntentService("HintsHelperService")
                 401->
                 {
                     val respMessage = response.first as Message
-                    createTextNotification("Errore", respMessage.message)
+                    createTextNotification(Resources.getSystem().getString(R.string.error), respMessage.message)
                 }
 
                 400->
                 {
                     val respMessage = response.first as Message
-                    createTextNotification("Errore", respMessage.message)
+                    createTextNotification(Resources.getSystem().getString(R.string.error), respMessage.message)
                 }
 
                 500 ->
                 {
                     val respMessage = response.first as Message
-                    createTextNotification("Errore", respMessage.message)
+                    createTextNotification(Resources.getSystem().getString(R.string.error), respMessage.message)
                 }
             }
         }

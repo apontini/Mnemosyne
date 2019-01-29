@@ -52,7 +52,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback
         {
             list.forEach {
                 val latlon = LatLng(it.coordinates.lat, it.coordinates.lon)
-                googleMap.addMarker(MarkerOptions().position(latlon).title(it.name).title(it.name ?: it.road ?: "Nome non trovato"))
+                googleMap.addMarker(MarkerOptions().position(latlon).title(it.name).title(it.name ?: it.road ?: getString(
+                                    R.string.error_placeNameNotFound)))
             }
 
             if(focusPlace != null)
@@ -70,7 +71,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback
         }
         else
         {
-            alert("Nessun posto indicato") {}.show()
+            alert(getString(R.string.error_noPlaceGiven)) {}.show()
             finish()
         }
     }

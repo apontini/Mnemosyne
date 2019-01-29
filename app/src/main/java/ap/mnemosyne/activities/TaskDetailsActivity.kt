@@ -43,7 +43,7 @@ class TaskDetailsActivity : AppCompatActivity(), OnMapReadyCallback
         focusPlace = try {(intent.extras.getSerializable("focusPlace") as Place)} catch (e : Exception){null}
         tasks = TasksHelper(this)
         val id = intent.extras?.getInt("task") ?: -1
-        task = tasks.getLocalTask(id) ?: Task(-1,"", "Task non trovato", null, false, false, false, false,
+        task = tasks.getLocalTask(id) ?: Task(-1,"", "", null, false, false, false, false,
             false, false, HashSet<Place>())
 
         super.onCreate(savedInstanceState)
@@ -56,7 +56,7 @@ class TaskDetailsActivity : AppCompatActivity(), OnMapReadyCallback
 
         if(task.id == -1)
         {
-            alert("Task non valido"){ okButton { supportFinishAfterTransition() }}.show()
+            alert(getString(R.string.error_invalidTask)){ okButton { supportFinishAfterTransition() }}.show()
         }
 
         if (!task.placesToSatisfy.isEmpty())
@@ -93,7 +93,7 @@ class TaskDetailsActivity : AppCompatActivity(), OnMapReadyCallback
 
         deleteTaskButton.setOnClickListener{
 
-            alert("Sei sicuro?"){
+            alert(getString(R.string.info_areYouSure)){
                 yesButton { deleteTask(task) }
                 noButton { }
             }.show()
@@ -178,12 +178,11 @@ class TaskDetailsActivity : AppCompatActivity(), OnMapReadyCallback
     {
         p0.uiSettings.isMapToolbarEnabled = false
         val list = task.placesToSatisfy as HashSet<Place>
-        Log.d("LISTA", list.toString())
         if(!list.isEmpty())
         {
             list.forEach {
                 val latlon = LatLng(it.coordinates.lat, it.coordinates.lon)
-                p0.addMarker(MarkerOptions().position(latlon).title(it.name).title(it.name ?: "Nome non trovato"))
+                p0.addMarker(MarkerOptions().position(latlon).title(it.name).title(it.name ?: getString(R.string.error_placeNameNotFound)))
             }
 
             if(focusPlace != null)
@@ -206,7 +205,7 @@ class TaskDetailsActivity : AppCompatActivity(), OnMapReadyCallback
         }
         else
         {
-            alert("Nessun posto indicato") {}.show()
+            alert(getString(R.string.error_noPlaceGiven)) {}.show()
             finish()
         }
     }
@@ -240,12 +239,12 @@ class TaskDetailsActivity : AppCompatActivity(), OnMapReadyCallback
 
                 200 ->
                 {
-                    toolbar.snackbar("Task aggiornato con successo")
+                    toolbar.snackbar(getString(R.string.info_taskUpdated))
                     tasks.modifyLocalTasks(newTask)
                 }
 
                 404 ->{
-                    uiThread { alert("Errore durante l'update del task (404)") {  }.show() }
+                    uiThread { alert(getString(R.string.error_taskUpdate404)) {  }.show() }
                 }
 
                 HttpHelper.ERROR_PERMISSIONS ->
@@ -366,7 +365,7 @@ class TaskDetailsActivity : AppCompatActivity(), OnMapReadyCallback
 
                 R.id.create_task_manual ->
                 {
-                    toolbar.snackbar("Non implementato").show()
+                    toolbar.snackbar(getString(R.string.error_notImplemented)).show()
                 }
 
             }
@@ -411,7 +410,7 @@ class TaskDetailsActivity : AppCompatActivity(), OnMapReadyCallback
             {
                 if(resultCode == 1000 && data?.getSerializableExtra("deletedTask") != null )
                 {
-                    toolbar.longSnackbar("Rimosso").show()
+                    toolbar.longSnackbar(getString(R.string.info_removed)).show()
                 }
             }
         }

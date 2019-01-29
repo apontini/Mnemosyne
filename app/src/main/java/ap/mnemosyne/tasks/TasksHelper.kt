@@ -27,7 +27,7 @@ import java.io.ObjectOutputStream
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.locks.ReentrantReadWriteLock
 
-class TasksHelper(val ctx : Context)
+class TasksHelper(private val ctx : Context)
 {
     companion object
     {
@@ -114,7 +114,7 @@ class TasksHelper(val ctx : Context)
                     else ->
                     {
                         error = -1
-                        uiThread {ctx.alert("Non ho potuto aggiornare i task, codice: " + resp.second.code()) { }.show()  }
+                        uiThread {ctx.alert(ctx.getString(R.string.error_taskUpdateGeneral, resp.second.code())) { }.show()  }
                     }
                 }
                 if (error == 0)

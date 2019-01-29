@@ -471,7 +471,7 @@ class SettingsActivity : AppCompatActivity()
                     {
                         if(resultCode == Activity.RESULT_OK)
                         {
-                            this.activity.toolbar.snackbar("Sei collegato come: " + session.user.email).show()
+                            this.activity.toolbar.snackbar(getString(R.string.login_connectedAs, session.user.email)).show()
                             printParameters()
                         }
                     }
@@ -480,7 +480,7 @@ class SettingsActivity : AppCompatActivity()
                     {
                         if(resultCode == Activity.RESULT_OK)
                         {
-                            this.activity.toolbar.snackbar("Password modificata").show()
+                            this.activity.toolbar.snackbar(getString(R.string.info_passwordChanged)).show()
                         }
                     }
                 }

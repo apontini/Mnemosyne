@@ -171,22 +171,8 @@ class HintsService : Service(), LocationListener
 
         var y : Long = (k*diff/(speed*diff+k)+minT).toLong()
 
-        /*Log.d("CALCOLI","speed: $speed -> $y")
-        speed = 8.33F
-        y = (k*diff/(speed*diff+k)+minT).toLong()
-        Log.d("CALCOLI","speed: $speed -> $y")
-        speed = 13.9F
-        y = (k*diff/(speed*diff+k)+minT).toLong()
-        Log.d("CALCOLI","speed: $speed -> $y")
-        speed = 19.4F
-        y = (k*diff/(speed*diff+k)+minT).toLong()
-        Log.d("CALCOLI","speed: $speed -> $y")
-        speed = 25F
-        y = (k*diff/(speed*diff+k)+minT).toLong()
-        Log.d("CALCOLI","speed: $speed -> $y")*/
         Log.d("SERVICE", "Next hint will be in $y seconds")
         return y * 1000
-        //return 30000L
     }
 
     @SuppressLint("MissingPermission")
@@ -200,25 +186,13 @@ class HintsService : Service(), LocationListener
             LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient,
                 locationRequest,
                 this@HintsService)
-            /*if(lastLocation != null && System.currentTimeMillis() - lastLocation.time > 30000)
-            {
-                Log.d("SERVICE", "Calcolo una nuova posizione")
-                LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient,
-                    locationRequest,
-                    this@HintsService)
-            }
-            else
-            {
-                Log.d("SERVICE", "Uso l'ultima posizione (time diff: ${System.currentTimeMillis() - lastLocation.time})")
-                onLocationChanged(lastLocation)
-            }*/
         }
     }
 
     override fun onLocationChanged(p0: Location?)
     {
         Log.d("SERVICE", "Trovata posizione: ${p0?.latitude ?: "null"} , ${p0?.longitude ?: "null"}, velocità: ${p0?.speed}")
-        createTextNotification("Posizione", "${p0?.latitude ?: "null"} , ${p0?.longitude ?: "null"}, velocità: ${p0?.speed}")
+        //createTextNotification("Posizione", "${p0?.latitude ?: "null"} , ${p0?.longitude ?: "null"}, velocità: ${p0?.speed}")
         LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, this)
         val time = LocalTime.now().toString(DateTimeFormat.forPattern("HH:mm"))
         val body = FormBody.Builder().add("lat", p0?.latitude.toString()).add("lon", p0?.longitude.toString())
@@ -272,27 +246,27 @@ class HintsService : Service(), LocationListener
                 401->
                 {
                     val respMessage = response.first as Message
-                    createTextNotification("Errore", "${respMessage.message}, tocca per risolvere", true)
+                    createTextNotification(getString(R.string.error), getString(R.string.notification_error401_descr, respMessage.message), true)
                     stopHintsService()
                 }
 
                 400->
                 {
                     val respMessage = response.first as Message
-                    createTextNotification("Errore", respMessage.message, true)
+                    createTextNotification(getString(R.string.error), respMessage.message, true)
                 }
 
                 406->
                 {
                     //Per ora non verrà mai restituita
                     val respMessage = response.first as Message
-                    createTextNotification("Errore", respMessage.message, true)
+                    createTextNotification(getString(R.string.error), respMessage.message, true)
                 }
 
                 500 ->
                 {
                     val respMessage = response.first as Message
-                    createTextNotification("Errore", respMessage.message, true)
+                    createTextNotification(getString(R.string.error), respMessage.message, true)
                 }
             }
 
@@ -335,7 +309,7 @@ class HintsService : Service(), LocationListener
             }
             val killPendingIntent: PendingIntent =
                 PendingIntent.getService(this@HintsService, 9, killIntent, 0)
-            addAction(R.drawable.places_ic_clear, "Non avvisarmi più", killPendingIntent)
+            addAction(R.drawable.places_ic_clear, getString(R.string.notification_mnemosyneForeground_stop), killPendingIntent)
         }
 
         startForeground(1, notification.build())
@@ -525,18 +499,18 @@ class HintsService : Service(), LocationListener
                 hint.isUrgent ->
                 {
                     with(bigTextStyle) {
-                        setBigContentTitle("URGENTE! ${title.capitalize()}")
+                        setBigContentTitle(getString(R.string.notification_urgentTask, title.capitalize()))
                         bigText(text)
                     }
                     setStyle(bigTextStyle)
-                    setContentTitle("URGENTE! ${title.capitalize()}")
+                    setContentTitle(getString(R.string.notification_urgentTask, title.capitalize()))
                     setVibrate(LongArray(1) {2000L})
                     val doneIntent = Intent(this@HintsService, HintsHelperService::class.java).apply {
                         action = HintsHelperService.ACTION_COMPLETED_SUCCESS
                         putExtra("taskID", hint.taskID)
                     }
                     val donePendingIntent = PendingIntent.getService(this@HintsService, hint.taskID, doneIntent, PendingIntent.FLAG_UPDATE_CURRENT)
-                    addAction(R.drawable.ic_baseline_clear_24px, "L'ho completato", donePendingIntent)
+                    addAction(R.drawable.ic_baseline_clear_24px, getString(R.string.notification_action_completed), donePendingIntent)
                     setOngoing(true)
                 }
 
@@ -548,21 +522,21 @@ class HintsService : Service(), LocationListener
                         putExtra("taskID", hint.taskID)
                     }
                     val snoozePendingIntent = PendingIntent.getService(this@HintsService, hint.taskID, snoozeIntent, PendingIntent.FLAG_UPDATE_CURRENT)
-                    addAction(R.drawable.ic_baseline_clear_24px, "Ritarda (15 min)", snoozePendingIntent)
+                    addAction(R.drawable.ic_baseline_clear_24px, getString(R.string.notification_action_snoozeMin), snoozePendingIntent)
 
                     val snoozeMaxIntent = Intent(this@HintsService, HintsHelperService::class.java).apply {
                         action = HintsHelperService.ACTION_SNOOZE_MAX
                         putExtra("taskID", hint.taskID)
                     }
                     val snoozeMaxPendingIntent = PendingIntent.getService(this@HintsService, hint.taskID, snoozeMaxIntent, PendingIntent.FLAG_UPDATE_CURRENT)
-                    addAction(R.drawable.ic_baseline_clear_24px, "Ritarda (1 ora)", snoozeMaxPendingIntent)
+                    addAction(R.drawable.ic_baseline_clear_24px, getString(R.string.notification_action_snoozeMax), snoozeMaxPendingIntent)
 
                     val doneIntent = Intent(this@HintsService, HintsHelperService::class.java).apply {
                         action = HintsHelperService.ACTION_COMPLETED_SUCCESS
                         putExtra("taskID", hint.taskID)
                     }
                     val donePendingIntent = PendingIntent.getService(this@HintsService, hint.taskID, doneIntent, PendingIntent.FLAG_UPDATE_CURRENT)
-                    addAction(R.drawable.ic_baseline_clear_24px, "Completato", donePendingIntent)
+                    addAction(R.drawable.ic_baseline_clear_24px, getString(R.string.notification_action_completed), donePendingIntent)
                 }
             }
 

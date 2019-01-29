@@ -114,11 +114,11 @@ class MainCardsAdapter(private val context: Context,
 
                 if(c.hint?.isUrgent == true)
                 {
-                    descr.text = "URGENTE!"
+                    descr.text = ctx.getString(R.string.info_urgent)
                 }
                 else
                 {
-                    descr.text = "Come prossima cosa.."
+                    descr.text = ctx.getString(R.string.info_nextTask)
                 }
             }
         }

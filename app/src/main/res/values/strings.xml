@@ -3,10 +3,10 @@
     <string name="action_settings">Impostazioni</string>
     <string name="sharedPreferences_user_FILE">apontini.mnemosyne.userSharedPrefs</string>
     <string name="sharedPreferences_tasks_FILE">apontini.mnemosyne.tasksSharedPrefs</string>
-    <string name="title_activity_login">Entra in Mnemosyne</string>
+    <string name="login_titleActivity">Entra in Mnemosyne</string>
     <string name="login_button">Mnemosyne Login</string>
-    <string name="user_login_hint">Email</string>
-    <string name="password_login_hint">Password</string>
+    <string name="login_userHint">Email</string>
+    <string name="login_passwordHint">Password</string>
     <string name="sharedPreferences_user_sessionid">JSESSIONID</string>
     <string name="sharedPreferences_user_mail">mail</string>
     <string name="sharedPreferences_user_psw">password</string>
@@ -70,10 +70,8 @@
     <string name="title_section1">Section 1</string>
     <string name="title_section2">Section 2</string>
     <string name="title_section3">Section 3</string>
-
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
-
     <string name="action_example">Example action</string>
     <string name="nav_create_voice">Crea task a voce</string>
     <string name="nav_task_list">Lista Task</string>
@@ -123,4 +121,37 @@
     <string name="psw_new_2">Conferma password</string>
     <string name="psw_button_confirm">Conferma</string>
     <string name="psw_button_cancel">Annulla</string>
+    <string name="login_invalidEmail">Inserisci un indirizzo email valido</string>
+    <string name="login_invalidPassword">Inserisci una password valida</string>
+    <string name="login_connectedAs">Sei collegato come: %s</string>
+    <string name="dashboard_taskRegistered">Task registrati</string>
+    <string name="dashboard_tasksCompleted">Task completati oggi</string>
+    <string name="dashboard_tasksFailed">Task falliti</string>
+    <string name="error_notImplemented">Non implementato</string>
+    <string name="info_removed">Rimosso</string>
+    <string name="error_placeNameNotFound">Nome non trovato</string>
+    <string name="error_noPlaceGiven">Nessun posto indicato</string>
+    <string name="error_passwordNotMatching">Le password non corrispondono</string>
+    <string name="error">Errore</string>
+    <string name="info_passwordChanged">Password modificata</string>
+    <string name="error_invalidTask">Task non valido</string>
+    <string name="info_areYouSure">Sei sicuro?</string>
+    <string name="info_taskUpdated">Task aggiornato con successo</string>
+    <string name="error_taskUpdate404">Errore durante l\'update del task (404)</string>
+    <string name="text_voice_extraPrompt">Dimmi cosa vuoi che ti ricordi</string>
+    <string name="info_urgent">URGENTE!</string>
+    <string name="info_nextTask">Come prossima cosa...</string>
+    <string name="text_list_ignoredToday">Non completabile oggi</string>
+    <string name="text_list_failed">Fallito: %s</string>
+    <string name="text_list_completed">Completato: %s</string>
+    <string name="error_nullResponse">null dal server</string>
+    <string name="error_updateParameters">Non ho potuto aggiornare i parametri, codice: %d</string>
+    <string name="notification_error401_descr">%s, tocca per risolvere</string>
+    <string name="notification_mnemosyneForeground_stop">Non avvisarmi più</string>
+    <string name="notification_urgentTask">URGENTE! %s</string>
+    <string name="notification_action_completed">Completato</string>
+    <string name="notification_action_snoozeMin">Ritarda (15 min)</string>
+    <string name="notification_action_snoozeMax">Ritarda (1 ora)</string>
+    <string name="error_commitUserSharedPrefs">Errore nel salvare i dati, riavvia l\'applicazione</string>
+    <string name="error_taskUpdateGeneral">Non ho potuto aggiornare i task, codice: %d</string>
 </resources>

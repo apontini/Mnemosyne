@@ -86,13 +86,15 @@ class TaskListAdapter(private val context: Context,
             nametext.text = task.name.capitalize()
             if(t.isIgnoredToday)
             {
-                extratext.text = "Non completabile oggi"
+                extratext.text = ctx.getString(R.string.text_list_ignoredToday)
                 extratext2.visibility = View.INVISIBLE
             }
             else
             {
-                extratext.text = "Fallito: ${if(task.isFailed) ctx.getString(R.string.text_yes) else ctx.getString(R.string.text_no)}"
-                extratext2.text = "Completato: ${if(task.isDoneToday) ctx.getString(R.string.text_yes) else ctx.getString(R.string.text_no)}"
+                extratext.text = ctx.getString(R.string.text_list_failed,
+                    if(task.isFailed) ctx.getString(R.string.text_yes) else ctx.getString(R.string.text_no))
+                extratext2.text = ctx.getString(R.string.text_list_completed,
+                    if(task.isDoneToday) ctx.getString(R.string.text_yes) else ctx.getString(R.string.text_no))
             }
         }
 

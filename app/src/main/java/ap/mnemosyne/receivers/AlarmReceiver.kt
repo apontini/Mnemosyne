@@ -10,7 +10,7 @@ class AlarmReceiver : BroadcastReceiver()
 {
     override fun onReceive(context: Context?, intent: Intent?)
     {
-        Log.d("ALARM", "Ricevuto allarme")
+        Log.d("ALARM", "Alarm Received")
         val serviceIntent = Intent(context, HintsService::class.java)
         serviceIntent.action = HintsService.CHECK_HINTS
         context?.startService(serviceIntent)

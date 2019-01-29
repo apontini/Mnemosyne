@@ -294,7 +294,7 @@ class VoiceActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks,
 
                 R.id.create_task_manual ->
                 {
-                    toolbar.snackbar("Non implementato").show()
+                    toolbar.snackbar(getString(R.string.error_notImplemented)).show()
                 }
             }
             drawer_layout.closeDrawers()
@@ -306,7 +306,7 @@ class VoiceActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks,
     {
         Log.d("POSITION", "results: ${p0.toString()}")
         p0 ?: return
-        toolbar.snackbar("Posizione acc: ${p0.accuracy}")
+        //toolbar.snackbar("Posizione acc: ${p0.accuracy}")
         if(p0.accuracy > 1000f) return
         LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, this)
         progressStatus.text = getString(R.string.text_voice_waitServer)
@@ -543,7 +543,7 @@ class VoiceActivity : AppCompatActivity(), GoogleApiClient.ConnectionCallbacks,
             RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault())
         intent.putExtra(RecognizerIntent.EXTRA_PROMPT,
-            "Dimmi cosa vuoi che ti ricordi")
+            getString(R.string.text_voice_extraPrompt))
         startActivityForResult(intent, 1234)
     }
 

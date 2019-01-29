@@ -60,7 +60,7 @@ class MainActivity : AppCompatActivity()
         setNavDrawer()
         setCards(true)
 
-        toolbar.snackbar("Sei collegato come: " + session.user.email).show()
+        toolbar.snackbar(getString(R.string.login_connectedAs, session.user.email)).show()
 
         noConnIcon.setOnClickListener {
             setCards(true)
@@ -109,8 +109,9 @@ class MainActivity : AppCompatActivity()
                 }
             }
 
-            val cardCreatedList = mutableListOf<Card>(NumberCard(tasksMap.size, "Task registrati"), NumberCard(doneToday, "Task completati oggi"),
-                NumberCard(failed, "Task falliti"))
+            val cardCreatedList = mutableListOf<Card>(NumberCard(tasksMap.size, getString(R.string.dashboard_taskRegistered)), NumberCard(doneToday, getString(
+                            R.string.dashboard_tasksCompleted)),
+                NumberCard(failed, getString(R.string.dashboard_tasksFailed)))
 
             val prefs = getSharedPreferences(getString(R.string.sharedPreferences_tasks_FILE), Context.MODE_PRIVATE)
             val lastRefr = LocalDateTime.parse(prefs.getString(getString(R.string.sharedPreferences_tasks_hints_lastRefresh), "1970-01-01 00:00"), TasksHelper.dateTimeFormat)
@@ -129,7 +130,7 @@ class MainActivity : AppCompatActivity()
                         false, false, HashSet<Place>())
 
                     hints.filter { it.isUrgent && !it.isConfirm }.forEach {
-                        var curTask = tasks.getLocalTask(it.taskID)
+                        val curTask = tasks.getLocalTask(it.taskID)
                         if(curTask != null) cardCreatedList.add(TaskCard(curTask, it))
                     }
 
@@ -193,7 +194,7 @@ class MainActivity : AppCompatActivity()
 
                 create_task_manual ->
                 {
-                    toolbar.snackbar("Non implementato").show()
+                    toolbar.snackbar(getString(R.string.error_notImplemented)).show()
                 }
 
                 action_settings ->
@@ -302,7 +303,7 @@ class MainActivity : AppCompatActivity()
                 setCards(false)
                 if(resultCode == 1000 && data?.getSerializableExtra("deletedTask") != null )
                 {
-                     toolbar.longSnackbar("Rimosso").show()
+                     toolbar.longSnackbar(getString(R.string.info_removed)).show()
                 }
             }
         }

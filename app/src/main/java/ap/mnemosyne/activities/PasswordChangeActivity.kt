@@ -68,7 +68,7 @@ class PasswordChangeActivity : AppCompatActivity()
 
         if(newpsw1Text != newpsw2Text)
         {
-            alert("Le password non corrispondono"){ title = "Errore"; okButton { } }.show()
+            alert(getString(R.string.error_passwordNotMatching)){ title = getString(R.string.error); okButton { } }.show()
             pswProgress.visibility = View.INVISIBLE
             oldpsw.isEnabled = true
             newpsw1.isEnabled = true
@@ -140,7 +140,7 @@ class PasswordChangeActivity : AppCompatActivity()
             {
                 if(resultCode == Activity.RESULT_OK)
                 {
-                    toolbar.snackbar("Sei collegato come: " + session.user.email).show()
+                    toolbar.snackbar(getString(R.string.login_connectedAs, session.user.email)).show()
                 }
             }
         }

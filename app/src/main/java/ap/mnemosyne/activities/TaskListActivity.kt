@@ -136,7 +136,7 @@ class TaskListActivity : AppCompatActivity()
 
                 R.id.create_task_manual ->
                 {
-                    toolbar.snackbar("Non implementato").show()
+                    toolbar.snackbar(getString(R.string.error_notImplemented)).show()
                 }
             }
             drawer_layout.closeDrawers()
@@ -151,7 +151,7 @@ class TaskListActivity : AppCompatActivity()
             101 ->{
                 if(resultCode == 1000 && data?.getSerializableExtra("deletedTask") != null )
                 {
-                    toolbar.longSnackbar("Rimosso").show()
+                    toolbar.longSnackbar(getString(R.string.info_removed)).show()
                     val tbr = data.getSerializableExtra("deletedTask") as Task
                     tasks.removeLocalTasks(tbr)
                     val pos = taskJSONList.indexOf(tbr)

@@ -52,7 +52,7 @@ class LoginActivity : AppCompatActivity()
         if(loginUser.text.toString() == "" || !android.util.Patterns.EMAIL_ADDRESS.matcher(loginUser.text.toString()).matches())
         {
             loginUser.requestFocus()
-            inputLayoutEmail.error = "Inserisci un indirizzo email valido"
+            inputLayoutEmail.error = getString(R.string.login_invalidEmail)
             return
         }
         else
@@ -63,7 +63,7 @@ class LoginActivity : AppCompatActivity()
         if(loginPassword.text.toString() == "")
         {
             loginPassword.requestFocus()
-            inputLayoutPassword.error = "Inserisci una password valida"
+            inputLayoutPassword.error = getString(R.string.login_invalidPassword)
             return
         }
         else

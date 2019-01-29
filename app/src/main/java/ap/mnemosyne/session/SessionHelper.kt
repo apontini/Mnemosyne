@@ -24,8 +24,8 @@ class SessionHelper(ctx : Context) : Serializable
     }
 
 
-    val thisCtx = ctx
-    val sharedPref : SharedPreferences =
+    private val thisCtx = ctx
+    private val sharedPref : SharedPreferences =
             ctx.getSharedPreferences(ctx.getString(R.string.sharedPreferences_user_FILE), Context.MODE_PRIVATE)
     var user : User
         get()
@@ -40,7 +40,7 @@ class SessionHelper(ctx : Context) : Serializable
             {
                 putString(thisCtx.getString(R.string.sharedPreferences_user_sessionid), u.sessionID)
                 putString(thisCtx.getString(R.string.sharedPreferences_user_mail), u.email)
-                if(!commit()) thisCtx.toast("Errore nel salvare i dati, riavvia l'applicazione").show()
+                if(!commit()) thisCtx.toast(thisCtx.getString(R.string.error_commitUserSharedPrefs)).show()
             }
         }
 
